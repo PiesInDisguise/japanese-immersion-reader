@@ -50,6 +50,15 @@ dependencies:
   pdfrx_engine: 0.4.6
   flutter_rust_bridge: 2.12.0
   file_picker: ^11.0.2
+  # OCR pipeline (spec §4/§7, docs/research/r3-ocr.md + r6-manga-text-detection.md):
+  # flutter_onnxruntime runs both real ONNX models (Manga OCR, comic-text-detector);
+  # image handles crop/resize/format-convert from raw rasterized page pixels into
+  # whatever each model's preprocessing needs; http fetches the (large, licensed,
+  # not committed -- same reasoning as the Yomitan/Sudachi assets) model weights
+  # on first use.
+  flutter_onnxruntime: ^1.8.3
+  image: ^4.9.1
+  http: ^1.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
