@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 
+import '../document_mode/document_mode_screen.dart';
 import 'card_mode_controller.dart';
 import 'token_gloss_view.dart';
 import 'word_lookup_sheet.dart';
@@ -21,6 +22,13 @@ class CardModeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(_titleFor(asyncState)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.view_agenda_outlined),
+            tooltip: 'Switch to Document Mode',
+            onPressed: () => Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const DocumentModeScreen()),
+            ),
+          ),
           if (asyncState.hasValue)
             IconButton(
               icon: const Icon(Icons.flip_camera_android_outlined),
@@ -178,10 +186,15 @@ class _CardAreaState extends ConsumerState<_CardArea> {
 
   Future<void> _handleWordTap(Token token) async {
     final messenger = ScaffoldMessenger.of(context);
+    final controller = ref.read(cardModeControllerProvider.notifier);
     final mined = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => WordLookupSheet(token: token),
+      builder: (_) => WordLookupSheet(
+        token: token,
+        lookup: () => controller.lookupWord(token),
+        mine: (senses) => controller.mineWord(token, senses),
+      ),
     );
     if (mined == true && mounted) {
       messenger.showSnackBar(

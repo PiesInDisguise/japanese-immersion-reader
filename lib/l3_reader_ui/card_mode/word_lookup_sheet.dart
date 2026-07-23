@@ -1,35 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
 
-import 'card_mode_controller.dart';
 import 'definition_rendering.dart';
 
-/// Card Mode's tap-a-word popup (spec §6/§10): shows
-/// [CardModeController.lookupWord]'s results -- word, reading, meaning,
-/// spec §10's default-on popup fields -- for [token], with a button to mine
-/// it (spec's auto-add-ON tap-to-mine behavior).
+/// Card Mode's and Document Mode's shared tap-a-word popup (spec §6/§7/§10):
+/// shows [lookup]'s results -- word, reading, meaning, spec §10's
+/// default-on popup fields -- for [token], with a button to mine it via
+/// [mine] (spec's auto-add-ON tap-to-mine behavior).
+///
+/// Takes [lookup]/[mine] as explicit callbacks rather than reaching into a
+/// specific mode's controller provider directly, since Card Mode and
+/// Document Mode both need this exact popup (spec §7: "same mining rules as
+/// Card Mode") but differ in how they identify the mined word's source
+/// sentence -- Card Mode always mines against its own single current card
+/// (`CardModeController.mineWord`), while Document Mode has no single
+/// "current sentence" and must be told which visible sentence contained the
+/// tapped token (`DocumentModeController.mineWord`'s required `sentenceId`).
+/// Each screen supplies closures over its own controller (and, for Document
+/// Mode, the containing sentence) rather than this widget knowing about
+/// either.
 ///
 /// Pops itself with `true` (via [Navigator.pop]) if the word was mined
-/// during this sheet's lifetime, `null`/`false` otherwise. The caller
-/// (`CardModeScreen`) uses that to decide whether to show the undo toast --
-/// the toast itself lives outside this sheet, since spec's undo toast is
-/// meant to keep working even after this popup has closed.
+/// during this sheet's lifetime, `null`/`false` otherwise. The caller uses
+/// that to decide whether to show the undo toast -- the toast itself lives
+/// outside this sheet, since spec's undo toast is meant to keep working even
+/// after this popup has closed.
 ///
 /// Optional popup fields from spec §10 (example sentences, pitch accent,
 /// conjugation table) aren't shown -- they're settings-gated and no
 /// settings screen exists yet, matching this pass's scope.
-class WordLookupSheet extends ConsumerStatefulWidget {
-  const WordLookupSheet({super.key, required this.token});
+class WordLookupSheet extends StatefulWidget {
+  const WordLookupSheet({
+    super.key,
+    required this.token,
+    required this.lookup,
+    required this.mine,
+  });
 
   final Token token;
 
+  /// Looks up dictionary senses for [token]. Wired by the caller to
+  /// whichever mode's controller is current -- e.g.
+  /// `() => cardModeController.lookupWord(token)`.
+  final Future<List<DictionaryLookupHit>> Function() lookup;
+
+  /// Mines [token] with [senses] (whatever [lookup] most recently found).
+  /// Wired by the caller -- e.g.
+  /// `(senses) => cardModeController.mineWord(token, senses)` for Card Mode,
+  /// or `(senses) => documentModeController.mineWord(token, senses,
+  /// sentenceId: ...)` for Document Mode, closing over whichever sentence
+  /// contains [token].
+  final Future<void> Function(List<DictionaryLookupHit> senses) mine;
+
   @override
-  ConsumerState<WordLookupSheet> createState() => _WordLookupSheetState();
+  State<WordLookupSheet> createState() => _WordLookupSheetState();
 }
 
-class _WordLookupSheetState extends ConsumerState<WordLookupSheet> {
+class _WordLookupSheetState extends State<WordLookupSheet> {
   late final Future<List<DictionaryLookupHit>> _lookupFuture;
   bool _mining = false;
 
@@ -39,16 +67,12 @@ class _WordLookupSheetState extends ConsumerState<WordLookupSheet> {
     // Captured once in initState (not read again on every build) so
     // rebuilding this widget -- e.g. while `_mining` flips -- never
     // re-triggers the lookup.
-    _lookupFuture = ref
-        .read(cardModeControllerProvider.notifier)
-        .lookupWord(widget.token);
+    _lookupFuture = widget.lookup();
   }
 
   Future<void> _mine(List<DictionaryLookupHit> hits) async {
     setState(() => _mining = true);
-    await ref
-        .read(cardModeControllerProvider.notifier)
-        .mineWord(widget.token, hits);
+    await widget.mine(hits);
     if (mounted) Navigator.of(context).pop(true);
   }
 

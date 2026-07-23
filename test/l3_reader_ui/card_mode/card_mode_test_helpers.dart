@@ -1,6 +1,9 @@
-// Shared fakes/harness for Card Mode's widget tests. Deliberately not named
-// `*_test.dart` so `flutter test` doesn't try to run it as its own suite --
-// see the individual `*_test.dart` files for the actual test cases.
+// Shared fakes/harness for Card Mode's *and* Document Mode's widget tests
+// (Document Mode's own suite imports this file rather than duplicating any
+// of it -- see `test/l3_reader_ui/document_mode/document_mode_screen_test.dart`).
+// Deliberately not named `*_test.dart` so `flutter test` doesn't try to run
+// it as its own suite -- see the individual `*_test.dart` files for the
+// actual test cases.
 //
 // Per the task brief: fakes are wired in at the *provider* level
 // (`tokenizerProvider`/`dictionaryRepositoryProvider`/
@@ -20,6 +23,7 @@ import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_r
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/tokenizer.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
+import 'package:japanese_immersion_reader/l3_reader_ui/document_mode/document_mode_screen.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/mining_engine.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/source_ref.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/word_collection_repository.dart';
@@ -278,6 +282,36 @@ Future<void> pumpCardModeScreen(
         ),
       ],
       child: const MaterialApp(home: CardModeScreen()),
+    ),
+  );
+}
+
+/// Pumps [DocumentModeScreen] inside a [ProviderScope] with the same set of
+/// fake dependency overrides as [pumpCardModeScreen] -- both screens sit on
+/// top of the same `tokenizerProvider`/`dictionaryRepositoryProvider`/
+/// `wordCollectionRepositoryProvider`/`currentDocumentProvider` seams, so
+/// there's nothing Document-Mode-specific to fake here beyond swapping
+/// which screen widget gets pumped.
+Future<void> pumpDocumentModeScreen(
+  WidgetTester tester, {
+  Document? document,
+  required FakeTokenizer tokenizer,
+  required FakeDictionaryRepository dictionaryRepository,
+  required FakeWordCollectionRepository wordCollectionRepository,
+}) {
+  return tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        currentDocumentProvider.overrideWith(
+          () => FixedCurrentDocument(document),
+        ),
+        tokenizerProvider.overrideWith((ref) async => tokenizer),
+        dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
+        wordCollectionRepositoryProvider.overrideWithValue(
+          wordCollectionRepository,
+        ),
+      ],
+      child: const MaterialApp(home: DocumentModeScreen()),
     ),
   );
 }
