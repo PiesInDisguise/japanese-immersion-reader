@@ -9,6 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  # research/ holds throwaway, time-boxed spike code (each with its own
+  # pubspec.yaml, several with a nested pubspec that still doesn't stop the
+  # outer analyzer from scanning them) -- not held to app lint standards, and
+  # shouldn't make CI red over an unused print() in a one-off CLI demo.
+  exclude:
+    - research/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

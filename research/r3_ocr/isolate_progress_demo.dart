@@ -61,8 +61,14 @@ void _ocrWorker(SendPort mainSendPort) {
   Future<void> run() async {
     for (var ch = 0; ch < _totalChapters; ch++) {
       if (cancelled) {
-        mainSendPort.send(Progress(ch / _totalChapters, Stage.ocr,
-            chapterIndex: ch, note: 'cancelled'));
+        mainSendPort.send(
+          Progress(
+            ch / _totalChapters,
+            Stage.ocr,
+            chapterIndex: ch,
+            note: 'cancelled',
+          ),
+        );
         mainSendPort.send('cancelled');
         return;
       }
@@ -75,13 +81,20 @@ void _ocrWorker(SendPort mainSendPort) {
         await _simulateChapterOcr(ch);
       } catch (e) {
         // A single bad region/chapter must not abort the whole document.
-        mainSendPort.send(Progress(ch / _totalChapters, Stage.ocr,
-            chapterIndex: ch, note: 'recovered from error: $e'));
+        mainSendPort.send(
+          Progress(
+            ch / _totalChapters,
+            Stage.ocr,
+            chapterIndex: ch,
+            note: 'recovered from error: $e',
+          ),
+        );
         continue;
       }
 
-      mainSendPort
-          .send(Progress((ch + 1) / _totalChapters, Stage.ocr, chapterIndex: ch));
+      mainSendPort.send(
+        Progress((ch + 1) / _totalChapters, Stage.ocr, chapterIndex: ch),
+      );
     }
     mainSendPort.send(const Progress(1.0, Stage.done));
     mainSendPort.send('done');
@@ -139,12 +152,15 @@ Future<void> _runScenario({Duration? cancelAfter}) async {
 
   await done.future;
   print(
-      'UI heartbeat ticked $uiTicks times while OCR ran in the background isolate '
-      '-- the calling isolate was never blocked.\n');
+    'UI heartbeat ticked $uiTicks times while OCR ran in the background isolate '
+    '-- the calling isolate was never blocked.\n',
+  );
 }
 
 Future<void> main() async {
-  print('=== Scenario A: full run (progress + recoverable per-chapter error) ===');
+  print(
+    '=== Scenario A: full run (progress + recoverable per-chapter error) ===',
+  );
   await _runScenario();
 
   print('=== Scenario B: cancelled partway through ===');

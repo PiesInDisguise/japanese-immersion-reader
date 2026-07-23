@@ -125,7 +125,9 @@ void main() {
 
   final tomodachi = rubyRuns.firstWhere((r) => r.base == '友達');
   check(tomodachi.reading == 'ともだち', 'bare-ruby reading for 友達');
-  print('[PASS] bare <ruby>base<rt> form (no <rb>): 友達 -> ${tomodachi.reading}');
+  print(
+    '[PASS] bare <ruby>base<rt> form (no <rb>): 友達 -> ${tomodachi.reading}',
+  );
 
   final daijoubu = rubyRuns.firstWhere((r) => r.base == '大丈夫');
   check(daijoubu.reading == 'だいじょうぶ', 'rp-fallback reading for 大丈夫');
@@ -164,15 +166,16 @@ void main() {
     'independent ruby spans per paragraph, and per multi-clause sentence, are normal.)',
   );
 
-  print('\n=== Step 7: round-trip a <ruby> element back to markup verbatim ===');
+  print(
+    '\n=== Step 7: round-trip a <ruby> element back to markup verbatim ===',
+  );
   final rubyElement = chapterFirstRubyElement(
     xml.XmlDocument.parse(readEntryAsString(archive, spineHrefs[0])),
   );
   final serialized = rubyElement.toXmlString();
   print('  Re-serialized: $serialized');
   check(
-    serialized.contains('<rb>東京</rb>') &&
-        serialized.contains('<rt>とうきょう</rt>'),
+    serialized.contains('<rb>東京</rb>') && serialized.contains('<rt>とうきょう</rt>'),
     're-serialized ruby element should contain the original rb/rt markup',
   );
   print('[PASS] package:xml can hand back the original markup unchanged.');
@@ -347,7 +350,10 @@ class ManifestItem {
   final Set<String> properties;
 }
 
-Map<String, ManifestItem> parseManifest(xml.XmlDocument opfDoc, String basePath) {
+Map<String, ManifestItem> parseManifest(
+  xml.XmlDocument opfDoc,
+  String basePath,
+) {
   final manifest = opfDoc.findAllElements('manifest').first;
   final result = <String, ManifestItem>{};
   for (final item in manifest.findElements('item')) {
@@ -363,7 +369,10 @@ Map<String, ManifestItem> parseManifest(xml.XmlDocument opfDoc, String basePath)
   return result;
 }
 
-List<String> parseSpine(xml.XmlDocument opfDoc, Map<String, ManifestItem> manifest) {
+List<String> parseSpine(
+  xml.XmlDocument opfDoc,
+  Map<String, ManifestItem> manifest,
+) {
   final spine = opfDoc.findAllElements('spine').first;
   return spine
       .findElements('itemref')
@@ -387,9 +396,8 @@ List<TocEntry> parseNavToc(xml.XmlDocument navDoc) {
   final navElement = navDoc
       .findAllElements('nav')
       .firstWhere(
-        (e) => e.attributes.any(
-          (a) => a.name.local == 'type' && a.value == 'toc',
-        ),
+        (e) =>
+            e.attributes.any((a) => a.name.local == 'type' && a.value == 'toc'),
       );
   final anchors = navElement.findAllElements('a');
   return anchors
@@ -519,9 +527,8 @@ List<List<Run>> splitIntoSentences(List<Run> runs) {
   return sentences;
 }
 
-String plainTextOf(List<Run> runs) => runs
-    .map((r) => r is RubyRun ? r.base : (r as TextRun).text)
-    .join();
+String plainTextOf(List<Run> runs) =>
+    runs.map((r) => r is RubyRun ? r.base : (r as TextRun).text).join();
 
 /// Aozora-Bunko-style《》 display, for human-readable console output only --
 /// this is NOT the on-disk or in-model representation, just a way to see the
@@ -545,8 +552,7 @@ extension _FirstOrNull<T> on Iterable<T> {
 void demoMalformedFallback() {
   // Missing closing </b>, which is fatal to a strict XML parser but is
   // exactly the kind of thing sloppy/converted "light novel" EPUBs contain.
-  const malformed =
-      '<div><p>これは<b>壊れた<ruby>本<rt>ほん</rt></ruby>タグです</p></div>';
+  const malformed = '<div><p>これは<b>壊れた<ruby>本<rt>ほん</rt></ruby>タグです</p></div>';
 
   try {
     xml.XmlDocument.parse(malformed);
@@ -558,7 +564,10 @@ void demoMalformedFallback() {
   final htmlDoc = html_parser.parse(malformed);
   final rubyEl = htmlDoc.querySelector('ruby')!;
   final rt = rubyEl.querySelector('rt')!.text;
-  final base = rubyEl.nodes.whereType<html_dom.Text>().map((t) => t.text).join();
+  final base = rubyEl.nodes
+      .whereType<html_dom.Text>()
+      .map((t) => t.text)
+      .join();
   print(
     '  package:html recovers it: ruby base="$base" reading="$rt" '
     '(confirms a lenient fallback is available if package:xml throws)',

@@ -61,8 +61,7 @@ void main() {
     expect(token.sourceRect, isNull);
   });
 
-  test(
-      'a pre-L2 sentence may hold multiple tokens split at ruby boundaries '
+  test('a pre-L2 sentence may hold multiple tokens split at ruby boundaries '
       '(each independent furigana span needs its own reading)', () {
     const sentence = Sentence(
       id: 'doc-1/0/0/0',

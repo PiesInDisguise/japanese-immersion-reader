@@ -39,8 +39,10 @@ Future<void> main(List<String> args) async {
       pageNumberOverride: pageIndex + 1,
     );
 
-    stdout.writeln('fullText (${text.fullText.length} chars): '
-        '${text.fullText.replaceAll('\n', '\\n')}');
+    stdout.writeln(
+      'fullText (${text.fullText.length} chars): '
+      '${text.fullText.replaceAll('\n', '\\n')}',
+    );
     stdout.writeln('charRects.length: ${text.charRects.length}');
 
     final n = text.charRects.length < 20 ? text.charRects.length : 20;

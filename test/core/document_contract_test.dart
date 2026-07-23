@@ -44,27 +44,37 @@ void main() {
     );
 
     test(
-        'accepts a sentence pre-split into multiple tokens at ruby '
-        'boundaries (no dictForm/pos/inflection yet, since L2 has not run)',
-        () {
-      final base = _buildDocument(withSourceRects: false);
-      final chapter = base.chapters.first;
-      final block = chapter.blocks.first;
-      final withRubySplit = base.copyWith(chapters: [
-        chapter.copyWith(blocks: [
-          block.copyWith(sentences: [
-            block.sentences.first.copyWith(tokens: [
-              const Token(surface: '彼は'),
-              const Token(surface: '東京', reading: 'とうきょう'),
-              const Token(surface: 'に行った'),
-            ]),
-          ]),
-        ]),
-      ]);
-      expect(
+      'accepts a sentence pre-split into multiple tokens at ruby '
+      'boundaries (no dictForm/pos/inflection yet, since L2 has not run)',
+      () {
+        final base = _buildDocument(withSourceRects: false);
+        final chapter = base.chapters.first;
+        final block = chapter.blocks.first;
+        final withRubySplit = base.copyWith(
+          chapters: [
+            chapter.copyWith(
+              blocks: [
+                block.copyWith(
+                  sentences: [
+                    block.sentences.first.copyWith(
+                      tokens: [
+                        const Token(surface: '彼は'),
+                        const Token(surface: '東京', reading: 'とうきょう'),
+                        const Token(surface: 'に行った'),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        );
+        expect(
           () => checkDocumentContract(withRubySplit, expectSourceRects: false),
-          returnsNormally);
-    });
+          returnsNormally,
+        );
+      },
+    );
 
     test('rejects a sentence with no tokens', () {
       final base = _buildDocument(withSourceRects: false);
