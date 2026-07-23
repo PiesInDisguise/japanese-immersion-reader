@@ -40,6 +40,17 @@ add_definitions(-DUNICODE -D_UNICODE)
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_17)
   target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100")
+  # Always interpret (and emit) source as UTF-8, regardless of the build
+  # machine's active code page. Without this, MSVC falls back to the system
+  # locale to interpret non-ASCII bytes in a source file with no BOM -- on a
+  # cp932 (Japanese) machine, a plugin whose .cpp contains a plain UTF-8
+  # character in a comment (e.g. flutter_onnxruntime 1.8.3's em-dash in
+  # flutter_onnxruntime_plugin.cpp) trips warning C4819, which /WX above then
+  # escalates into a hard build failure -- not a bug in that plugin's logic,
+  # just an unhandled locale mismatch. /utf-8 is locale-independent and safe
+  # on any machine (ASCII-only sources are unaffected), so this is a general
+  # portability fix, not a workaround narrowly scoped to this one plugin.
+  target_compile_options(${TARGET} PRIVATE /utf-8)
   target_compile_options(${TARGET} PRIVATE /EHsc)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
