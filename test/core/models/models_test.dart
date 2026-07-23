@@ -60,4 +60,26 @@ void main() {
     expect(token.inflection, isNull);
     expect(token.sourceRect, isNull);
   });
+
+  test(
+      'a pre-L2 sentence may hold multiple tokens split at ruby boundaries '
+      '(each independent furigana span needs its own reading)', () {
+    const sentence = Sentence(
+      id: 'doc-1/0/0/0',
+      index: 0,
+      tokens: [
+        Token(surface: '彼は'),
+        Token(surface: '東京', reading: 'とうきょう'),
+        Token(surface: 'に行った'),
+      ],
+    );
+
+    expect(sentence.surfaceText, '彼は東京に行った');
+    expect(sentence.tokens[1].reading, 'とうきょう');
+    for (final token in sentence.tokens) {
+      expect(token.dictForm, isNull);
+      expect(token.pos, isNull);
+      expect(token.inflection, isNull);
+    }
+  });
 }

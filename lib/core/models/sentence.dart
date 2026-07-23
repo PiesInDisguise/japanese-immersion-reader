@@ -10,11 +10,20 @@ part 'sentence.g.dart';
 /// so re-imports/OCR reprocessing don't shift IDs that mining/SRS rows key off.
 ///
 /// `tokens` is never empty. Immediately after L1 ingestion (before Sudachi
-/// segmentation runs in L2), a sentence holds exactly one placeholder Token
-/// spanning its full text with null linguistic fields — L2 replaces that
-/// placeholder with the real multi-token Sudachi output. This keeps the type
-/// shape identical before and after L2, so nothing downstream needs to know
-/// whether tokenization has happened yet.
+/// segmentation runs in L2), a sentence holds one or more placeholder Tokens,
+/// pre-split only at boundaries L1 has independent evidence for — e.g. an
+/// EPUB author-supplied `<ruby>` span, where `surface` is the base text and
+/// `reading` is the furigana. Absent such evidence, L1 emits a single token
+/// spanning the whole sentence. Either way, `dictForm`/`pos`/`inflection`
+/// stay null until L2 runs — those are exclusively Sudachi's job. L2 replaces
+/// this placeholder list with the real Sudachi segmentation, reconciling any
+/// L1-supplied readings onto whichever resulting token(s) overlap that span.
+///
+/// (Revised after the R1 EPUB research spike found the original "always
+/// exactly one placeholder" rule left author-supplied furigana with nowhere
+/// to live — a sentence routinely contains more than one independent ruby
+/// span, and one token's `reading` field can't hold more than one. See
+/// docs/research/r1-epub.md.)
 @freezed
 abstract class Sentence with _$Sentence {
   const Sentence._();
