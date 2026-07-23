@@ -202,6 +202,38 @@ void main() {
     },
   );
 
+  test(
+    'assumeVertical sets Block.direction on every page (default: horizontal)',
+    () async {
+      final horizontalImporter = ScannedPdfImporter(
+        const FakeOcrEngine(),
+        rasterizer: FakePdfPageRasterizer(pageCount: 2),
+        cacheDirectory: Directory('${cacheDir.path}/horizontal'),
+      );
+      final horizontalDoc = await horizontalImporter.import(
+        sourceFile,
+        onProgress: (_) {},
+      );
+      for (final block in horizontalDoc.chapters.single.blocks) {
+        expect(block.direction, WritingDirection.horizontal);
+      }
+
+      final verticalImporter = ScannedPdfImporter(
+        const FakeOcrEngine(),
+        rasterizer: FakePdfPageRasterizer(pageCount: 2),
+        cacheDirectory: Directory('${cacheDir.path}/vertical'),
+        assumeVertical: true,
+      );
+      final verticalDoc = await verticalImporter.import(
+        sourceFile,
+        onProgress: (_) {},
+      );
+      for (final block in verticalDoc.chapters.single.blocks) {
+        expect(block.direction, WritingDirection.vertical);
+      }
+    },
+  );
+
   test('a page that fails to rasterize becomes an empty block without '
       'aborting the import', () async {
     final importer = ScannedPdfImporter(

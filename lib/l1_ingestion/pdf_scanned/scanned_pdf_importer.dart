@@ -246,6 +246,9 @@ class ScannedPdfImporter implements Importer {
           index: pageIndex,
           kind: BlockKind.page,
           sentences: sentences,
+          direction: assumeVertical
+              ? WritingDirection.vertical
+              : WritingDirection.horizontal,
         ),
       );
     }
