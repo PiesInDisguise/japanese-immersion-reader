@@ -15,6 +15,7 @@ _Token _$TokenFromJson(Map<String, dynamic> json) => _Token(
   sourceRect: json['sourceRect'] == null
       ? null
       : SourceRect.fromJson(json['sourceRect'] as Map<String, dynamic>),
+  confidence: (json['confidence'] as num?)?.toDouble(),
 );
 
 Map<String, dynamic> _$TokenToJson(_Token instance) => <String, dynamic>{
@@ -24,4 +25,5 @@ Map<String, dynamic> _$TokenToJson(_Token instance) => <String, dynamic>{
   'pos': instance.pos,
   'inflection': instance.inflection,
   'sourceRect': instance.sourceRect?.toJson(),
+  'confidence': instance.confidence,
 };

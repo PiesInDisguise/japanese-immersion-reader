@@ -59,6 +59,12 @@ void main() {
     expect(token.pos, isNull);
     expect(token.inflection, isNull);
     expect(token.sourceRect, isNull);
+    expect(token.confidence, isNull);
+  });
+
+  test('Token.confidence is settable (OCR-only signal)', () {
+    const token = Token(surface: '食べた', confidence: 0.87);
+    expect(token.confidence, 0.87);
   });
 
   test('a pre-L2 sentence may hold multiple tokens split at ruby boundaries '

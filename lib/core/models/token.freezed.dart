@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Token {
 
- String get surface; String? get dictForm; String? get reading; String? get pos; String? get inflection; SourceRect? get sourceRect;
+ String get surface; String? get dictForm; String? get reading; String? get pos; String? get inflection; SourceRect? get sourceRect; double? get confidence;
 /// Create a copy of Token
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TokenCopyWith<Token> get copyWith => _$TokenCopyWithImpl<Token>(this as Token, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Token&&(identical(other.surface, surface) || other.surface == surface)&&(identical(other.dictForm, dictForm) || other.dictForm == dictForm)&&(identical(other.reading, reading) || other.reading == reading)&&(identical(other.pos, pos) || other.pos == pos)&&(identical(other.inflection, inflection) || other.inflection == inflection)&&(identical(other.sourceRect, sourceRect) || other.sourceRect == sourceRect));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Token&&(identical(other.surface, surface) || other.surface == surface)&&(identical(other.dictForm, dictForm) || other.dictForm == dictForm)&&(identical(other.reading, reading) || other.reading == reading)&&(identical(other.pos, pos) || other.pos == pos)&&(identical(other.inflection, inflection) || other.inflection == inflection)&&(identical(other.sourceRect, sourceRect) || other.sourceRect == sourceRect)&&(identical(other.confidence, confidence) || other.confidence == confidence));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,surface,dictForm,reading,pos,inflection,sourceRect);
+int get hashCode => Object.hash(runtimeType,surface,dictForm,reading,pos,inflection,sourceRect,confidence);
 
 @override
 String toString() {
-  return 'Token(surface: $surface, dictForm: $dictForm, reading: $reading, pos: $pos, inflection: $inflection, sourceRect: $sourceRect)';
+  return 'Token(surface: $surface, dictForm: $dictForm, reading: $reading, pos: $pos, inflection: $inflection, sourceRect: $sourceRect, confidence: $confidence)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TokenCopyWith<$Res>  {
   factory $TokenCopyWith(Token value, $Res Function(Token) _then) = _$TokenCopyWithImpl;
 @useResult
 $Res call({
- String surface, String? dictForm, String? reading, String? pos, String? inflection, SourceRect? sourceRect
+ String surface, String? dictForm, String? reading, String? pos, String? inflection, SourceRect? sourceRect, double? confidence
 });
 
 
@@ -65,7 +65,7 @@ class _$TokenCopyWithImpl<$Res>
 
 /// Create a copy of Token
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? surface = null,Object? dictForm = freezed,Object? reading = freezed,Object? pos = freezed,Object? inflection = freezed,Object? sourceRect = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? surface = null,Object? dictForm = freezed,Object? reading = freezed,Object? pos = freezed,Object? inflection = freezed,Object? sourceRect = freezed,Object? confidence = freezed,}) {
   return _then(_self.copyWith(
 surface: null == surface ? _self.surface : surface // ignore: cast_nullable_to_non_nullable
 as String,dictForm: freezed == dictForm ? _self.dictForm : dictForm // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as String?,reading: freezed == reading ? _self.reading : reading // ignore: cast
 as String?,pos: freezed == pos ? _self.pos : pos // ignore: cast_nullable_to_non_nullable
 as String?,inflection: freezed == inflection ? _self.inflection : inflection // ignore: cast_nullable_to_non_nullable
 as String?,sourceRect: freezed == sourceRect ? _self.sourceRect : sourceRect // ignore: cast_nullable_to_non_nullable
-as SourceRect?,
+as SourceRect?,confidence: freezed == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 /// Create a copy of Token
@@ -170,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String surface,  String? dictForm,  String? reading,  String? pos,  String? inflection,  SourceRect? sourceRect)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String surface,  String? dictForm,  String? reading,  String? pos,  String? inflection,  SourceRect? sourceRect,  double? confidence)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Token() when $default != null:
-return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.inflection,_that.sourceRect);case _:
+return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.inflection,_that.sourceRect,_that.confidence);case _:
   return orElse();
 
 }
@@ -191,10 +192,10 @@ return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.infle
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String surface,  String? dictForm,  String? reading,  String? pos,  String? inflection,  SourceRect? sourceRect)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String surface,  String? dictForm,  String? reading,  String? pos,  String? inflection,  SourceRect? sourceRect,  double? confidence)  $default,) {final _that = this;
 switch (_that) {
 case _Token():
-return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.inflection,_that.sourceRect);case _:
+return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.inflection,_that.sourceRect,_that.confidence);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +212,10 @@ return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.infle
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String surface,  String? dictForm,  String? reading,  String? pos,  String? inflection,  SourceRect? sourceRect)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String surface,  String? dictForm,  String? reading,  String? pos,  String? inflection,  SourceRect? sourceRect,  double? confidence)?  $default,) {final _that = this;
 switch (_that) {
 case _Token() when $default != null:
-return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.inflection,_that.sourceRect);case _:
+return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.inflection,_that.sourceRect,_that.confidence);case _:
   return null;
 
 }
@@ -226,7 +227,7 @@ return $default(_that.surface,_that.dictForm,_that.reading,_that.pos,_that.infle
 @JsonSerializable()
 
 class _Token implements Token {
-  const _Token({required this.surface, this.dictForm, this.reading, this.pos, this.inflection, this.sourceRect});
+  const _Token({required this.surface, this.dictForm, this.reading, this.pos, this.inflection, this.sourceRect, this.confidence});
   factory _Token.fromJson(Map<String, dynamic> json) => _$TokenFromJson(json);
 
 @override final  String surface;
@@ -235,6 +236,7 @@ class _Token implements Token {
 @override final  String? pos;
 @override final  String? inflection;
 @override final  SourceRect? sourceRect;
+@override final  double? confidence;
 
 /// Create a copy of Token
 /// with the given fields replaced by the non-null parameter values.
@@ -249,16 +251,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Token&&(identical(other.surface, surface) || other.surface == surface)&&(identical(other.dictForm, dictForm) || other.dictForm == dictForm)&&(identical(other.reading, reading) || other.reading == reading)&&(identical(other.pos, pos) || other.pos == pos)&&(identical(other.inflection, inflection) || other.inflection == inflection)&&(identical(other.sourceRect, sourceRect) || other.sourceRect == sourceRect));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Token&&(identical(other.surface, surface) || other.surface == surface)&&(identical(other.dictForm, dictForm) || other.dictForm == dictForm)&&(identical(other.reading, reading) || other.reading == reading)&&(identical(other.pos, pos) || other.pos == pos)&&(identical(other.inflection, inflection) || other.inflection == inflection)&&(identical(other.sourceRect, sourceRect) || other.sourceRect == sourceRect)&&(identical(other.confidence, confidence) || other.confidence == confidence));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,surface,dictForm,reading,pos,inflection,sourceRect);
+int get hashCode => Object.hash(runtimeType,surface,dictForm,reading,pos,inflection,sourceRect,confidence);
 
 @override
 String toString() {
-  return 'Token(surface: $surface, dictForm: $dictForm, reading: $reading, pos: $pos, inflection: $inflection, sourceRect: $sourceRect)';
+  return 'Token(surface: $surface, dictForm: $dictForm, reading: $reading, pos: $pos, inflection: $inflection, sourceRect: $sourceRect, confidence: $confidence)';
 }
 
 
@@ -269,7 +271,7 @@ abstract mixin class _$TokenCopyWith<$Res> implements $TokenCopyWith<$Res> {
   factory _$TokenCopyWith(_Token value, $Res Function(_Token) _then) = __$TokenCopyWithImpl;
 @override @useResult
 $Res call({
- String surface, String? dictForm, String? reading, String? pos, String? inflection, SourceRect? sourceRect
+ String surface, String? dictForm, String? reading, String? pos, String? inflection, SourceRect? sourceRect, double? confidence
 });
 
 
@@ -286,7 +288,7 @@ class __$TokenCopyWithImpl<$Res>
 
 /// Create a copy of Token
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? surface = null,Object? dictForm = freezed,Object? reading = freezed,Object? pos = freezed,Object? inflection = freezed,Object? sourceRect = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? surface = null,Object? dictForm = freezed,Object? reading = freezed,Object? pos = freezed,Object? inflection = freezed,Object? sourceRect = freezed,Object? confidence = freezed,}) {
   return _then(_Token(
 surface: null == surface ? _self.surface : surface // ignore: cast_nullable_to_non_nullable
 as String,dictForm: freezed == dictForm ? _self.dictForm : dictForm // ignore: cast_nullable_to_non_nullable
@@ -294,7 +296,8 @@ as String?,reading: freezed == reading ? _self.reading : reading // ignore: cast
 as String?,pos: freezed == pos ? _self.pos : pos // ignore: cast_nullable_to_non_nullable
 as String?,inflection: freezed == inflection ? _self.inflection : inflection // ignore: cast_nullable_to_non_nullable
 as String?,sourceRect: freezed == sourceRect ? _self.sourceRect : sourceRect // ignore: cast_nullable_to_non_nullable
-as SourceRect?,
+as SourceRect?,confidence: freezed == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
