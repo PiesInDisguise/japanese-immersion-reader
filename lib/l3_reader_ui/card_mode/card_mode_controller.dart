@@ -1,11 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
-import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/reconcile.dart';
-import 'package:japanese_immersion_reader/l4_mining/collection/mining_engine.dart';
-import 'package:japanese_immersion_reader/l4_mining/collection/source_ref.dart';
 
-import '../../app/services.dart';
+import '../reader_mining_session.dart';
 
 /// The `Document` Card Mode is currently showing, or `null` before any book
 /// is opened. Deliberately a plain [Notifier] holding one value (not a
@@ -76,22 +73,13 @@ final cardModeControllerProvider =
     );
 
 /// Drives one Card Mode session over whatever [currentDocumentProvider]
-/// currently holds (spec §6).
-///
-/// **Scope note**: implements auto-add-ON mining semantics only (tap a word
-/// -> `WordCollectionRepository.mine` decides fresh-add vs.
-/// reset-to-new-if-already-collected internally, matching spec's "tapping
-/// an already-collected word resets its SRS state" -- the controller never
-/// needs to check collected-state itself before calling `mine`). Auto-add
-/// OFF's +/- toggle needs a "is this already collected" query that doesn't
-/// exist on `WordCollectionRepository` yet, plus a settings screen to
-/// choose the mode -- neither exists, so that mode is a deliberate follow-up
-/// rather than something guessed at here. Grammar-point mining is similarly
-/// deferred: there's no grammar-point database yet (spec §8, a later
-/// phase) to mine *from*.
+/// currently holds (spec §6). The real tokenize/lookup/mine/undo logic
+/// lives in [ReaderMiningSession] (shared with Document Mode); this class
+/// only owns Card Mode's own concern -- the linear card position and the
+/// flip state.
 class CardModeController extends AsyncNotifier<CardModeState> {
   late List<_FlatPosition> _positions;
-  MineResult? _lastMineResult;
+  late ReaderMiningSession _mining;
 
   @override
   Future<CardModeState> build() async {
@@ -102,6 +90,7 @@ class CardModeController extends AsyncNotifier<CardModeState> {
         'currentDocumentProvider before watching cardModeControllerProvider.',
       );
     }
+    _mining = ReaderMiningSession(ref);
     _positions = [
       for (final chapter in document.chapters)
         for (final block in chapter.blocks)
@@ -112,20 +101,13 @@ class CardModeController extends AsyncNotifier<CardModeState> {
 
   Future<CardModeState> _loadCard(Document document, int index) async {
     final position = _positions[index];
-    final tokenizer = await ref.read(tokenizerProvider.future);
-    final sudachiTokens = await tokenizer.tokenize(
-      position.sentence.surfaceText,
-    );
-    final reconciled = reconcileSentenceTokens(
-      position.sentence.tokens,
-      sudachiTokens,
-    );
+    final tokens = await _mining.tokenizeSentence(position.sentence);
     return CardModeState(
       document: document,
       cardIndex: index,
       totalCards: _positions.length,
       sentence: position.sentence,
-      tokens: reconciled,
+      tokens: tokens,
       isFlipped: false,
     );
   }
@@ -157,59 +139,22 @@ class CardModeController extends AsyncNotifier<CardModeState> {
     state = AsyncData(current.copyWith(isFlipped: !current.isFlipped));
   }
 
-  /// Tap-a-word (spec §6): definition + reading popup content.
-  Future<List<DictionaryLookupHit>> lookupWord(Token token) {
-    final dictForm = token.dictForm ?? token.surface;
-    final surfaceForm = token.surface;
-    return ref
-        .read(dictionaryRepositoryProvider)
-        .lookup(
-          dictForm: dictForm,
-          surfaceForm: surfaceForm,
-          reading: token.reading,
-        );
-  }
+  Future<List<DictionaryLookupHit>> lookupWord(Token token) =>
+      _mining.lookupWord(token);
 
-  /// Auto-add-ON's core tap behavior: add fresh, or reset-to-new if already
-  /// collected (spec §6) -- `WordCollectionRepository.mine` decides which
-  /// internally. `senses` should come from whatever the popup's own
-  /// [lookupWord] call already found for this token, so mining and looking
-  /// up a word always agree on which dictionary senses it's associated with.
-  Future<void> mineWord(Token token, List<DictionaryLookupHit> senses) async {
+  Future<void> mineWord(Token token, List<DictionaryLookupHit> senses) {
     final current = state.value;
-    if (current == null) return;
-
-    final repository = ref.read(wordCollectionRepositoryProvider);
-    final result = await repository.mine(
-      dictForm: token.dictForm ?? token.surface,
-      reading: token.reading ?? token.surface,
-      senseIds: [for (final hit in senses) hit.term.id],
-      source: SourceRef(
-        workId: current.document.id,
-        sentenceId: current.sentence.id,
-        mediaType: CollectionMediaType.lightNovel,
-      ),
+    if (current == null) return Future.value();
+    return _mining.mineWord(
+      token,
+      senses,
+      workId: current.document.id,
+      sentenceId: current.sentence.id,
     );
-    _lastMineResult = result;
   }
 
-  /// Long-press-to-remove (spec §6), given the word's own dictForm/reading
-  /// (its collection identity -- see `contentDerivedWordId`).
-  Future<void> removeWord(String dictForm, String reading) {
-    _lastMineResult = null;
-    return ref
-        .read(wordCollectionRepositoryProvider)
-        .remove(dictForm: dictForm, reading: reading);
-  }
+  Future<void> removeWord(String dictForm, String reading) =>
+      _mining.removeWord(dictForm, reading);
 
-  /// The undo-toast action (spec §6): reverses whatever the *last*
-  /// [mineWord] call did, whether that was a fresh add or a reset. A no-op
-  /// if nothing has been mined yet this session, or the last action was
-  /// already undone/removed.
-  Future<void> undoLastMining() async {
-    final result = _lastMineResult;
-    if (result == null) return;
-    _lastMineResult = null;
-    await ref.read(wordCollectionRepositoryProvider).undo(result);
-  }
+  Future<void> undoLastMining() => _mining.undoLastMining();
 }
