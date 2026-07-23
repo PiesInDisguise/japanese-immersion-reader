@@ -55,10 +55,12 @@ dependencies:
   # image handles crop/resize/format-convert from raw rasterized page pixels into
   # whatever each model's preprocessing needs; http fetches the (large, licensed,
   # not committed -- same reasoning as the Yomitan/Sudachi assets) model weights
-  # on first use.
+  # on first use; meta's @visibleForTesting marks pure pre/postprocessing helpers
+  # (letterboxing, YOLO decode/NMS) testable without a real ONNX session.
   flutter_onnxruntime: ^1.8.3
   image: ^4.9.1
   http: ^1.6.0
+  meta: ^1.16.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -91,10 +93,14 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  # Manga OCR's character-level vocab (docs/research/r3-ocr.md §1.1): small
+  # (~24KB) and stable, so -- unlike the ~450MB encoder/decoder ONNX weights,
+  # which stay gitignored and are fetched at runtime via ModelFetcher, same
+  # as the Yomitan/Sudachi dictionaries -- it's committed and bundled as a
+  # real Flutter asset rather than fetched over the network. Sourced verbatim
+  # from https://huggingface.co/kha-white/manga-ocr-base/raw/main/vocab.txt.
+  assets:
+    - assets/manga_ocr/vocab.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
