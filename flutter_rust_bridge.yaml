@@ -1,0 +1,12 @@
+# flutter_rust_bridge codegen config. Regenerate with:
+#   flutter_rust_bridge_codegen generate
+#
+# Dart output deliberately lives under lib/l2_linguistics/tokenizer/rust/
+# rather than the flutter_rust_bridge-default lib/src/rust/ -- everything
+# else in this codebase is organized by architecture layer (see
+# docs/spec.md §3), not by implementation language, and the tokenizer is
+# exclusively an L2 concern. See docs/research/r4-tokenizer.md for the
+# research spike this was ported from.
+rust_input: crate::api
+rust_root: rust
+dart_output: lib/l2_linguistics/tokenizer/rust

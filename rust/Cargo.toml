@@ -1,0 +1,21 @@
+[package]
+name = "sudachi_tokenizer"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "sudachi_tokenizer"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# sudachi.rs is not published on crates.io (its own README lists that as a
+# TODO), so it must be pulled as a git dependency. Pinned to the latest
+# tagged release for reproducibility -- see docs/research/r4-tokenizer.md,
+# which proved this exact version compiles and tokenizes correctly here.
+sudachi = { git = "https://github.com/WorksApplications/sudachi.rs", tag = "v0.6.11" }
+# Must match the flutter_rust_bridge Dart package version in the app's
+# pubspec.yaml exactly -- codegen embeds a content hash both sides check at
+# init time, and a version mismatch fails that check loudly (see
+# frb_generated.dart's `_sanityCheckCodegenVersion`).
+flutter_rust_bridge = "=2.12.0"
