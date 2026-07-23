@@ -68,3 +68,36 @@ String contentDerivedDictionaryId({
       '${title.length}:$title:${revision.length}:$revision:$formatVersion';
   return 'dictionary-${sha1.convert(utf8.encode(input))}';
 }
+
+/// Deterministic, content-derived id for a `CollectedWord` row (spec §11):
+/// hashes `dictForm`+`reading` (length-prefixed, exactly like
+/// `contentDerivedDictionaryId` above and for the same reason -- so two
+/// different (dictForm, reading) pairs can never hash identically by having
+/// text shift across the join) rather than generating a random id.
+///
+/// This is what makes "is this word already collected" (spec §6's
+/// re-tap-resets-it behavior) a direct primary-key lookup on
+/// `CollectedWords.id` instead of a separate uniqueness query, and what
+/// makes mining the same word twice -- once from today's chapter, once from
+/// a subtitle track later -- resolve to one row with two sightings rather
+/// than a duplicate row. Word identity is `dictForm`+`reading` rather than
+/// `dictForm` alone because the same dictionary form can carry more than one
+/// reading (different words), which must not collapse into one entry.
+String contentDerivedWordId({
+  required String dictForm,
+  required String reading,
+}) {
+  final input = '${dictForm.length}:$dictForm:${reading.length}:$reading';
+  return 'word-${sha1.convert(utf8.encode(input))}';
+}
+
+/// Deterministic id for a `CollectedGrammar` row (spec §11: `id,
+/// grammarPointId`). Unlike [contentDerivedWordId], there's no compound key
+/// to collapse here -- a grammar point's own id *is* its collection
+/// identity (the grammar-point database itself is a later phase per spec
+/// §8, so `grammarPointId` is taken as an already-unique opaque string).
+/// This just namespaces it with a prefix, like the other
+/// `contentDerived*Id` functions, rather than hashing -- hashing an
+/// already-unique id would add nothing.
+String contentDerivedGrammarId(String grammarPointId) =>
+    'grammar-$grammarPointId';

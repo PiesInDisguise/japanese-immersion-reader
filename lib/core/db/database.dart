@@ -20,6 +20,11 @@ part 'database.g.dart';
     DictionaryTagEntries,
     DictionaryTermEntries,
     DictionaryTermMetaEntries,
+    // Collection layer (spec §11) -- see lib/l4_mining/collection/.
+    CollectedWords,
+    CollectedWordSources,
+    CollectedGrammars,
+    CollectedGrammarSources,
   ],
 )
 class AppDatabase extends _$AppDatabase {

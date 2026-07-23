@@ -3776,6 +3776,2091 @@ class DictionaryTermMetaEntriesCompanion
   }
 }
 
+class $CollectedWordsTable extends CollectedWords
+    with TableInfo<$CollectedWordsTable, CollectedWord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CollectedWordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dictFormMeta = const VerificationMeta(
+    'dictForm',
+  );
+  @override
+  late final GeneratedColumn<String> dictForm = GeneratedColumn<String>(
+    'dict_form',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _readingMeta = const VerificationMeta(
+    'reading',
+  );
+  @override
+  late final GeneratedColumn<String> reading = GeneratedColumn<String>(
+    'reading',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _senseIdsJsonMeta = const VerificationMeta(
+    'senseIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> senseIdsJson = GeneratedColumn<String>(
+    'sense_ids_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsIntervalMeta = const VerificationMeta(
+    'srsInterval',
+  );
+  @override
+  late final GeneratedColumn<int> srsInterval = GeneratedColumn<int>(
+    'srs_interval',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsEaseMeta = const VerificationMeta(
+    'srsEase',
+  );
+  @override
+  late final GeneratedColumn<double> srsEase = GeneratedColumn<double>(
+    'srs_ease',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsDueMeta = const VerificationMeta('srsDue');
+  @override
+  late final GeneratedColumn<DateTime> srsDue = GeneratedColumn<DateTime>(
+    'srs_due',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsLapsesMeta = const VerificationMeta(
+    'srsLapses',
+  );
+  @override
+  late final GeneratedColumn<int> srsLapses = GeneratedColumn<int>(
+    'srs_lapses',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsStatusMeta = const VerificationMeta(
+    'srsStatus',
+  );
+  @override
+  late final GeneratedColumn<String> srsStatus = GeneratedColumn<String>(
+    'srs_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dictForm,
+    reading,
+    senseIdsJson,
+    addedAt,
+    updatedAt,
+    srsInterval,
+    srsEase,
+    srsDue,
+    srsLapses,
+    srsStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'collected_words';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CollectedWord> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('dict_form')) {
+      context.handle(
+        _dictFormMeta,
+        dictForm.isAcceptableOrUnknown(data['dict_form']!, _dictFormMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dictFormMeta);
+    }
+    if (data.containsKey('reading')) {
+      context.handle(
+        _readingMeta,
+        reading.isAcceptableOrUnknown(data['reading']!, _readingMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_readingMeta);
+    }
+    if (data.containsKey('sense_ids_json')) {
+      context.handle(
+        _senseIdsJsonMeta,
+        senseIdsJson.isAcceptableOrUnknown(
+          data['sense_ids_json']!,
+          _senseIdsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_senseIdsJsonMeta);
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_addedAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('srs_interval')) {
+      context.handle(
+        _srsIntervalMeta,
+        srsInterval.isAcceptableOrUnknown(
+          data['srs_interval']!,
+          _srsIntervalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_srsIntervalMeta);
+    }
+    if (data.containsKey('srs_ease')) {
+      context.handle(
+        _srsEaseMeta,
+        srsEase.isAcceptableOrUnknown(data['srs_ease']!, _srsEaseMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsEaseMeta);
+    }
+    if (data.containsKey('srs_due')) {
+      context.handle(
+        _srsDueMeta,
+        srsDue.isAcceptableOrUnknown(data['srs_due']!, _srsDueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsDueMeta);
+    }
+    if (data.containsKey('srs_lapses')) {
+      context.handle(
+        _srsLapsesMeta,
+        srsLapses.isAcceptableOrUnknown(data['srs_lapses']!, _srsLapsesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsLapsesMeta);
+    }
+    if (data.containsKey('srs_status')) {
+      context.handle(
+        _srsStatusMeta,
+        srsStatus.isAcceptableOrUnknown(data['srs_status']!, _srsStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CollectedWord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CollectedWord(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      dictForm: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dict_form'],
+      )!,
+      reading: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reading'],
+      )!,
+      senseIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sense_ids_json'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      srsInterval: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}srs_interval'],
+      )!,
+      srsEase: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}srs_ease'],
+      )!,
+      srsDue: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}srs_due'],
+      )!,
+      srsLapses: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}srs_lapses'],
+      )!,
+      srsStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}srs_status'],
+      )!,
+    );
+  }
+
+  @override
+  $CollectedWordsTable createAlias(String alias) {
+    return $CollectedWordsTable(attachedDatabase, alias);
+  }
+}
+
+class CollectedWord extends DataClass implements Insertable<CollectedWord> {
+  final String id;
+  final String dictForm;
+  final String reading;
+
+  /// JSON-encoded `List<int>` of `DictionaryTermEntry.id`s (spec §11) this
+  /// collection came from. Not independently queryable the way
+  /// `sourceRefs` needs to be, so JSON is fine here. Set on a fresh add;
+  /// deliberately left untouched by a reset-tap (spec §6's re-tap only
+  /// appends a sighting and resets SRS state).
+  final String senseIdsJson;
+  final DateTime addedAt;
+  final DateTime updatedAt;
+  final int srsInterval;
+  final double srsEase;
+  final DateTime srsDue;
+  final int srsLapses;
+  final String srsStatus;
+  const CollectedWord({
+    required this.id,
+    required this.dictForm,
+    required this.reading,
+    required this.senseIdsJson,
+    required this.addedAt,
+    required this.updatedAt,
+    required this.srsInterval,
+    required this.srsEase,
+    required this.srsDue,
+    required this.srsLapses,
+    required this.srsStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['dict_form'] = Variable<String>(dictForm);
+    map['reading'] = Variable<String>(reading);
+    map['sense_ids_json'] = Variable<String>(senseIdsJson);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['srs_interval'] = Variable<int>(srsInterval);
+    map['srs_ease'] = Variable<double>(srsEase);
+    map['srs_due'] = Variable<DateTime>(srsDue);
+    map['srs_lapses'] = Variable<int>(srsLapses);
+    map['srs_status'] = Variable<String>(srsStatus);
+    return map;
+  }
+
+  CollectedWordsCompanion toCompanion(bool nullToAbsent) {
+    return CollectedWordsCompanion(
+      id: Value(id),
+      dictForm: Value(dictForm),
+      reading: Value(reading),
+      senseIdsJson: Value(senseIdsJson),
+      addedAt: Value(addedAt),
+      updatedAt: Value(updatedAt),
+      srsInterval: Value(srsInterval),
+      srsEase: Value(srsEase),
+      srsDue: Value(srsDue),
+      srsLapses: Value(srsLapses),
+      srsStatus: Value(srsStatus),
+    );
+  }
+
+  factory CollectedWord.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CollectedWord(
+      id: serializer.fromJson<String>(json['id']),
+      dictForm: serializer.fromJson<String>(json['dictForm']),
+      reading: serializer.fromJson<String>(json['reading']),
+      senseIdsJson: serializer.fromJson<String>(json['senseIdsJson']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      srsInterval: serializer.fromJson<int>(json['srsInterval']),
+      srsEase: serializer.fromJson<double>(json['srsEase']),
+      srsDue: serializer.fromJson<DateTime>(json['srsDue']),
+      srsLapses: serializer.fromJson<int>(json['srsLapses']),
+      srsStatus: serializer.fromJson<String>(json['srsStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'dictForm': serializer.toJson<String>(dictForm),
+      'reading': serializer.toJson<String>(reading),
+      'senseIdsJson': serializer.toJson<String>(senseIdsJson),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'srsInterval': serializer.toJson<int>(srsInterval),
+      'srsEase': serializer.toJson<double>(srsEase),
+      'srsDue': serializer.toJson<DateTime>(srsDue),
+      'srsLapses': serializer.toJson<int>(srsLapses),
+      'srsStatus': serializer.toJson<String>(srsStatus),
+    };
+  }
+
+  CollectedWord copyWith({
+    String? id,
+    String? dictForm,
+    String? reading,
+    String? senseIdsJson,
+    DateTime? addedAt,
+    DateTime? updatedAt,
+    int? srsInterval,
+    double? srsEase,
+    DateTime? srsDue,
+    int? srsLapses,
+    String? srsStatus,
+  }) => CollectedWord(
+    id: id ?? this.id,
+    dictForm: dictForm ?? this.dictForm,
+    reading: reading ?? this.reading,
+    senseIdsJson: senseIdsJson ?? this.senseIdsJson,
+    addedAt: addedAt ?? this.addedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    srsInterval: srsInterval ?? this.srsInterval,
+    srsEase: srsEase ?? this.srsEase,
+    srsDue: srsDue ?? this.srsDue,
+    srsLapses: srsLapses ?? this.srsLapses,
+    srsStatus: srsStatus ?? this.srsStatus,
+  );
+  CollectedWord copyWithCompanion(CollectedWordsCompanion data) {
+    return CollectedWord(
+      id: data.id.present ? data.id.value : this.id,
+      dictForm: data.dictForm.present ? data.dictForm.value : this.dictForm,
+      reading: data.reading.present ? data.reading.value : this.reading,
+      senseIdsJson: data.senseIdsJson.present
+          ? data.senseIdsJson.value
+          : this.senseIdsJson,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      srsInterval: data.srsInterval.present
+          ? data.srsInterval.value
+          : this.srsInterval,
+      srsEase: data.srsEase.present ? data.srsEase.value : this.srsEase,
+      srsDue: data.srsDue.present ? data.srsDue.value : this.srsDue,
+      srsLapses: data.srsLapses.present ? data.srsLapses.value : this.srsLapses,
+      srsStatus: data.srsStatus.present ? data.srsStatus.value : this.srsStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedWord(')
+          ..write('id: $id, ')
+          ..write('dictForm: $dictForm, ')
+          ..write('reading: $reading, ')
+          ..write('senseIdsJson: $senseIdsJson, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('srsInterval: $srsInterval, ')
+          ..write('srsEase: $srsEase, ')
+          ..write('srsDue: $srsDue, ')
+          ..write('srsLapses: $srsLapses, ')
+          ..write('srsStatus: $srsStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    dictForm,
+    reading,
+    senseIdsJson,
+    addedAt,
+    updatedAt,
+    srsInterval,
+    srsEase,
+    srsDue,
+    srsLapses,
+    srsStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CollectedWord &&
+          other.id == this.id &&
+          other.dictForm == this.dictForm &&
+          other.reading == this.reading &&
+          other.senseIdsJson == this.senseIdsJson &&
+          other.addedAt == this.addedAt &&
+          other.updatedAt == this.updatedAt &&
+          other.srsInterval == this.srsInterval &&
+          other.srsEase == this.srsEase &&
+          other.srsDue == this.srsDue &&
+          other.srsLapses == this.srsLapses &&
+          other.srsStatus == this.srsStatus);
+}
+
+class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
+  final Value<String> id;
+  final Value<String> dictForm;
+  final Value<String> reading;
+  final Value<String> senseIdsJson;
+  final Value<DateTime> addedAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> srsInterval;
+  final Value<double> srsEase;
+  final Value<DateTime> srsDue;
+  final Value<int> srsLapses;
+  final Value<String> srsStatus;
+  final Value<int> rowid;
+  const CollectedWordsCompanion({
+    this.id = const Value.absent(),
+    this.dictForm = const Value.absent(),
+    this.reading = const Value.absent(),
+    this.senseIdsJson = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.srsInterval = const Value.absent(),
+    this.srsEase = const Value.absent(),
+    this.srsDue = const Value.absent(),
+    this.srsLapses = const Value.absent(),
+    this.srsStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CollectedWordsCompanion.insert({
+    required String id,
+    required String dictForm,
+    required String reading,
+    required String senseIdsJson,
+    required DateTime addedAt,
+    required DateTime updatedAt,
+    required int srsInterval,
+    required double srsEase,
+    required DateTime srsDue,
+    required int srsLapses,
+    required String srsStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       dictForm = Value(dictForm),
+       reading = Value(reading),
+       senseIdsJson = Value(senseIdsJson),
+       addedAt = Value(addedAt),
+       updatedAt = Value(updatedAt),
+       srsInterval = Value(srsInterval),
+       srsEase = Value(srsEase),
+       srsDue = Value(srsDue),
+       srsLapses = Value(srsLapses),
+       srsStatus = Value(srsStatus);
+  static Insertable<CollectedWord> custom({
+    Expression<String>? id,
+    Expression<String>? dictForm,
+    Expression<String>? reading,
+    Expression<String>? senseIdsJson,
+    Expression<DateTime>? addedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? srsInterval,
+    Expression<double>? srsEase,
+    Expression<DateTime>? srsDue,
+    Expression<int>? srsLapses,
+    Expression<String>? srsStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dictForm != null) 'dict_form': dictForm,
+      if (reading != null) 'reading': reading,
+      if (senseIdsJson != null) 'sense_ids_json': senseIdsJson,
+      if (addedAt != null) 'added_at': addedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (srsInterval != null) 'srs_interval': srsInterval,
+      if (srsEase != null) 'srs_ease': srsEase,
+      if (srsDue != null) 'srs_due': srsDue,
+      if (srsLapses != null) 'srs_lapses': srsLapses,
+      if (srsStatus != null) 'srs_status': srsStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CollectedWordsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? dictForm,
+    Value<String>? reading,
+    Value<String>? senseIdsJson,
+    Value<DateTime>? addedAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? srsInterval,
+    Value<double>? srsEase,
+    Value<DateTime>? srsDue,
+    Value<int>? srsLapses,
+    Value<String>? srsStatus,
+    Value<int>? rowid,
+  }) {
+    return CollectedWordsCompanion(
+      id: id ?? this.id,
+      dictForm: dictForm ?? this.dictForm,
+      reading: reading ?? this.reading,
+      senseIdsJson: senseIdsJson ?? this.senseIdsJson,
+      addedAt: addedAt ?? this.addedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      srsInterval: srsInterval ?? this.srsInterval,
+      srsEase: srsEase ?? this.srsEase,
+      srsDue: srsDue ?? this.srsDue,
+      srsLapses: srsLapses ?? this.srsLapses,
+      srsStatus: srsStatus ?? this.srsStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (dictForm.present) {
+      map['dict_form'] = Variable<String>(dictForm.value);
+    }
+    if (reading.present) {
+      map['reading'] = Variable<String>(reading.value);
+    }
+    if (senseIdsJson.present) {
+      map['sense_ids_json'] = Variable<String>(senseIdsJson.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (srsInterval.present) {
+      map['srs_interval'] = Variable<int>(srsInterval.value);
+    }
+    if (srsEase.present) {
+      map['srs_ease'] = Variable<double>(srsEase.value);
+    }
+    if (srsDue.present) {
+      map['srs_due'] = Variable<DateTime>(srsDue.value);
+    }
+    if (srsLapses.present) {
+      map['srs_lapses'] = Variable<int>(srsLapses.value);
+    }
+    if (srsStatus.present) {
+      map['srs_status'] = Variable<String>(srsStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedWordsCompanion(')
+          ..write('id: $id, ')
+          ..write('dictForm: $dictForm, ')
+          ..write('reading: $reading, ')
+          ..write('senseIdsJson: $senseIdsJson, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('srsInterval: $srsInterval, ')
+          ..write('srsEase: $srsEase, ')
+          ..write('srsDue: $srsDue, ')
+          ..write('srsLapses: $srsLapses, ')
+          ..write('srsStatus: $srsStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CollectedWordSourcesTable extends CollectedWordSources
+    with TableInfo<$CollectedWordSourcesTable, CollectedWordSource> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CollectedWordSourcesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _collectedWordIdMeta = const VerificationMeta(
+    'collectedWordId',
+  );
+  @override
+  late final GeneratedColumn<String> collectedWordId = GeneratedColumn<String>(
+    'collected_word_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES collected_words (id)',
+    ),
+  );
+  static const VerificationMeta _workIdMeta = const VerificationMeta('workId');
+  @override
+  late final GeneratedColumn<String> workId = GeneratedColumn<String>(
+    'work_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES documents (id)',
+    ),
+  );
+  static const VerificationMeta _sentenceIdMeta = const VerificationMeta(
+    'sentenceId',
+  );
+  @override
+  late final GeneratedColumn<String> sentenceId = GeneratedColumn<String>(
+    'sentence_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sentences (id)',
+    ),
+  );
+  static const VerificationMeta _mediaTypeMeta = const VerificationMeta(
+    'mediaType',
+  );
+  @override
+  late final GeneratedColumn<String> mediaType = GeneratedColumn<String>(
+    'media_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minedAtMeta = const VerificationMeta(
+    'minedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> minedAt = GeneratedColumn<DateTime>(
+    'mined_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    collectedWordId,
+    workId,
+    sentenceId,
+    mediaType,
+    minedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'collected_word_sources';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CollectedWordSource> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('collected_word_id')) {
+      context.handle(
+        _collectedWordIdMeta,
+        collectedWordId.isAcceptableOrUnknown(
+          data['collected_word_id']!,
+          _collectedWordIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedWordIdMeta);
+    }
+    if (data.containsKey('work_id')) {
+      context.handle(
+        _workIdMeta,
+        workId.isAcceptableOrUnknown(data['work_id']!, _workIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_workIdMeta);
+    }
+    if (data.containsKey('sentence_id')) {
+      context.handle(
+        _sentenceIdMeta,
+        sentenceId.isAcceptableOrUnknown(data['sentence_id']!, _sentenceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sentenceIdMeta);
+    }
+    if (data.containsKey('media_type')) {
+      context.handle(
+        _mediaTypeMeta,
+        mediaType.isAcceptableOrUnknown(data['media_type']!, _mediaTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mediaTypeMeta);
+    }
+    if (data.containsKey('mined_at')) {
+      context.handle(
+        _minedAtMeta,
+        minedAt.isAcceptableOrUnknown(data['mined_at']!, _minedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_minedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CollectedWordSource map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CollectedWordSource(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      collectedWordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_word_id'],
+      )!,
+      workId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}work_id'],
+      )!,
+      sentenceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sentence_id'],
+      )!,
+      mediaType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_type'],
+      )!,
+      minedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}mined_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CollectedWordSourcesTable createAlias(String alias) {
+    return $CollectedWordSourcesTable(attachedDatabase, alias);
+  }
+}
+
+class CollectedWordSource extends DataClass
+    implements Insertable<CollectedWordSource> {
+  final int id;
+  final String collectedWordId;
+  final String workId;
+  final String sentenceId;
+
+  /// `CollectionMediaType.name` (lib/l4_mining/collection/source_ref.dart) --
+  /// deliberately not `DocumentSourceType`; see that enum's doc comment.
+  final String mediaType;
+  final DateTime minedAt;
+  const CollectedWordSource({
+    required this.id,
+    required this.collectedWordId,
+    required this.workId,
+    required this.sentenceId,
+    required this.mediaType,
+    required this.minedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['collected_word_id'] = Variable<String>(collectedWordId);
+    map['work_id'] = Variable<String>(workId);
+    map['sentence_id'] = Variable<String>(sentenceId);
+    map['media_type'] = Variable<String>(mediaType);
+    map['mined_at'] = Variable<DateTime>(minedAt);
+    return map;
+  }
+
+  CollectedWordSourcesCompanion toCompanion(bool nullToAbsent) {
+    return CollectedWordSourcesCompanion(
+      id: Value(id),
+      collectedWordId: Value(collectedWordId),
+      workId: Value(workId),
+      sentenceId: Value(sentenceId),
+      mediaType: Value(mediaType),
+      minedAt: Value(minedAt),
+    );
+  }
+
+  factory CollectedWordSource.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CollectedWordSource(
+      id: serializer.fromJson<int>(json['id']),
+      collectedWordId: serializer.fromJson<String>(json['collectedWordId']),
+      workId: serializer.fromJson<String>(json['workId']),
+      sentenceId: serializer.fromJson<String>(json['sentenceId']),
+      mediaType: serializer.fromJson<String>(json['mediaType']),
+      minedAt: serializer.fromJson<DateTime>(json['minedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'collectedWordId': serializer.toJson<String>(collectedWordId),
+      'workId': serializer.toJson<String>(workId),
+      'sentenceId': serializer.toJson<String>(sentenceId),
+      'mediaType': serializer.toJson<String>(mediaType),
+      'minedAt': serializer.toJson<DateTime>(minedAt),
+    };
+  }
+
+  CollectedWordSource copyWith({
+    int? id,
+    String? collectedWordId,
+    String? workId,
+    String? sentenceId,
+    String? mediaType,
+    DateTime? minedAt,
+  }) => CollectedWordSource(
+    id: id ?? this.id,
+    collectedWordId: collectedWordId ?? this.collectedWordId,
+    workId: workId ?? this.workId,
+    sentenceId: sentenceId ?? this.sentenceId,
+    mediaType: mediaType ?? this.mediaType,
+    minedAt: minedAt ?? this.minedAt,
+  );
+  CollectedWordSource copyWithCompanion(CollectedWordSourcesCompanion data) {
+    return CollectedWordSource(
+      id: data.id.present ? data.id.value : this.id,
+      collectedWordId: data.collectedWordId.present
+          ? data.collectedWordId.value
+          : this.collectedWordId,
+      workId: data.workId.present ? data.workId.value : this.workId,
+      sentenceId: data.sentenceId.present
+          ? data.sentenceId.value
+          : this.sentenceId,
+      mediaType: data.mediaType.present ? data.mediaType.value : this.mediaType,
+      minedAt: data.minedAt.present ? data.minedAt.value : this.minedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedWordSource(')
+          ..write('id: $id, ')
+          ..write('collectedWordId: $collectedWordId, ')
+          ..write('workId: $workId, ')
+          ..write('sentenceId: $sentenceId, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('minedAt: $minedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, collectedWordId, workId, sentenceId, mediaType, minedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CollectedWordSource &&
+          other.id == this.id &&
+          other.collectedWordId == this.collectedWordId &&
+          other.workId == this.workId &&
+          other.sentenceId == this.sentenceId &&
+          other.mediaType == this.mediaType &&
+          other.minedAt == this.minedAt);
+}
+
+class CollectedWordSourcesCompanion
+    extends UpdateCompanion<CollectedWordSource> {
+  final Value<int> id;
+  final Value<String> collectedWordId;
+  final Value<String> workId;
+  final Value<String> sentenceId;
+  final Value<String> mediaType;
+  final Value<DateTime> minedAt;
+  const CollectedWordSourcesCompanion({
+    this.id = const Value.absent(),
+    this.collectedWordId = const Value.absent(),
+    this.workId = const Value.absent(),
+    this.sentenceId = const Value.absent(),
+    this.mediaType = const Value.absent(),
+    this.minedAt = const Value.absent(),
+  });
+  CollectedWordSourcesCompanion.insert({
+    this.id = const Value.absent(),
+    required String collectedWordId,
+    required String workId,
+    required String sentenceId,
+    required String mediaType,
+    required DateTime minedAt,
+  }) : collectedWordId = Value(collectedWordId),
+       workId = Value(workId),
+       sentenceId = Value(sentenceId),
+       mediaType = Value(mediaType),
+       minedAt = Value(minedAt);
+  static Insertable<CollectedWordSource> custom({
+    Expression<int>? id,
+    Expression<String>? collectedWordId,
+    Expression<String>? workId,
+    Expression<String>? sentenceId,
+    Expression<String>? mediaType,
+    Expression<DateTime>? minedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (collectedWordId != null) 'collected_word_id': collectedWordId,
+      if (workId != null) 'work_id': workId,
+      if (sentenceId != null) 'sentence_id': sentenceId,
+      if (mediaType != null) 'media_type': mediaType,
+      if (minedAt != null) 'mined_at': minedAt,
+    });
+  }
+
+  CollectedWordSourcesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? collectedWordId,
+    Value<String>? workId,
+    Value<String>? sentenceId,
+    Value<String>? mediaType,
+    Value<DateTime>? minedAt,
+  }) {
+    return CollectedWordSourcesCompanion(
+      id: id ?? this.id,
+      collectedWordId: collectedWordId ?? this.collectedWordId,
+      workId: workId ?? this.workId,
+      sentenceId: sentenceId ?? this.sentenceId,
+      mediaType: mediaType ?? this.mediaType,
+      minedAt: minedAt ?? this.minedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (collectedWordId.present) {
+      map['collected_word_id'] = Variable<String>(collectedWordId.value);
+    }
+    if (workId.present) {
+      map['work_id'] = Variable<String>(workId.value);
+    }
+    if (sentenceId.present) {
+      map['sentence_id'] = Variable<String>(sentenceId.value);
+    }
+    if (mediaType.present) {
+      map['media_type'] = Variable<String>(mediaType.value);
+    }
+    if (minedAt.present) {
+      map['mined_at'] = Variable<DateTime>(minedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedWordSourcesCompanion(')
+          ..write('id: $id, ')
+          ..write('collectedWordId: $collectedWordId, ')
+          ..write('workId: $workId, ')
+          ..write('sentenceId: $sentenceId, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('minedAt: $minedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CollectedGrammarsTable extends CollectedGrammars
+    with TableInfo<$CollectedGrammarsTable, CollectedGrammar> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CollectedGrammarsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _grammarPointIdMeta = const VerificationMeta(
+    'grammarPointId',
+  );
+  @override
+  late final GeneratedColumn<String> grammarPointId = GeneratedColumn<String>(
+    'grammar_point_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsIntervalMeta = const VerificationMeta(
+    'srsInterval',
+  );
+  @override
+  late final GeneratedColumn<int> srsInterval = GeneratedColumn<int>(
+    'srs_interval',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsEaseMeta = const VerificationMeta(
+    'srsEase',
+  );
+  @override
+  late final GeneratedColumn<double> srsEase = GeneratedColumn<double>(
+    'srs_ease',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsDueMeta = const VerificationMeta('srsDue');
+  @override
+  late final GeneratedColumn<DateTime> srsDue = GeneratedColumn<DateTime>(
+    'srs_due',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsLapsesMeta = const VerificationMeta(
+    'srsLapses',
+  );
+  @override
+  late final GeneratedColumn<int> srsLapses = GeneratedColumn<int>(
+    'srs_lapses',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _srsStatusMeta = const VerificationMeta(
+    'srsStatus',
+  );
+  @override
+  late final GeneratedColumn<String> srsStatus = GeneratedColumn<String>(
+    'srs_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    grammarPointId,
+    addedAt,
+    updatedAt,
+    srsInterval,
+    srsEase,
+    srsDue,
+    srsLapses,
+    srsStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'collected_grammars';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CollectedGrammar> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('grammar_point_id')) {
+      context.handle(
+        _grammarPointIdMeta,
+        grammarPointId.isAcceptableOrUnknown(
+          data['grammar_point_id']!,
+          _grammarPointIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_grammarPointIdMeta);
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_addedAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('srs_interval')) {
+      context.handle(
+        _srsIntervalMeta,
+        srsInterval.isAcceptableOrUnknown(
+          data['srs_interval']!,
+          _srsIntervalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_srsIntervalMeta);
+    }
+    if (data.containsKey('srs_ease')) {
+      context.handle(
+        _srsEaseMeta,
+        srsEase.isAcceptableOrUnknown(data['srs_ease']!, _srsEaseMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsEaseMeta);
+    }
+    if (data.containsKey('srs_due')) {
+      context.handle(
+        _srsDueMeta,
+        srsDue.isAcceptableOrUnknown(data['srs_due']!, _srsDueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsDueMeta);
+    }
+    if (data.containsKey('srs_lapses')) {
+      context.handle(
+        _srsLapsesMeta,
+        srsLapses.isAcceptableOrUnknown(data['srs_lapses']!, _srsLapsesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsLapsesMeta);
+    }
+    if (data.containsKey('srs_status')) {
+      context.handle(
+        _srsStatusMeta,
+        srsStatus.isAcceptableOrUnknown(data['srs_status']!, _srsStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_srsStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CollectedGrammar map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CollectedGrammar(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      grammarPointId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}grammar_point_id'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      srsInterval: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}srs_interval'],
+      )!,
+      srsEase: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}srs_ease'],
+      )!,
+      srsDue: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}srs_due'],
+      )!,
+      srsLapses: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}srs_lapses'],
+      )!,
+      srsStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}srs_status'],
+      )!,
+    );
+  }
+
+  @override
+  $CollectedGrammarsTable createAlias(String alias) {
+    return $CollectedGrammarsTable(attachedDatabase, alias);
+  }
+}
+
+class CollectedGrammar extends DataClass
+    implements Insertable<CollectedGrammar> {
+  final String id;
+  final String grammarPointId;
+  final DateTime addedAt;
+  final DateTime updatedAt;
+  final int srsInterval;
+  final double srsEase;
+  final DateTime srsDue;
+  final int srsLapses;
+  final String srsStatus;
+  const CollectedGrammar({
+    required this.id,
+    required this.grammarPointId,
+    required this.addedAt,
+    required this.updatedAt,
+    required this.srsInterval,
+    required this.srsEase,
+    required this.srsDue,
+    required this.srsLapses,
+    required this.srsStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['grammar_point_id'] = Variable<String>(grammarPointId);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['srs_interval'] = Variable<int>(srsInterval);
+    map['srs_ease'] = Variable<double>(srsEase);
+    map['srs_due'] = Variable<DateTime>(srsDue);
+    map['srs_lapses'] = Variable<int>(srsLapses);
+    map['srs_status'] = Variable<String>(srsStatus);
+    return map;
+  }
+
+  CollectedGrammarsCompanion toCompanion(bool nullToAbsent) {
+    return CollectedGrammarsCompanion(
+      id: Value(id),
+      grammarPointId: Value(grammarPointId),
+      addedAt: Value(addedAt),
+      updatedAt: Value(updatedAt),
+      srsInterval: Value(srsInterval),
+      srsEase: Value(srsEase),
+      srsDue: Value(srsDue),
+      srsLapses: Value(srsLapses),
+      srsStatus: Value(srsStatus),
+    );
+  }
+
+  factory CollectedGrammar.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CollectedGrammar(
+      id: serializer.fromJson<String>(json['id']),
+      grammarPointId: serializer.fromJson<String>(json['grammarPointId']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      srsInterval: serializer.fromJson<int>(json['srsInterval']),
+      srsEase: serializer.fromJson<double>(json['srsEase']),
+      srsDue: serializer.fromJson<DateTime>(json['srsDue']),
+      srsLapses: serializer.fromJson<int>(json['srsLapses']),
+      srsStatus: serializer.fromJson<String>(json['srsStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'grammarPointId': serializer.toJson<String>(grammarPointId),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'srsInterval': serializer.toJson<int>(srsInterval),
+      'srsEase': serializer.toJson<double>(srsEase),
+      'srsDue': serializer.toJson<DateTime>(srsDue),
+      'srsLapses': serializer.toJson<int>(srsLapses),
+      'srsStatus': serializer.toJson<String>(srsStatus),
+    };
+  }
+
+  CollectedGrammar copyWith({
+    String? id,
+    String? grammarPointId,
+    DateTime? addedAt,
+    DateTime? updatedAt,
+    int? srsInterval,
+    double? srsEase,
+    DateTime? srsDue,
+    int? srsLapses,
+    String? srsStatus,
+  }) => CollectedGrammar(
+    id: id ?? this.id,
+    grammarPointId: grammarPointId ?? this.grammarPointId,
+    addedAt: addedAt ?? this.addedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    srsInterval: srsInterval ?? this.srsInterval,
+    srsEase: srsEase ?? this.srsEase,
+    srsDue: srsDue ?? this.srsDue,
+    srsLapses: srsLapses ?? this.srsLapses,
+    srsStatus: srsStatus ?? this.srsStatus,
+  );
+  CollectedGrammar copyWithCompanion(CollectedGrammarsCompanion data) {
+    return CollectedGrammar(
+      id: data.id.present ? data.id.value : this.id,
+      grammarPointId: data.grammarPointId.present
+          ? data.grammarPointId.value
+          : this.grammarPointId,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      srsInterval: data.srsInterval.present
+          ? data.srsInterval.value
+          : this.srsInterval,
+      srsEase: data.srsEase.present ? data.srsEase.value : this.srsEase,
+      srsDue: data.srsDue.present ? data.srsDue.value : this.srsDue,
+      srsLapses: data.srsLapses.present ? data.srsLapses.value : this.srsLapses,
+      srsStatus: data.srsStatus.present ? data.srsStatus.value : this.srsStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedGrammar(')
+          ..write('id: $id, ')
+          ..write('grammarPointId: $grammarPointId, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('srsInterval: $srsInterval, ')
+          ..write('srsEase: $srsEase, ')
+          ..write('srsDue: $srsDue, ')
+          ..write('srsLapses: $srsLapses, ')
+          ..write('srsStatus: $srsStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    grammarPointId,
+    addedAt,
+    updatedAt,
+    srsInterval,
+    srsEase,
+    srsDue,
+    srsLapses,
+    srsStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CollectedGrammar &&
+          other.id == this.id &&
+          other.grammarPointId == this.grammarPointId &&
+          other.addedAt == this.addedAt &&
+          other.updatedAt == this.updatedAt &&
+          other.srsInterval == this.srsInterval &&
+          other.srsEase == this.srsEase &&
+          other.srsDue == this.srsDue &&
+          other.srsLapses == this.srsLapses &&
+          other.srsStatus == this.srsStatus);
+}
+
+class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
+  final Value<String> id;
+  final Value<String> grammarPointId;
+  final Value<DateTime> addedAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> srsInterval;
+  final Value<double> srsEase;
+  final Value<DateTime> srsDue;
+  final Value<int> srsLapses;
+  final Value<String> srsStatus;
+  final Value<int> rowid;
+  const CollectedGrammarsCompanion({
+    this.id = const Value.absent(),
+    this.grammarPointId = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.srsInterval = const Value.absent(),
+    this.srsEase = const Value.absent(),
+    this.srsDue = const Value.absent(),
+    this.srsLapses = const Value.absent(),
+    this.srsStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CollectedGrammarsCompanion.insert({
+    required String id,
+    required String grammarPointId,
+    required DateTime addedAt,
+    required DateTime updatedAt,
+    required int srsInterval,
+    required double srsEase,
+    required DateTime srsDue,
+    required int srsLapses,
+    required String srsStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       grammarPointId = Value(grammarPointId),
+       addedAt = Value(addedAt),
+       updatedAt = Value(updatedAt),
+       srsInterval = Value(srsInterval),
+       srsEase = Value(srsEase),
+       srsDue = Value(srsDue),
+       srsLapses = Value(srsLapses),
+       srsStatus = Value(srsStatus);
+  static Insertable<CollectedGrammar> custom({
+    Expression<String>? id,
+    Expression<String>? grammarPointId,
+    Expression<DateTime>? addedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? srsInterval,
+    Expression<double>? srsEase,
+    Expression<DateTime>? srsDue,
+    Expression<int>? srsLapses,
+    Expression<String>? srsStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (grammarPointId != null) 'grammar_point_id': grammarPointId,
+      if (addedAt != null) 'added_at': addedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (srsInterval != null) 'srs_interval': srsInterval,
+      if (srsEase != null) 'srs_ease': srsEase,
+      if (srsDue != null) 'srs_due': srsDue,
+      if (srsLapses != null) 'srs_lapses': srsLapses,
+      if (srsStatus != null) 'srs_status': srsStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CollectedGrammarsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? grammarPointId,
+    Value<DateTime>? addedAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? srsInterval,
+    Value<double>? srsEase,
+    Value<DateTime>? srsDue,
+    Value<int>? srsLapses,
+    Value<String>? srsStatus,
+    Value<int>? rowid,
+  }) {
+    return CollectedGrammarsCompanion(
+      id: id ?? this.id,
+      grammarPointId: grammarPointId ?? this.grammarPointId,
+      addedAt: addedAt ?? this.addedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      srsInterval: srsInterval ?? this.srsInterval,
+      srsEase: srsEase ?? this.srsEase,
+      srsDue: srsDue ?? this.srsDue,
+      srsLapses: srsLapses ?? this.srsLapses,
+      srsStatus: srsStatus ?? this.srsStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (grammarPointId.present) {
+      map['grammar_point_id'] = Variable<String>(grammarPointId.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (srsInterval.present) {
+      map['srs_interval'] = Variable<int>(srsInterval.value);
+    }
+    if (srsEase.present) {
+      map['srs_ease'] = Variable<double>(srsEase.value);
+    }
+    if (srsDue.present) {
+      map['srs_due'] = Variable<DateTime>(srsDue.value);
+    }
+    if (srsLapses.present) {
+      map['srs_lapses'] = Variable<int>(srsLapses.value);
+    }
+    if (srsStatus.present) {
+      map['srs_status'] = Variable<String>(srsStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedGrammarsCompanion(')
+          ..write('id: $id, ')
+          ..write('grammarPointId: $grammarPointId, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('srsInterval: $srsInterval, ')
+          ..write('srsEase: $srsEase, ')
+          ..write('srsDue: $srsDue, ')
+          ..write('srsLapses: $srsLapses, ')
+          ..write('srsStatus: $srsStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CollectedGrammarSourcesTable extends CollectedGrammarSources
+    with TableInfo<$CollectedGrammarSourcesTable, CollectedGrammarSource> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CollectedGrammarSourcesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _collectedGrammarIdMeta =
+      const VerificationMeta('collectedGrammarId');
+  @override
+  late final GeneratedColumn<String> collectedGrammarId =
+      GeneratedColumn<String>(
+        'collected_grammar_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES collected_grammars (id)',
+        ),
+      );
+  static const VerificationMeta _workIdMeta = const VerificationMeta('workId');
+  @override
+  late final GeneratedColumn<String> workId = GeneratedColumn<String>(
+    'work_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES documents (id)',
+    ),
+  );
+  static const VerificationMeta _sentenceIdMeta = const VerificationMeta(
+    'sentenceId',
+  );
+  @override
+  late final GeneratedColumn<String> sentenceId = GeneratedColumn<String>(
+    'sentence_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sentences (id)',
+    ),
+  );
+  static const VerificationMeta _mediaTypeMeta = const VerificationMeta(
+    'mediaType',
+  );
+  @override
+  late final GeneratedColumn<String> mediaType = GeneratedColumn<String>(
+    'media_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minedAtMeta = const VerificationMeta(
+    'minedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> minedAt = GeneratedColumn<DateTime>(
+    'mined_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    collectedGrammarId,
+    workId,
+    sentenceId,
+    mediaType,
+    minedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'collected_grammar_sources';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CollectedGrammarSource> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('collected_grammar_id')) {
+      context.handle(
+        _collectedGrammarIdMeta,
+        collectedGrammarId.isAcceptableOrUnknown(
+          data['collected_grammar_id']!,
+          _collectedGrammarIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_collectedGrammarIdMeta);
+    }
+    if (data.containsKey('work_id')) {
+      context.handle(
+        _workIdMeta,
+        workId.isAcceptableOrUnknown(data['work_id']!, _workIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_workIdMeta);
+    }
+    if (data.containsKey('sentence_id')) {
+      context.handle(
+        _sentenceIdMeta,
+        sentenceId.isAcceptableOrUnknown(data['sentence_id']!, _sentenceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sentenceIdMeta);
+    }
+    if (data.containsKey('media_type')) {
+      context.handle(
+        _mediaTypeMeta,
+        mediaType.isAcceptableOrUnknown(data['media_type']!, _mediaTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mediaTypeMeta);
+    }
+    if (data.containsKey('mined_at')) {
+      context.handle(
+        _minedAtMeta,
+        minedAt.isAcceptableOrUnknown(data['mined_at']!, _minedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_minedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CollectedGrammarSource map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CollectedGrammarSource(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      collectedGrammarId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collected_grammar_id'],
+      )!,
+      workId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}work_id'],
+      )!,
+      sentenceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sentence_id'],
+      )!,
+      mediaType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_type'],
+      )!,
+      minedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}mined_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CollectedGrammarSourcesTable createAlias(String alias) {
+    return $CollectedGrammarSourcesTable(attachedDatabase, alias);
+  }
+}
+
+class CollectedGrammarSource extends DataClass
+    implements Insertable<CollectedGrammarSource> {
+  final int id;
+  final String collectedGrammarId;
+  final String workId;
+  final String sentenceId;
+  final String mediaType;
+  final DateTime minedAt;
+  const CollectedGrammarSource({
+    required this.id,
+    required this.collectedGrammarId,
+    required this.workId,
+    required this.sentenceId,
+    required this.mediaType,
+    required this.minedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['collected_grammar_id'] = Variable<String>(collectedGrammarId);
+    map['work_id'] = Variable<String>(workId);
+    map['sentence_id'] = Variable<String>(sentenceId);
+    map['media_type'] = Variable<String>(mediaType);
+    map['mined_at'] = Variable<DateTime>(minedAt);
+    return map;
+  }
+
+  CollectedGrammarSourcesCompanion toCompanion(bool nullToAbsent) {
+    return CollectedGrammarSourcesCompanion(
+      id: Value(id),
+      collectedGrammarId: Value(collectedGrammarId),
+      workId: Value(workId),
+      sentenceId: Value(sentenceId),
+      mediaType: Value(mediaType),
+      minedAt: Value(minedAt),
+    );
+  }
+
+  factory CollectedGrammarSource.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CollectedGrammarSource(
+      id: serializer.fromJson<int>(json['id']),
+      collectedGrammarId: serializer.fromJson<String>(
+        json['collectedGrammarId'],
+      ),
+      workId: serializer.fromJson<String>(json['workId']),
+      sentenceId: serializer.fromJson<String>(json['sentenceId']),
+      mediaType: serializer.fromJson<String>(json['mediaType']),
+      minedAt: serializer.fromJson<DateTime>(json['minedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'collectedGrammarId': serializer.toJson<String>(collectedGrammarId),
+      'workId': serializer.toJson<String>(workId),
+      'sentenceId': serializer.toJson<String>(sentenceId),
+      'mediaType': serializer.toJson<String>(mediaType),
+      'minedAt': serializer.toJson<DateTime>(minedAt),
+    };
+  }
+
+  CollectedGrammarSource copyWith({
+    int? id,
+    String? collectedGrammarId,
+    String? workId,
+    String? sentenceId,
+    String? mediaType,
+    DateTime? minedAt,
+  }) => CollectedGrammarSource(
+    id: id ?? this.id,
+    collectedGrammarId: collectedGrammarId ?? this.collectedGrammarId,
+    workId: workId ?? this.workId,
+    sentenceId: sentenceId ?? this.sentenceId,
+    mediaType: mediaType ?? this.mediaType,
+    minedAt: minedAt ?? this.minedAt,
+  );
+  CollectedGrammarSource copyWithCompanion(
+    CollectedGrammarSourcesCompanion data,
+  ) {
+    return CollectedGrammarSource(
+      id: data.id.present ? data.id.value : this.id,
+      collectedGrammarId: data.collectedGrammarId.present
+          ? data.collectedGrammarId.value
+          : this.collectedGrammarId,
+      workId: data.workId.present ? data.workId.value : this.workId,
+      sentenceId: data.sentenceId.present
+          ? data.sentenceId.value
+          : this.sentenceId,
+      mediaType: data.mediaType.present ? data.mediaType.value : this.mediaType,
+      minedAt: data.minedAt.present ? data.minedAt.value : this.minedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedGrammarSource(')
+          ..write('id: $id, ')
+          ..write('collectedGrammarId: $collectedGrammarId, ')
+          ..write('workId: $workId, ')
+          ..write('sentenceId: $sentenceId, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('minedAt: $minedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    collectedGrammarId,
+    workId,
+    sentenceId,
+    mediaType,
+    minedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CollectedGrammarSource &&
+          other.id == this.id &&
+          other.collectedGrammarId == this.collectedGrammarId &&
+          other.workId == this.workId &&
+          other.sentenceId == this.sentenceId &&
+          other.mediaType == this.mediaType &&
+          other.minedAt == this.minedAt);
+}
+
+class CollectedGrammarSourcesCompanion
+    extends UpdateCompanion<CollectedGrammarSource> {
+  final Value<int> id;
+  final Value<String> collectedGrammarId;
+  final Value<String> workId;
+  final Value<String> sentenceId;
+  final Value<String> mediaType;
+  final Value<DateTime> minedAt;
+  const CollectedGrammarSourcesCompanion({
+    this.id = const Value.absent(),
+    this.collectedGrammarId = const Value.absent(),
+    this.workId = const Value.absent(),
+    this.sentenceId = const Value.absent(),
+    this.mediaType = const Value.absent(),
+    this.minedAt = const Value.absent(),
+  });
+  CollectedGrammarSourcesCompanion.insert({
+    this.id = const Value.absent(),
+    required String collectedGrammarId,
+    required String workId,
+    required String sentenceId,
+    required String mediaType,
+    required DateTime minedAt,
+  }) : collectedGrammarId = Value(collectedGrammarId),
+       workId = Value(workId),
+       sentenceId = Value(sentenceId),
+       mediaType = Value(mediaType),
+       minedAt = Value(minedAt);
+  static Insertable<CollectedGrammarSource> custom({
+    Expression<int>? id,
+    Expression<String>? collectedGrammarId,
+    Expression<String>? workId,
+    Expression<String>? sentenceId,
+    Expression<String>? mediaType,
+    Expression<DateTime>? minedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (collectedGrammarId != null)
+        'collected_grammar_id': collectedGrammarId,
+      if (workId != null) 'work_id': workId,
+      if (sentenceId != null) 'sentence_id': sentenceId,
+      if (mediaType != null) 'media_type': mediaType,
+      if (minedAt != null) 'mined_at': minedAt,
+    });
+  }
+
+  CollectedGrammarSourcesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? collectedGrammarId,
+    Value<String>? workId,
+    Value<String>? sentenceId,
+    Value<String>? mediaType,
+    Value<DateTime>? minedAt,
+  }) {
+    return CollectedGrammarSourcesCompanion(
+      id: id ?? this.id,
+      collectedGrammarId: collectedGrammarId ?? this.collectedGrammarId,
+      workId: workId ?? this.workId,
+      sentenceId: sentenceId ?? this.sentenceId,
+      mediaType: mediaType ?? this.mediaType,
+      minedAt: minedAt ?? this.minedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (collectedGrammarId.present) {
+      map['collected_grammar_id'] = Variable<String>(collectedGrammarId.value);
+    }
+    if (workId.present) {
+      map['work_id'] = Variable<String>(workId.value);
+    }
+    if (sentenceId.present) {
+      map['sentence_id'] = Variable<String>(sentenceId.value);
+    }
+    if (mediaType.present) {
+      map['media_type'] = Variable<String>(mediaType.value);
+    }
+    if (minedAt.present) {
+      map['mined_at'] = Variable<DateTime>(minedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CollectedGrammarSourcesCompanion(')
+          ..write('id: $id, ')
+          ..write('collectedGrammarId: $collectedGrammarId, ')
+          ..write('workId: $workId, ')
+          ..write('sentenceId: $sentenceId, ')
+          ..write('mediaType: $mediaType, ')
+          ..write('minedAt: $minedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3789,6 +5874,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $DictionaryTermEntriesTable(this);
   late final $DictionaryTermMetaEntriesTable dictionaryTermMetaEntries =
       $DictionaryTermMetaEntriesTable(this);
+  late final $CollectedWordsTable collectedWords = $CollectedWordsTable(this);
+  late final $CollectedWordSourcesTable collectedWordSources =
+      $CollectedWordSourcesTable(this);
+  late final $CollectedGrammarsTable collectedGrammars =
+      $CollectedGrammarsTable(this);
+  late final $CollectedGrammarSourcesTable collectedGrammarSources =
+      $CollectedGrammarSourcesTable(this);
   late final Index idxDictTermHeadword = Index(
     'idx_dict_term_headword',
     'CREATE INDEX idx_dict_term_headword ON dictionary_term_entries (headword)',
@@ -3805,6 +5897,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_dict_term_meta_lookup',
     'CREATE INDEX idx_dict_term_meta_lookup ON dictionary_term_meta_entries (dictionary_id, headword, mode)',
   );
+  late final Index idxCollectedWordSourcesWord = Index(
+    'idx_collected_word_sources_word',
+    'CREATE INDEX idx_collected_word_sources_word ON collected_word_sources (collected_word_id)',
+  );
+  late final Index idxCollectedGrammarSourcesGrammar = Index(
+    'idx_collected_grammar_sources_grammar',
+    'CREATE INDEX idx_collected_grammar_sources_grammar ON collected_grammar_sources (collected_grammar_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3817,10 +5917,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     dictionaryTagEntries,
     dictionaryTermEntries,
     dictionaryTermMetaEntries,
+    collectedWords,
+    collectedWordSources,
+    collectedGrammars,
+    collectedGrammarSources,
     idxDictTermHeadword,
     idxDictTermReadingNormalized,
     idxDictTermDictionarySequence,
     idxDictTermMetaLookup,
+    idxCollectedWordSourcesWord,
+    idxCollectedGrammarSourcesGrammar,
   ];
 }
 
@@ -3878,6 +5984,56 @@ final class $$DocumentsTableReferences
     ).filter((f) => f.documentId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_sentencesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $CollectedWordSourcesTable,
+    List<CollectedWordSource>
+  >
+  _collectedWordSourcesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.collectedWordSources,
+        aliasName: 'documents__id__collected_word_sources__work_id',
+      );
+
+  $$CollectedWordSourcesTableProcessedTableManager
+  get collectedWordSourcesRefs {
+    final manager = $$CollectedWordSourcesTableTableManager(
+      $_db,
+      $_db.collectedWordSources,
+    ).filter((f) => f.workId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _collectedWordSourcesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $CollectedGrammarSourcesTable,
+    List<CollectedGrammarSource>
+  >
+  _collectedGrammarSourcesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.collectedGrammarSources,
+        aliasName: 'documents__id__collected_grammar_sources__work_id',
+      );
+
+  $$CollectedGrammarSourcesTableProcessedTableManager
+  get collectedGrammarSourcesRefs {
+    final manager = $$CollectedGrammarSourcesTableTableManager(
+      $_db,
+      $_db.collectedGrammarSources,
+    ).filter((f) => f.workId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _collectedGrammarSourcesRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -3965,6 +6121,57 @@ class $$DocumentsTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> collectedWordSourcesRefs(
+    Expression<bool> Function($$CollectedWordSourcesTableFilterComposer f) f,
+  ) {
+    final $$CollectedWordSourcesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.collectedWordSources,
+      getReferencedColumn: (t) => t.workId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedWordSourcesTableFilterComposer(
+            $db: $db,
+            $table: $db.collectedWordSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> collectedGrammarSourcesRefs(
+    Expression<bool> Function($$CollectedGrammarSourcesTableFilterComposer f) f,
+  ) {
+    final $$CollectedGrammarSourcesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedGrammarSources,
+          getReferencedColumn: (t) => t.workId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarSourcesTableFilterComposer(
+                $db: $db,
+                $table: $db.collectedGrammarSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -4079,6 +6286,59 @@ class $$DocumentsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> collectedWordSourcesRefs<T extends Object>(
+    Expression<T> Function($$CollectedWordSourcesTableAnnotationComposer a) f,
+  ) {
+    final $$CollectedWordSourcesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedWordSources,
+          getReferencedColumn: (t) => t.workId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedWordSourcesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedWordSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> collectedGrammarSourcesRefs<T extends Object>(
+    Expression<T> Function($$CollectedGrammarSourcesTableAnnotationComposer a)
+    f,
+  ) {
+    final $$CollectedGrammarSourcesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedGrammarSources,
+          getReferencedColumn: (t) => t.workId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarSourcesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedGrammarSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$DocumentsTableTableManager
@@ -4094,7 +6354,12 @@ class $$DocumentsTableTableManager
           $$DocumentsTableUpdateCompanionBuilder,
           (DocumentRow, $$DocumentsTableReferences),
           DocumentRow,
-          PrefetchHooks Function({bool chaptersRefs, bool sentencesRefs})
+          PrefetchHooks Function({
+            bool chaptersRefs,
+            bool sentencesRefs,
+            bool collectedWordSourcesRefs,
+            bool collectedGrammarSourcesRefs,
+          })
         > {
   $$DocumentsTableTableManager(_$AppDatabase db, $DocumentsTable table)
     : super(
@@ -4148,12 +6413,19 @@ class $$DocumentsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({chaptersRefs = false, sentencesRefs = false}) {
+              ({
+                chaptersRefs = false,
+                sentencesRefs = false,
+                collectedWordSourcesRefs = false,
+                collectedGrammarSourcesRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (chaptersRefs) db.chapters,
                     if (sentencesRefs) db.sentences,
+                    if (collectedWordSourcesRefs) db.collectedWordSources,
+                    if (collectedGrammarSourcesRefs) db.collectedGrammarSources,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -4200,6 +6472,48 @@ class $$DocumentsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (collectedWordSourcesRefs)
+                        await $_getPrefetchedData<
+                          DocumentRow,
+                          $DocumentsTable,
+                          CollectedWordSource
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DocumentsTableReferences
+                              ._collectedWordSourcesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DocumentsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).collectedWordSourcesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.workId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (collectedGrammarSourcesRefs)
+                        await $_getPrefetchedData<
+                          DocumentRow,
+                          $DocumentsTable,
+                          CollectedGrammarSource
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DocumentsTableReferences
+                              ._collectedGrammarSourcesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DocumentsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).collectedGrammarSourcesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.workId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -4220,7 +6534,12 @@ typedef $$DocumentsTableProcessedTableManager =
       $$DocumentsTableUpdateCompanionBuilder,
       (DocumentRow, $$DocumentsTableReferences),
       DocumentRow,
-      PrefetchHooks Function({bool chaptersRefs, bool sentencesRefs})
+      PrefetchHooks Function({
+        bool chaptersRefs,
+        bool sentencesRefs,
+        bool collectedWordSourcesRefs,
+        bool collectedGrammarSourcesRefs,
+      })
     >;
 typedef $$ChaptersTableCreateCompanionBuilder =
     ChaptersCompanion Function({
@@ -4690,6 +7009,56 @@ final class $$SentencesTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<
+    $CollectedWordSourcesTable,
+    List<CollectedWordSource>
+  >
+  _collectedWordSourcesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.collectedWordSources,
+        aliasName: 'sentences__id__collected_word_sources__sentence_id',
+      );
+
+  $$CollectedWordSourcesTableProcessedTableManager
+  get collectedWordSourcesRefs {
+    final manager = $$CollectedWordSourcesTableTableManager(
+      $_db,
+      $_db.collectedWordSources,
+    ).filter((f) => f.sentenceId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _collectedWordSourcesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $CollectedGrammarSourcesTable,
+    List<CollectedGrammarSource>
+  >
+  _collectedGrammarSourcesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.collectedGrammarSources,
+        aliasName: 'sentences__id__collected_grammar_sources__sentence_id',
+      );
+
+  $$CollectedGrammarSourcesTableProcessedTableManager
+  get collectedGrammarSourcesRefs {
+    final manager = $$CollectedGrammarSourcesTableTableManager(
+      $_db,
+      $_db.collectedGrammarSources,
+    ).filter((f) => f.sentenceId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _collectedGrammarSourcesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$SentencesTableFilterComposer
@@ -4770,6 +7139,57 @@ class $$SentencesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> collectedWordSourcesRefs(
+    Expression<bool> Function($$CollectedWordSourcesTableFilterComposer f) f,
+  ) {
+    final $$CollectedWordSourcesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.collectedWordSources,
+      getReferencedColumn: (t) => t.sentenceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedWordSourcesTableFilterComposer(
+            $db: $db,
+            $table: $db.collectedWordSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> collectedGrammarSourcesRefs(
+    Expression<bool> Function($$CollectedGrammarSourcesTableFilterComposer f) f,
+  ) {
+    final $$CollectedGrammarSourcesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedGrammarSources,
+          getReferencedColumn: (t) => t.sentenceId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarSourcesTableFilterComposer(
+                $db: $db,
+                $table: $db.collectedGrammarSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
   }
 }
 
@@ -4929,6 +7349,59 @@ class $$SentencesTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> collectedWordSourcesRefs<T extends Object>(
+    Expression<T> Function($$CollectedWordSourcesTableAnnotationComposer a) f,
+  ) {
+    final $$CollectedWordSourcesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedWordSources,
+          getReferencedColumn: (t) => t.sentenceId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedWordSourcesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedWordSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> collectedGrammarSourcesRefs<T extends Object>(
+    Expression<T> Function($$CollectedGrammarSourcesTableAnnotationComposer a)
+    f,
+  ) {
+    final $$CollectedGrammarSourcesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedGrammarSources,
+          getReferencedColumn: (t) => t.sentenceId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarSourcesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedGrammarSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$SentencesTableTableManager
@@ -4944,7 +7417,12 @@ class $$SentencesTableTableManager
           $$SentencesTableUpdateCompanionBuilder,
           (SentenceRow, $$SentencesTableReferences),
           SentenceRow,
-          PrefetchHooks Function({bool documentId, bool chapterId})
+          PrefetchHooks Function({
+            bool documentId,
+            bool chapterId,
+            bool collectedWordSourcesRefs,
+            bool collectedGrammarSourcesRefs,
+          })
         > {
   $$SentencesTableTableManager(_$AppDatabase db, $SentencesTable table)
     : super(
@@ -5005,60 +7483,112 @@ class $$SentencesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({documentId = false, chapterId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (documentId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.documentId,
-                                referencedTable: $$SentencesTableReferences
-                                    ._documentIdTable(db),
-                                referencedColumn: $$SentencesTableReferences
-                                    ._documentIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (chapterId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.chapterId,
-                                referencedTable: $$SentencesTableReferences
-                                    ._chapterIdTable(db),
-                                referencedColumn: $$SentencesTableReferences
-                                    ._chapterIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                documentId = false,
+                chapterId = false,
+                collectedWordSourcesRefs = false,
+                collectedGrammarSourcesRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (collectedWordSourcesRefs) db.collectedWordSources,
+                    if (collectedGrammarSourcesRefs) db.collectedGrammarSources,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (documentId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.documentId,
+                                    referencedTable: $$SentencesTableReferences
+                                        ._documentIdTable(db),
+                                    referencedColumn: $$SentencesTableReferences
+                                        ._documentIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (chapterId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.chapterId,
+                                    referencedTable: $$SentencesTableReferences
+                                        ._chapterIdTable(db),
+                                    referencedColumn: $$SentencesTableReferences
+                                        ._chapterIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (collectedWordSourcesRefs)
+                        await $_getPrefetchedData<
+                          SentenceRow,
+                          $SentencesTable,
+                          CollectedWordSource
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SentencesTableReferences
+                              ._collectedWordSourcesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SentencesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).collectedWordSourcesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.sentenceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (collectedGrammarSourcesRefs)
+                        await $_getPrefetchedData<
+                          SentenceRow,
+                          $SentencesTable,
+                          CollectedGrammarSource
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SentencesTableReferences
+                              ._collectedGrammarSourcesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SentencesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).collectedGrammarSourcesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.sentenceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -5075,7 +7605,12 @@ typedef $$SentencesTableProcessedTableManager =
       $$SentencesTableUpdateCompanionBuilder,
       (SentenceRow, $$SentencesTableReferences),
       SentenceRow,
-      PrefetchHooks Function({bool documentId, bool chapterId})
+      PrefetchHooks Function({
+        bool documentId,
+        bool chapterId,
+        bool collectedWordSourcesRefs,
+        bool collectedGrammarSourcesRefs,
+      })
     >;
 typedef $$DictionariesTableCreateCompanionBuilder =
     DictionariesCompanion Function({
@@ -7024,6 +9559,1942 @@ typedef $$DictionaryTermMetaEntriesTableProcessedTableManager =
       DictionaryTermMetaEntry,
       PrefetchHooks Function({bool dictionaryId})
     >;
+typedef $$CollectedWordsTableCreateCompanionBuilder =
+    CollectedWordsCompanion Function({
+      required String id,
+      required String dictForm,
+      required String reading,
+      required String senseIdsJson,
+      required DateTime addedAt,
+      required DateTime updatedAt,
+      required int srsInterval,
+      required double srsEase,
+      required DateTime srsDue,
+      required int srsLapses,
+      required String srsStatus,
+      Value<int> rowid,
+    });
+typedef $$CollectedWordsTableUpdateCompanionBuilder =
+    CollectedWordsCompanion Function({
+      Value<String> id,
+      Value<String> dictForm,
+      Value<String> reading,
+      Value<String> senseIdsJson,
+      Value<DateTime> addedAt,
+      Value<DateTime> updatedAt,
+      Value<int> srsInterval,
+      Value<double> srsEase,
+      Value<DateTime> srsDue,
+      Value<int> srsLapses,
+      Value<String> srsStatus,
+      Value<int> rowid,
+    });
+
+final class $$CollectedWordsTableReferences
+    extends BaseReferences<_$AppDatabase, $CollectedWordsTable, CollectedWord> {
+  $$CollectedWordsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $CollectedWordSourcesTable,
+    List<CollectedWordSource>
+  >
+  _collectedWordSourcesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.collectedWordSources,
+        aliasName:
+            'collected_words__id__collected_word_sources__collected_word_id',
+      );
+
+  $$CollectedWordSourcesTableProcessedTableManager
+  get collectedWordSourcesRefs {
+    final manager =
+        $$CollectedWordSourcesTableTableManager(
+          $_db,
+          $_db.collectedWordSources,
+        ).filter(
+          (f) => f.collectedWordId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _collectedWordSourcesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CollectedWordsTableFilterComposer
+    extends Composer<_$AppDatabase, $CollectedWordsTable> {
+  $$CollectedWordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dictForm => $composableBuilder(
+    column: $table.dictForm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get senseIdsJson => $composableBuilder(
+    column: $table.senseIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get srsInterval => $composableBuilder(
+    column: $table.srsInterval,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get srsEase => $composableBuilder(
+    column: $table.srsEase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get srsDue => $composableBuilder(
+    column: $table.srsDue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get srsLapses => $composableBuilder(
+    column: $table.srsLapses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get srsStatus => $composableBuilder(
+    column: $table.srsStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> collectedWordSourcesRefs(
+    Expression<bool> Function($$CollectedWordSourcesTableFilterComposer f) f,
+  ) {
+    final $$CollectedWordSourcesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.collectedWordSources,
+      getReferencedColumn: (t) => t.collectedWordId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedWordSourcesTableFilterComposer(
+            $db: $db,
+            $table: $db.collectedWordSources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CollectedWordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CollectedWordsTable> {
+  $$CollectedWordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dictForm => $composableBuilder(
+    column: $table.dictForm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get senseIdsJson => $composableBuilder(
+    column: $table.senseIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get srsInterval => $composableBuilder(
+    column: $table.srsInterval,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get srsEase => $composableBuilder(
+    column: $table.srsEase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get srsDue => $composableBuilder(
+    column: $table.srsDue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get srsLapses => $composableBuilder(
+    column: $table.srsLapses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get srsStatus => $composableBuilder(
+    column: $table.srsStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CollectedWordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CollectedWordsTable> {
+  $$CollectedWordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get dictForm =>
+      $composableBuilder(column: $table.dictForm, builder: (column) => column);
+
+  GeneratedColumn<String> get reading =>
+      $composableBuilder(column: $table.reading, builder: (column) => column);
+
+  GeneratedColumn<String> get senseIdsJson => $composableBuilder(
+    column: $table.senseIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get srsInterval => $composableBuilder(
+    column: $table.srsInterval,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get srsEase =>
+      $composableBuilder(column: $table.srsEase, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get srsDue =>
+      $composableBuilder(column: $table.srsDue, builder: (column) => column);
+
+  GeneratedColumn<int> get srsLapses =>
+      $composableBuilder(column: $table.srsLapses, builder: (column) => column);
+
+  GeneratedColumn<String> get srsStatus =>
+      $composableBuilder(column: $table.srsStatus, builder: (column) => column);
+
+  Expression<T> collectedWordSourcesRefs<T extends Object>(
+    Expression<T> Function($$CollectedWordSourcesTableAnnotationComposer a) f,
+  ) {
+    final $$CollectedWordSourcesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedWordSources,
+          getReferencedColumn: (t) => t.collectedWordId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedWordSourcesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedWordSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CollectedWordsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CollectedWordsTable,
+          CollectedWord,
+          $$CollectedWordsTableFilterComposer,
+          $$CollectedWordsTableOrderingComposer,
+          $$CollectedWordsTableAnnotationComposer,
+          $$CollectedWordsTableCreateCompanionBuilder,
+          $$CollectedWordsTableUpdateCompanionBuilder,
+          (CollectedWord, $$CollectedWordsTableReferences),
+          CollectedWord,
+          PrefetchHooks Function({bool collectedWordSourcesRefs})
+        > {
+  $$CollectedWordsTableTableManager(
+    _$AppDatabase db,
+    $CollectedWordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CollectedWordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CollectedWordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CollectedWordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> dictForm = const Value.absent(),
+                Value<String> reading = const Value.absent(),
+                Value<String> senseIdsJson = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> srsInterval = const Value.absent(),
+                Value<double> srsEase = const Value.absent(),
+                Value<DateTime> srsDue = const Value.absent(),
+                Value<int> srsLapses = const Value.absent(),
+                Value<String> srsStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CollectedWordsCompanion(
+                id: id,
+                dictForm: dictForm,
+                reading: reading,
+                senseIdsJson: senseIdsJson,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                srsInterval: srsInterval,
+                srsEase: srsEase,
+                srsDue: srsDue,
+                srsLapses: srsLapses,
+                srsStatus: srsStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String dictForm,
+                required String reading,
+                required String senseIdsJson,
+                required DateTime addedAt,
+                required DateTime updatedAt,
+                required int srsInterval,
+                required double srsEase,
+                required DateTime srsDue,
+                required int srsLapses,
+                required String srsStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => CollectedWordsCompanion.insert(
+                id: id,
+                dictForm: dictForm,
+                reading: reading,
+                senseIdsJson: senseIdsJson,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                srsInterval: srsInterval,
+                srsEase: srsEase,
+                srsDue: srsDue,
+                srsLapses: srsLapses,
+                srsStatus: srsStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CollectedWordsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({collectedWordSourcesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (collectedWordSourcesRefs) db.collectedWordSources,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (collectedWordSourcesRefs)
+                    await $_getPrefetchedData<
+                      CollectedWord,
+                      $CollectedWordsTable,
+                      CollectedWordSource
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CollectedWordsTableReferences
+                          ._collectedWordSourcesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CollectedWordsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).collectedWordSourcesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.collectedWordId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CollectedWordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CollectedWordsTable,
+      CollectedWord,
+      $$CollectedWordsTableFilterComposer,
+      $$CollectedWordsTableOrderingComposer,
+      $$CollectedWordsTableAnnotationComposer,
+      $$CollectedWordsTableCreateCompanionBuilder,
+      $$CollectedWordsTableUpdateCompanionBuilder,
+      (CollectedWord, $$CollectedWordsTableReferences),
+      CollectedWord,
+      PrefetchHooks Function({bool collectedWordSourcesRefs})
+    >;
+typedef $$CollectedWordSourcesTableCreateCompanionBuilder =
+    CollectedWordSourcesCompanion Function({
+      Value<int> id,
+      required String collectedWordId,
+      required String workId,
+      required String sentenceId,
+      required String mediaType,
+      required DateTime minedAt,
+    });
+typedef $$CollectedWordSourcesTableUpdateCompanionBuilder =
+    CollectedWordSourcesCompanion Function({
+      Value<int> id,
+      Value<String> collectedWordId,
+      Value<String> workId,
+      Value<String> sentenceId,
+      Value<String> mediaType,
+      Value<DateTime> minedAt,
+    });
+
+final class $$CollectedWordSourcesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CollectedWordSourcesTable,
+          CollectedWordSource
+        > {
+  $$CollectedWordSourcesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CollectedWordsTable _collectedWordIdTable(_$AppDatabase db) =>
+      db.collectedWords.createAlias(
+        'collected_word_sources__collected_word_id__collected_words__id',
+      );
+
+  $$CollectedWordsTableProcessedTableManager get collectedWordId {
+    final $_column = $_itemColumn<String>('collected_word_id')!;
+
+    final manager = $$CollectedWordsTableTableManager(
+      $_db,
+      $_db.collectedWords,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_collectedWordIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $DocumentsTable _workIdTable(_$AppDatabase db) => db.documents
+      .createAlias('collected_word_sources__work_id__documents__id');
+
+  $$DocumentsTableProcessedTableManager get workId {
+    final $_column = $_itemColumn<String>('work_id')!;
+
+    final manager = $$DocumentsTableTableManager(
+      $_db,
+      $_db.documents,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_workIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SentencesTable _sentenceIdTable(_$AppDatabase db) => db.sentences
+      .createAlias('collected_word_sources__sentence_id__sentences__id');
+
+  $$SentencesTableProcessedTableManager get sentenceId {
+    final $_column = $_itemColumn<String>('sentence_id')!;
+
+    final manager = $$SentencesTableTableManager(
+      $_db,
+      $_db.sentences,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sentenceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CollectedWordSourcesTableFilterComposer
+    extends Composer<_$AppDatabase, $CollectedWordSourcesTable> {
+  $$CollectedWordSourcesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaType => $composableBuilder(
+    column: $table.mediaType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get minedAt => $composableBuilder(
+    column: $table.minedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CollectedWordsTableFilterComposer get collectedWordId {
+    final $$CollectedWordsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.collectedWordId,
+      referencedTable: $db.collectedWords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedWordsTableFilterComposer(
+            $db: $db,
+            $table: $db.collectedWords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$DocumentsTableFilterComposer get workId {
+    final $$DocumentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.workId,
+      referencedTable: $db.documents,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DocumentsTableFilterComposer(
+            $db: $db,
+            $table: $db.documents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SentencesTableFilterComposer get sentenceId {
+    final $$SentencesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sentenceId,
+      referencedTable: $db.sentences,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SentencesTableFilterComposer(
+            $db: $db,
+            $table: $db.sentences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CollectedWordSourcesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CollectedWordSourcesTable> {
+  $$CollectedWordSourcesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaType => $composableBuilder(
+    column: $table.mediaType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get minedAt => $composableBuilder(
+    column: $table.minedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CollectedWordsTableOrderingComposer get collectedWordId {
+    final $$CollectedWordsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.collectedWordId,
+      referencedTable: $db.collectedWords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedWordsTableOrderingComposer(
+            $db: $db,
+            $table: $db.collectedWords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$DocumentsTableOrderingComposer get workId {
+    final $$DocumentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.workId,
+      referencedTable: $db.documents,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DocumentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.documents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SentencesTableOrderingComposer get sentenceId {
+    final $$SentencesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sentenceId,
+      referencedTable: $db.sentences,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SentencesTableOrderingComposer(
+            $db: $db,
+            $table: $db.sentences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CollectedWordSourcesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CollectedWordSourcesTable> {
+  $$CollectedWordSourcesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaType =>
+      $composableBuilder(column: $table.mediaType, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get minedAt =>
+      $composableBuilder(column: $table.minedAt, builder: (column) => column);
+
+  $$CollectedWordsTableAnnotationComposer get collectedWordId {
+    final $$CollectedWordsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.collectedWordId,
+      referencedTable: $db.collectedWords,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedWordsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.collectedWords,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$DocumentsTableAnnotationComposer get workId {
+    final $$DocumentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.workId,
+      referencedTable: $db.documents,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DocumentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.documents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SentencesTableAnnotationComposer get sentenceId {
+    final $$SentencesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sentenceId,
+      referencedTable: $db.sentences,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SentencesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sentences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CollectedWordSourcesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CollectedWordSourcesTable,
+          CollectedWordSource,
+          $$CollectedWordSourcesTableFilterComposer,
+          $$CollectedWordSourcesTableOrderingComposer,
+          $$CollectedWordSourcesTableAnnotationComposer,
+          $$CollectedWordSourcesTableCreateCompanionBuilder,
+          $$CollectedWordSourcesTableUpdateCompanionBuilder,
+          (CollectedWordSource, $$CollectedWordSourcesTableReferences),
+          CollectedWordSource,
+          PrefetchHooks Function({
+            bool collectedWordId,
+            bool workId,
+            bool sentenceId,
+          })
+        > {
+  $$CollectedWordSourcesTableTableManager(
+    _$AppDatabase db,
+    $CollectedWordSourcesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CollectedWordSourcesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CollectedWordSourcesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CollectedWordSourcesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> collectedWordId = const Value.absent(),
+                Value<String> workId = const Value.absent(),
+                Value<String> sentenceId = const Value.absent(),
+                Value<String> mediaType = const Value.absent(),
+                Value<DateTime> minedAt = const Value.absent(),
+              }) => CollectedWordSourcesCompanion(
+                id: id,
+                collectedWordId: collectedWordId,
+                workId: workId,
+                sentenceId: sentenceId,
+                mediaType: mediaType,
+                minedAt: minedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String collectedWordId,
+                required String workId,
+                required String sentenceId,
+                required String mediaType,
+                required DateTime minedAt,
+              }) => CollectedWordSourcesCompanion.insert(
+                id: id,
+                collectedWordId: collectedWordId,
+                workId: workId,
+                sentenceId: sentenceId,
+                mediaType: mediaType,
+                minedAt: minedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CollectedWordSourcesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({collectedWordId = false, workId = false, sentenceId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (collectedWordId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.collectedWordId,
+                                    referencedTable:
+                                        $$CollectedWordSourcesTableReferences
+                                            ._collectedWordIdTable(db),
+                                    referencedColumn:
+                                        $$CollectedWordSourcesTableReferences
+                                            ._collectedWordIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (workId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.workId,
+                                    referencedTable:
+                                        $$CollectedWordSourcesTableReferences
+                                            ._workIdTable(db),
+                                    referencedColumn:
+                                        $$CollectedWordSourcesTableReferences
+                                            ._workIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (sentenceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.sentenceId,
+                                    referencedTable:
+                                        $$CollectedWordSourcesTableReferences
+                                            ._sentenceIdTable(db),
+                                    referencedColumn:
+                                        $$CollectedWordSourcesTableReferences
+                                            ._sentenceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$CollectedWordSourcesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CollectedWordSourcesTable,
+      CollectedWordSource,
+      $$CollectedWordSourcesTableFilterComposer,
+      $$CollectedWordSourcesTableOrderingComposer,
+      $$CollectedWordSourcesTableAnnotationComposer,
+      $$CollectedWordSourcesTableCreateCompanionBuilder,
+      $$CollectedWordSourcesTableUpdateCompanionBuilder,
+      (CollectedWordSource, $$CollectedWordSourcesTableReferences),
+      CollectedWordSource,
+      PrefetchHooks Function({
+        bool collectedWordId,
+        bool workId,
+        bool sentenceId,
+      })
+    >;
+typedef $$CollectedGrammarsTableCreateCompanionBuilder =
+    CollectedGrammarsCompanion Function({
+      required String id,
+      required String grammarPointId,
+      required DateTime addedAt,
+      required DateTime updatedAt,
+      required int srsInterval,
+      required double srsEase,
+      required DateTime srsDue,
+      required int srsLapses,
+      required String srsStatus,
+      Value<int> rowid,
+    });
+typedef $$CollectedGrammarsTableUpdateCompanionBuilder =
+    CollectedGrammarsCompanion Function({
+      Value<String> id,
+      Value<String> grammarPointId,
+      Value<DateTime> addedAt,
+      Value<DateTime> updatedAt,
+      Value<int> srsInterval,
+      Value<double> srsEase,
+      Value<DateTime> srsDue,
+      Value<int> srsLapses,
+      Value<String> srsStatus,
+      Value<int> rowid,
+    });
+
+final class $$CollectedGrammarsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CollectedGrammarsTable,
+          CollectedGrammar
+        > {
+  $$CollectedGrammarsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $CollectedGrammarSourcesTable,
+    List<CollectedGrammarSource>
+  >
+  _collectedGrammarSourcesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.collectedGrammarSources,
+    aliasName:
+        'collected_grammars__id__collected_grammar_sources__collected_grammar_id',
+  );
+
+  $$CollectedGrammarSourcesTableProcessedTableManager
+  get collectedGrammarSourcesRefs {
+    final manager =
+        $$CollectedGrammarSourcesTableTableManager(
+          $_db,
+          $_db.collectedGrammarSources,
+        ).filter(
+          (f) => f.collectedGrammarId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _collectedGrammarSourcesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CollectedGrammarsTableFilterComposer
+    extends Composer<_$AppDatabase, $CollectedGrammarsTable> {
+  $$CollectedGrammarsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get grammarPointId => $composableBuilder(
+    column: $table.grammarPointId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get srsInterval => $composableBuilder(
+    column: $table.srsInterval,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get srsEase => $composableBuilder(
+    column: $table.srsEase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get srsDue => $composableBuilder(
+    column: $table.srsDue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get srsLapses => $composableBuilder(
+    column: $table.srsLapses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get srsStatus => $composableBuilder(
+    column: $table.srsStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> collectedGrammarSourcesRefs(
+    Expression<bool> Function($$CollectedGrammarSourcesTableFilterComposer f) f,
+  ) {
+    final $$CollectedGrammarSourcesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedGrammarSources,
+          getReferencedColumn: (t) => t.collectedGrammarId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarSourcesTableFilterComposer(
+                $db: $db,
+                $table: $db.collectedGrammarSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CollectedGrammarsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CollectedGrammarsTable> {
+  $$CollectedGrammarsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get grammarPointId => $composableBuilder(
+    column: $table.grammarPointId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get srsInterval => $composableBuilder(
+    column: $table.srsInterval,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get srsEase => $composableBuilder(
+    column: $table.srsEase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get srsDue => $composableBuilder(
+    column: $table.srsDue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get srsLapses => $composableBuilder(
+    column: $table.srsLapses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get srsStatus => $composableBuilder(
+    column: $table.srsStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CollectedGrammarsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CollectedGrammarsTable> {
+  $$CollectedGrammarsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get grammarPointId => $composableBuilder(
+    column: $table.grammarPointId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get srsInterval => $composableBuilder(
+    column: $table.srsInterval,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get srsEase =>
+      $composableBuilder(column: $table.srsEase, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get srsDue =>
+      $composableBuilder(column: $table.srsDue, builder: (column) => column);
+
+  GeneratedColumn<int> get srsLapses =>
+      $composableBuilder(column: $table.srsLapses, builder: (column) => column);
+
+  GeneratedColumn<String> get srsStatus =>
+      $composableBuilder(column: $table.srsStatus, builder: (column) => column);
+
+  Expression<T> collectedGrammarSourcesRefs<T extends Object>(
+    Expression<T> Function($$CollectedGrammarSourcesTableAnnotationComposer a)
+    f,
+  ) {
+    final $$CollectedGrammarSourcesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.collectedGrammarSources,
+          getReferencedColumn: (t) => t.collectedGrammarId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarSourcesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedGrammarSources,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$CollectedGrammarsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CollectedGrammarsTable,
+          CollectedGrammar,
+          $$CollectedGrammarsTableFilterComposer,
+          $$CollectedGrammarsTableOrderingComposer,
+          $$CollectedGrammarsTableAnnotationComposer,
+          $$CollectedGrammarsTableCreateCompanionBuilder,
+          $$CollectedGrammarsTableUpdateCompanionBuilder,
+          (CollectedGrammar, $$CollectedGrammarsTableReferences),
+          CollectedGrammar,
+          PrefetchHooks Function({bool collectedGrammarSourcesRefs})
+        > {
+  $$CollectedGrammarsTableTableManager(
+    _$AppDatabase db,
+    $CollectedGrammarsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CollectedGrammarsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CollectedGrammarsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CollectedGrammarsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> grammarPointId = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> srsInterval = const Value.absent(),
+                Value<double> srsEase = const Value.absent(),
+                Value<DateTime> srsDue = const Value.absent(),
+                Value<int> srsLapses = const Value.absent(),
+                Value<String> srsStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CollectedGrammarsCompanion(
+                id: id,
+                grammarPointId: grammarPointId,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                srsInterval: srsInterval,
+                srsEase: srsEase,
+                srsDue: srsDue,
+                srsLapses: srsLapses,
+                srsStatus: srsStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String grammarPointId,
+                required DateTime addedAt,
+                required DateTime updatedAt,
+                required int srsInterval,
+                required double srsEase,
+                required DateTime srsDue,
+                required int srsLapses,
+                required String srsStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => CollectedGrammarsCompanion.insert(
+                id: id,
+                grammarPointId: grammarPointId,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                srsInterval: srsInterval,
+                srsEase: srsEase,
+                srsDue: srsDue,
+                srsLapses: srsLapses,
+                srsStatus: srsStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CollectedGrammarsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({collectedGrammarSourcesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (collectedGrammarSourcesRefs) db.collectedGrammarSources,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (collectedGrammarSourcesRefs)
+                    await $_getPrefetchedData<
+                      CollectedGrammar,
+                      $CollectedGrammarsTable,
+                      CollectedGrammarSource
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CollectedGrammarsTableReferences
+                          ._collectedGrammarSourcesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CollectedGrammarsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).collectedGrammarSourcesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.collectedGrammarId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CollectedGrammarsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CollectedGrammarsTable,
+      CollectedGrammar,
+      $$CollectedGrammarsTableFilterComposer,
+      $$CollectedGrammarsTableOrderingComposer,
+      $$CollectedGrammarsTableAnnotationComposer,
+      $$CollectedGrammarsTableCreateCompanionBuilder,
+      $$CollectedGrammarsTableUpdateCompanionBuilder,
+      (CollectedGrammar, $$CollectedGrammarsTableReferences),
+      CollectedGrammar,
+      PrefetchHooks Function({bool collectedGrammarSourcesRefs})
+    >;
+typedef $$CollectedGrammarSourcesTableCreateCompanionBuilder =
+    CollectedGrammarSourcesCompanion Function({
+      Value<int> id,
+      required String collectedGrammarId,
+      required String workId,
+      required String sentenceId,
+      required String mediaType,
+      required DateTime minedAt,
+    });
+typedef $$CollectedGrammarSourcesTableUpdateCompanionBuilder =
+    CollectedGrammarSourcesCompanion Function({
+      Value<int> id,
+      Value<String> collectedGrammarId,
+      Value<String> workId,
+      Value<String> sentenceId,
+      Value<String> mediaType,
+      Value<DateTime> minedAt,
+    });
+
+final class $$CollectedGrammarSourcesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CollectedGrammarSourcesTable,
+          CollectedGrammarSource
+        > {
+  $$CollectedGrammarSourcesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CollectedGrammarsTable _collectedGrammarIdTable(
+    _$AppDatabase db,
+  ) => db.collectedGrammars.createAlias(
+    'collected_grammar_sources__collected_grammar_id__collected_grammars__id',
+  );
+
+  $$CollectedGrammarsTableProcessedTableManager get collectedGrammarId {
+    final $_column = $_itemColumn<String>('collected_grammar_id')!;
+
+    final manager = $$CollectedGrammarsTableTableManager(
+      $_db,
+      $_db.collectedGrammars,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_collectedGrammarIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $DocumentsTable _workIdTable(_$AppDatabase db) => db.documents
+      .createAlias('collected_grammar_sources__work_id__documents__id');
+
+  $$DocumentsTableProcessedTableManager get workId {
+    final $_column = $_itemColumn<String>('work_id')!;
+
+    final manager = $$DocumentsTableTableManager(
+      $_db,
+      $_db.documents,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_workIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SentencesTable _sentenceIdTable(_$AppDatabase db) => db.sentences
+      .createAlias('collected_grammar_sources__sentence_id__sentences__id');
+
+  $$SentencesTableProcessedTableManager get sentenceId {
+    final $_column = $_itemColumn<String>('sentence_id')!;
+
+    final manager = $$SentencesTableTableManager(
+      $_db,
+      $_db.sentences,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sentenceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CollectedGrammarSourcesTableFilterComposer
+    extends Composer<_$AppDatabase, $CollectedGrammarSourcesTable> {
+  $$CollectedGrammarSourcesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaType => $composableBuilder(
+    column: $table.mediaType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get minedAt => $composableBuilder(
+    column: $table.minedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CollectedGrammarsTableFilterComposer get collectedGrammarId {
+    final $$CollectedGrammarsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.collectedGrammarId,
+      referencedTable: $db.collectedGrammars,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedGrammarsTableFilterComposer(
+            $db: $db,
+            $table: $db.collectedGrammars,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$DocumentsTableFilterComposer get workId {
+    final $$DocumentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.workId,
+      referencedTable: $db.documents,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DocumentsTableFilterComposer(
+            $db: $db,
+            $table: $db.documents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SentencesTableFilterComposer get sentenceId {
+    final $$SentencesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sentenceId,
+      referencedTable: $db.sentences,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SentencesTableFilterComposer(
+            $db: $db,
+            $table: $db.sentences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CollectedGrammarSourcesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CollectedGrammarSourcesTable> {
+  $$CollectedGrammarSourcesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaType => $composableBuilder(
+    column: $table.mediaType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get minedAt => $composableBuilder(
+    column: $table.minedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CollectedGrammarsTableOrderingComposer get collectedGrammarId {
+    final $$CollectedGrammarsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.collectedGrammarId,
+      referencedTable: $db.collectedGrammars,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CollectedGrammarsTableOrderingComposer(
+            $db: $db,
+            $table: $db.collectedGrammars,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$DocumentsTableOrderingComposer get workId {
+    final $$DocumentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.workId,
+      referencedTable: $db.documents,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DocumentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.documents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SentencesTableOrderingComposer get sentenceId {
+    final $$SentencesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sentenceId,
+      referencedTable: $db.sentences,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SentencesTableOrderingComposer(
+            $db: $db,
+            $table: $db.sentences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CollectedGrammarSourcesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CollectedGrammarSourcesTable> {
+  $$CollectedGrammarSourcesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaType =>
+      $composableBuilder(column: $table.mediaType, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get minedAt =>
+      $composableBuilder(column: $table.minedAt, builder: (column) => column);
+
+  $$CollectedGrammarsTableAnnotationComposer get collectedGrammarId {
+    final $$CollectedGrammarsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.collectedGrammarId,
+          referencedTable: $db.collectedGrammars,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CollectedGrammarsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.collectedGrammars,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$DocumentsTableAnnotationComposer get workId {
+    final $$DocumentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.workId,
+      referencedTable: $db.documents,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DocumentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.documents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SentencesTableAnnotationComposer get sentenceId {
+    final $$SentencesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sentenceId,
+      referencedTable: $db.sentences,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SentencesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sentences,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CollectedGrammarSourcesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CollectedGrammarSourcesTable,
+          CollectedGrammarSource,
+          $$CollectedGrammarSourcesTableFilterComposer,
+          $$CollectedGrammarSourcesTableOrderingComposer,
+          $$CollectedGrammarSourcesTableAnnotationComposer,
+          $$CollectedGrammarSourcesTableCreateCompanionBuilder,
+          $$CollectedGrammarSourcesTableUpdateCompanionBuilder,
+          (CollectedGrammarSource, $$CollectedGrammarSourcesTableReferences),
+          CollectedGrammarSource,
+          PrefetchHooks Function({
+            bool collectedGrammarId,
+            bool workId,
+            bool sentenceId,
+          })
+        > {
+  $$CollectedGrammarSourcesTableTableManager(
+    _$AppDatabase db,
+    $CollectedGrammarSourcesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CollectedGrammarSourcesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CollectedGrammarSourcesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CollectedGrammarSourcesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> collectedGrammarId = const Value.absent(),
+                Value<String> workId = const Value.absent(),
+                Value<String> sentenceId = const Value.absent(),
+                Value<String> mediaType = const Value.absent(),
+                Value<DateTime> minedAt = const Value.absent(),
+              }) => CollectedGrammarSourcesCompanion(
+                id: id,
+                collectedGrammarId: collectedGrammarId,
+                workId: workId,
+                sentenceId: sentenceId,
+                mediaType: mediaType,
+                minedAt: minedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String collectedGrammarId,
+                required String workId,
+                required String sentenceId,
+                required String mediaType,
+                required DateTime minedAt,
+              }) => CollectedGrammarSourcesCompanion.insert(
+                id: id,
+                collectedGrammarId: collectedGrammarId,
+                workId: workId,
+                sentenceId: sentenceId,
+                mediaType: mediaType,
+                minedAt: minedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CollectedGrammarSourcesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                collectedGrammarId = false,
+                workId = false,
+                sentenceId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (collectedGrammarId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.collectedGrammarId,
+                                    referencedTable:
+                                        $$CollectedGrammarSourcesTableReferences
+                                            ._collectedGrammarIdTable(db),
+                                    referencedColumn:
+                                        $$CollectedGrammarSourcesTableReferences
+                                            ._collectedGrammarIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (workId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.workId,
+                                    referencedTable:
+                                        $$CollectedGrammarSourcesTableReferences
+                                            ._workIdTable(db),
+                                    referencedColumn:
+                                        $$CollectedGrammarSourcesTableReferences
+                                            ._workIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (sentenceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.sentenceId,
+                                    referencedTable:
+                                        $$CollectedGrammarSourcesTableReferences
+                                            ._sentenceIdTable(db),
+                                    referencedColumn:
+                                        $$CollectedGrammarSourcesTableReferences
+                                            ._sentenceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$CollectedGrammarSourcesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CollectedGrammarSourcesTable,
+      CollectedGrammarSource,
+      $$CollectedGrammarSourcesTableFilterComposer,
+      $$CollectedGrammarSourcesTableOrderingComposer,
+      $$CollectedGrammarSourcesTableAnnotationComposer,
+      $$CollectedGrammarSourcesTableCreateCompanionBuilder,
+      $$CollectedGrammarSourcesTableUpdateCompanionBuilder,
+      (CollectedGrammarSource, $$CollectedGrammarSourcesTableReferences),
+      CollectedGrammarSource,
+      PrefetchHooks Function({
+        bool collectedGrammarId,
+        bool workId,
+        bool sentenceId,
+      })
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7044,5 +11515,16 @@ class $AppDatabaseManager {
       $$DictionaryTermMetaEntriesTableTableManager(
         _db,
         _db.dictionaryTermMetaEntries,
+      );
+  $$CollectedWordsTableTableManager get collectedWords =>
+      $$CollectedWordsTableTableManager(_db, _db.collectedWords);
+  $$CollectedWordSourcesTableTableManager get collectedWordSources =>
+      $$CollectedWordSourcesTableTableManager(_db, _db.collectedWordSources);
+  $$CollectedGrammarsTableTableManager get collectedGrammars =>
+      $$CollectedGrammarsTableTableManager(_db, _db.collectedGrammars);
+  $$CollectedGrammarSourcesTableTableManager get collectedGrammarSources =>
+      $$CollectedGrammarSourcesTableTableManager(
+        _db,
+        _db.collectedGrammarSources,
       );
 }

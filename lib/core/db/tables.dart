@@ -203,3 +203,126 @@ class DictionaryTermMetaEntries extends Table {
   TextColumn get dataJson =>
       text().named('data_json')(); // full mode-specific payload, verbatim
 }
+
+// ---------------------------------------------------------------------------
+// Collection layer (L4, spec §11): mined words/grammar points and their SRS
+// state. `CollectedWords`/`CollectedGrammars` are structurally parallel --
+// see lib/l4_mining/collection/mining_engine.dart for the shared mine/
+// remove/undo state machine both are built on (spec §6: "the grammar side
+// behaves identically" against the grammar dictionary). `CollectedGrammars`
+// simply omits `senseIds`, since grammar points aren't dictionary senses.
+//
+// SRS state is stored as flat columns (`srsInterval`/`srsEase`/`srsDue`/
+// `srsLapses`/`srsStatus`) rather than spec §11's nested `srsState` struct,
+// since Drift columns are scalar -- see
+// lib/l4_mining/collection/srs_state.dart for the in-memory shape these
+// columns round-trip through. Values are schema-correct placeholders only;
+// the real FSRS algorithm is a later phase (lib/l5_srs/fsrs/).
+//
+// `sourceRefs[]` (spec §11) is a proper joined table per entry
+// (`CollectedWordSources`/`CollectedGrammarSources`), not JSON, because spec
+// explicitly wants this queryable later ("first seen in Chapter 3 of X").
+// Rows are deliberately not unique on (parent, workId, sentenceId): mining
+// the same word from the same sentence twice, or from two different works,
+// is two rows (spec §11: "the same word mined from a novel today and a
+// subtitle later is one entry with two sightings").
+//
+// Neither pair needs `@DataClassName`: Drift's default singularization
+// (`CollectedWords` -> `CollectedWord`, `CollectedGrammars` ->
+// `CollectedGrammar`, `CollectedWordSources` -> `CollectedWordSource`,
+// `CollectedGrammarSources` -> `CollectedGrammarSource`) doesn't collide
+// with anything in lib/core/models/ today -- see Documents/Chapters/
+// Sentences above for what to do if a future table's singular ever would.
+// ---------------------------------------------------------------------------
+
+/// One row per mined word, keyed by [contentDerivedWordId]'s content-derived
+/// id so "is this word already collected" is a direct primary-key lookup.
+/// Sync-ready per spec §13 (`addedAt`/`updatedAt`), matching `Documents`'/
+/// `Dictionaries`' treatment: this is small, user-authored state, not bulk
+/// regenerable content.
+class CollectedWords extends Table {
+  TextColumn get id => text()();
+  TextColumn get dictForm => text().named('dict_form')();
+  TextColumn get reading => text()();
+
+  /// JSON-encoded `List<int>` of `DictionaryTermEntry.id`s (spec §11) this
+  /// collection came from. Not independently queryable the way
+  /// `sourceRefs` needs to be, so JSON is fine here. Set on a fresh add;
+  /// deliberately left untouched by a reset-tap (spec §6's re-tap only
+  /// appends a sighting and resets SRS state).
+  TextColumn get senseIdsJson => text().named('sense_ids_json')();
+
+  DateTimeColumn get addedAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  IntColumn get srsInterval => integer().named('srs_interval')();
+  RealColumn get srsEase => real().named('srs_ease')();
+  DateTimeColumn get srsDue => dateTime().named('srs_due')();
+  IntColumn get srsLapses => integer().named('srs_lapses')();
+  TextColumn get srsStatus => text().named('srs_status')();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// One row per sighting of a `CollectedWords` entry (spec §11's
+/// `sourceRefs[] -> { workId, sentenceId, mediaType }`). `workId`/
+/// `sentenceId` reference `Documents`/`Sentences` (this codebase doesn't
+/// enable SQLite's `PRAGMA foreign_keys`, so these aren't enforced at
+/// runtime -- see `MiningStore.deleteEntry` implementations, which delete a
+/// parent's sightings explicitly rather than relying on an FK cascade).
+@TableIndex(
+  name: 'idx_collected_word_sources_word',
+  columns: {#collectedWordId},
+)
+class CollectedWordSources extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get collectedWordId =>
+      text().references(CollectedWords, #id).named('collected_word_id')();
+  TextColumn get workId => text().references(Documents, #id).named('work_id')();
+  TextColumn get sentenceId =>
+      text().references(Sentences, #id).named('sentence_id')();
+
+  /// `CollectionMediaType.name` (lib/l4_mining/collection/source_ref.dart) --
+  /// deliberately not `DocumentSourceType`; see that enum's doc comment.
+  TextColumn get mediaType => text().named('media_type')();
+  DateTimeColumn get minedAt => dateTime().named('mined_at')();
+}
+
+/// Grammar-side mirror of `CollectedWords`, keyed by
+/// [contentDerivedGrammarId]. `grammarPointId` is an opaque string id from
+/// spec §8's grammar-point database, which doesn't exist as a concrete
+/// model yet (a later phase) -- no `senseIds` here, since grammar points
+/// aren't dictionary senses.
+class CollectedGrammars extends Table {
+  TextColumn get id => text()();
+  TextColumn get grammarPointId => text().named('grammar_point_id')();
+
+  DateTimeColumn get addedAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  IntColumn get srsInterval => integer().named('srs_interval')();
+  RealColumn get srsEase => real().named('srs_ease')();
+  DateTimeColumn get srsDue => dateTime().named('srs_due')();
+  IntColumn get srsLapses => integer().named('srs_lapses')();
+  TextColumn get srsStatus => text().named('srs_status')();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Grammar-side mirror of `CollectedWordSources`.
+@TableIndex(
+  name: 'idx_collected_grammar_sources_grammar',
+  columns: {#collectedGrammarId},
+)
+class CollectedGrammarSources extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get collectedGrammarId =>
+      text().references(CollectedGrammars, #id).named('collected_grammar_id')();
+  TextColumn get workId => text().references(Documents, #id).named('work_id')();
+  TextColumn get sentenceId =>
+      text().references(Sentences, #id).named('sentence_id')();
+  TextColumn get mediaType => text().named('media_type')();
+  DateTimeColumn get minedAt => dateTime().named('mined_at')();
+}
