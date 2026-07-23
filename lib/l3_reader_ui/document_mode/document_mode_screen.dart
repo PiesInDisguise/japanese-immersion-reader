@@ -5,6 +5,7 @@ import 'package:japanese_immersion_reader/core/models/models.dart';
 import '../card_mode/card_mode_screen.dart';
 import '../card_mode/token_gloss_view.dart';
 import '../card_mode/word_lookup_sheet.dart';
+import '../vertical_text/vertical_text.dart';
 import 'document_mode_controller.dart';
 
 /// Document Mode's screen (spec §7): a standard, continuously scrollable
@@ -13,10 +14,13 @@ import 'document_mode_controller.dart';
 /// [DocumentModeController]'s own scope-note doc comment for what's
 /// deliberately not implemented this pass (drag-to-override the tokenizer
 /// boundary; matched grammar points/LLM explanation beyond layer-1 token
-/// gloss). Vertical-text rendering (also mentioned in spec §7) is likewise
-/// out of scope this pass -- this screen renders horizontally, same as Card
-/// Mode's own front face; `lib/l3_reader_ui/vertical_text/` is a separate,
-/// not-yet-wired-in concern.
+/// gloss). Vertical-text rendering (also mentioned in spec §7) *is* wired up
+/// this pass: each row renders horizontally or vertically per its
+/// containing `Block.direction` (see `_flattenDocument`/`_SentenceRow` and
+/// `_SentenceRowView`'s own doc comment) -- vertical rows delegate to
+/// `VerticalSentenceView` (`lib/l3_reader_ui/vertical_text/`), which hosts
+/// the same tap/long-press/double-tap semantics on top of the vertical-text
+/// rendering spike.
 class DocumentModeScreen extends ConsumerWidget {
   const DocumentModeScreen({super.key});
 
@@ -130,13 +134,23 @@ class _ChapterHeaderRow extends _Row {
 }
 
 class _SentenceRow extends _Row {
-  const _SentenceRow(this.sentence, {required this.isBlockStart});
+  const _SentenceRow(
+    this.sentence, {
+    required this.isBlockStart,
+    required this.direction,
+  });
   final Sentence sentence;
 
   /// Whether this is the first sentence of its containing block -- used
   /// only for a little extra spacing above, so paragraph/bubble/line breaks
   /// (`BlockKind`) stay visually legible in an otherwise flat sentence list.
   final bool isBlockStart;
+
+  /// The containing `Block`'s `direction` -- carried per-row (rather than
+  /// re-derived from the block later) since flattening is the one place
+  /// that already walks block-by-block; see `_SentenceRowView` for how this
+  /// picks horizontal vs. vertical rendering.
+  final WritingDirection direction;
 }
 
 List<_Row> _flattenDocument(Document document) {
@@ -146,7 +160,13 @@ List<_Row> _flattenDocument(Document document) {
     for (final block in chapter.blocks) {
       var isBlockStart = true;
       for (final sentence in block.sentences) {
-        rows.add(_SentenceRow(sentence, isBlockStart: isBlockStart));
+        rows.add(
+          _SentenceRow(
+            sentence,
+            isBlockStart: isBlockStart,
+            direction: block.direction,
+          ),
+        );
         isBlockStart = false;
       }
     }
@@ -376,6 +396,7 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
                   key: ValueKey(row.sentence.id),
                   sentence: row.sentence,
                   isBlockStart: row.isBlockStart,
+                  direction: row.direction,
                   tokensFuture: () => ref
                       .read(documentModeControllerProvider.notifier)
                       .tokensFor(row.sentence),
@@ -427,15 +448,28 @@ class _ChapterHeaderTile extends StatelessWidget {
 /// builds (roughly the viewport plus its cache extent) ever need real
 /// tokenization.
 ///
-/// Renders the same per-token tappable [Wrap] idea as Card Mode's
-/// `_FrontFace`, but every token here also answers double-tap -- see the
-/// class-level rationale below for why that's on the *same* GestureDetector
-/// as tap/long-press rather than a separate one layered over the whole row.
+/// Branches purely on [direction] once tokens resolve -- everything before
+/// that point (the `FutureBuilder`, the loading/error states, the outer
+/// `Padding`) is identical either way, so only the actual token rendering
+/// differs:
+///  - **Horizontal** (the default/common case): the same per-token tappable
+///    [Wrap] idea as Card Mode's `_FrontFace`, but every token here also
+///    answers double-tap -- see the class-level rationale below for why
+///    that's on the *same* GestureDetector as tap/long-press rather than a
+///    separate one layered over the whole row.
+///  - **Vertical**: delegates entirely to `VerticalSentenceView`
+///    (`lib/l3_reader_ui/vertical_text/vertical_sentence_view.dart`), which
+///    hosts the equivalent tap/long-press/double-tap semantics on top of
+///    the vertical-text rendering spike -- see *that* class's own doc
+///    comment for why its gesture layering necessarily looks different from
+///    the horizontal case below (`VerticalTextView` doesn't expose a
+///    composable tap recognizer the way plain per-token `Text` widgets do).
 class _SentenceRowView extends StatefulWidget {
   const _SentenceRowView({
     super.key,
     required this.sentence,
     required this.isBlockStart,
+    required this.direction,
     required this.tokensFuture,
     required this.onWordTap,
     required this.onWordLongPress,
@@ -444,6 +478,7 @@ class _SentenceRowView extends StatefulWidget {
 
   final Sentence sentence;
   final bool isBlockStart;
+  final WritingDirection direction;
   final Future<List<Token>> Function() tokensFuture;
   final ValueChanged<Token> onWordTap;
   final ValueChanged<Token> onWordLongPress;
@@ -487,6 +522,15 @@ class _SentenceRowViewState extends State<_SentenceRowView> {
               style: const TextStyle(fontSize: 20, height: 1.8),
             );
           }
+          if (widget.direction == WritingDirection.vertical) {
+            return VerticalSentenceView(
+              tokens: tokens,
+              onWordTap: widget.onWordTap,
+              onWordLongPress: widget.onWordLongPress,
+              onSentenceDoubleTap: widget.onSentenceDoubleTap,
+            );
+          }
+
           // A single GestureDetector per token carries onTap, onDoubleTap,
           // *and* onLongPress together (rather than, say, a separate
           // sentence-wide onDoubleTap layered over this Wrap) because

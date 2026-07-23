@@ -12,5 +12,13 @@ void main() {
 
     expect(find.text('Load Sample Book'), findsOneWidget);
     expect(find.text('Import EPUB...'), findsOneWidget);
+    // PdfTextImporter wiring (see home_screen.dart's _importPdf) and the
+    // vertical-text manual-verification entry point (see
+    // sample_content.dart's loadSampleVerticalPdf) -- this smoke test only
+    // ever checks that the buttons render, the same as the two assertions
+    // above; it doesn't drive a real file pick or import (that would need
+    // FilePicker test infrastructure this suite doesn't have set up yet).
+    expect(find.text('Import PDF...'), findsOneWidget);
+    expect(find.text('Load Sample Vertical PDF'), findsOneWidget);
   });
 }

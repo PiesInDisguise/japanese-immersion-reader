@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l1_ingestion/epub/epub_importer.dart';
+import 'package:japanese_immersion_reader/l1_ingestion/pdf_text/pdf_text_importer.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_importer.dart';
 
 import 'package:japanese_immersion_reader/core/models/models.dart';
@@ -35,6 +36,23 @@ Future<void> seedSampleDictionaryIfEmpty(AppDatabase db) async {
 Future<Document> loadSampleBook() {
   return EpubImporter().import(
     File('assets/fixtures/epub_ruby_forms.epub'),
+    onProgress: (_) {},
+  );
+}
+
+/// Loads one of the synthetic vertical-writing-mode (縦書き) PDF fixtures
+/// `test/l1_ingestion/pdf_text/pdf_text_importer_test.dart` itself tests
+/// against, via [PdfTextImporter], so Document Mode's vertical-text
+/// rendering (`lib/l3_reader_ui/vertical_text/`) has something real -- real
+/// per-character geometry and a real `Block.direction ==
+/// WritingDirection.vertical`, reconstructed by
+/// `l1_ingestion/pdf_text/reading_order.dart` -- to render end-to-end for
+/// manual/test verification, without a real scanned or authored
+/// vertical-writing-mode PDF existing yet (that fixture gap is a separately
+/// flagged, deferred research risk -- see docs/research/r2-pdf-text.md §6).
+Future<Document> loadSampleVerticalPdf() {
+  return PdfTextImporter().import(
+    File('assets/fixtures/synthetic_vertical_sim_ja.pdf'),
     onProgress: (_) {},
   );
 }

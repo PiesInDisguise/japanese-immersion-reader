@@ -232,6 +232,49 @@ FakeTokenizer buildTestTokenizer() {
   });
 }
 
+/// A minimal, single-block *vertical* (縦書き) document, for exercising
+/// Document Mode's vertical-rendering branch (`Block.direction ==
+/// WritingDirection.vertical`, see `document_mode_screen.dart`'s
+/// `_SentenceRowView`). Deliberately reuses [buildTestDocument]'s first two
+/// sentences' exact surface text ('猫が走る。', '犬が鳴く。') rather than
+/// inventing new ones, so [buildTestTokenizer] already has fixtures
+/// registered for them and this doesn't need its own vertical-specific
+/// twin -- one real fake tokenizer serves both documents.
+Document buildVerticalTestDocument() {
+  return Document(
+    id: 'doc-vertical-1',
+    title: 'Test Vertical Book',
+    sourceType: DocumentSourceType.pdfText,
+    chapters: [
+      Chapter(
+        id: 'ch-v-1',
+        index: 0,
+        title: 'Chapter 1',
+        blocks: [
+          Block(
+            id: 'block-v-1',
+            index: 0,
+            kind: BlockKind.page,
+            direction: WritingDirection.vertical,
+            sentences: [
+              Sentence(
+                id: 'sent-v-0',
+                index: 0,
+                tokens: const [Token(surface: '猫が走る。')],
+              ),
+              Sentence(
+                id: 'sent-v-1',
+                index: 1,
+                tokens: const [Token(surface: '犬が鳴く。')],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
 /// A single dictionary hit for 猫 ("cat"), used by the lookup/mine tests.
 DictionaryLookupHit buildCatLookupHit() {
   const entry = DictionaryTermEntry(
