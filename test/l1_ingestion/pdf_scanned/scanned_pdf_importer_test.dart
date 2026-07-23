@@ -57,7 +57,7 @@ void main() {
     () async {
       final events = <ImportProgress>[];
       final importer = ScannedPdfImporter(
-        const FakeOcrEngine(),
+        FakeOcrEngine.new,
         rasterizer: FakePdfPageRasterizer(pageCount: 3),
         cacheDirectory: cacheDir,
       );
@@ -98,7 +98,7 @@ void main() {
       height: 60,
     );
     final importer1 = ScannedPdfImporter(
-      const FakeOcrEngine(
+      () => const FakeOcrEngine(
         defaultRegions: [
           OcrRegionResult(
             text: 'こんにちは。今日は晴れです。',
@@ -122,7 +122,7 @@ void main() {
       height: 60,
     );
     final importer2 = ScannedPdfImporter(
-      _ThrowingOcrEngine(),
+      _ThrowingOcrEngine.new,
       rasterizer: rasterizer2,
       cacheDirectory: cacheDir,
     );
@@ -144,7 +144,7 @@ void main() {
   test('OCR confidence flows through to Token.confidence and produces a '
       'contract-valid document', () async {
     final importer = ScannedPdfImporter(
-      const FakeOcrEngine(
+      () => const FakeOcrEngine(
         defaultRegions: [
           OcrRegionResult(
             text: '猫が好きです。犬も好きです。',
@@ -187,7 +187,7 @@ void main() {
     'produces exactly one Block per page, in order, all kind page',
     () async {
       final importer = ScannedPdfImporter(
-        const FakeOcrEngine(),
+        FakeOcrEngine.new,
         rasterizer: FakePdfPageRasterizer(pageCount: 5),
         cacheDirectory: cacheDir,
       );
@@ -206,7 +206,7 @@ void main() {
     'assumeVertical sets Block.direction on every page (default: horizontal)',
     () async {
       final horizontalImporter = ScannedPdfImporter(
-        const FakeOcrEngine(),
+        FakeOcrEngine.new,
         rasterizer: FakePdfPageRasterizer(pageCount: 2),
         cacheDirectory: Directory('${cacheDir.path}/horizontal'),
       );
@@ -219,7 +219,7 @@ void main() {
       }
 
       final verticalImporter = ScannedPdfImporter(
-        const FakeOcrEngine(),
+        FakeOcrEngine.new,
         rasterizer: FakePdfPageRasterizer(pageCount: 2),
         cacheDirectory: Directory('${cacheDir.path}/vertical'),
         assumeVertical: true,
@@ -237,7 +237,7 @@ void main() {
   test('a page that fails to rasterize becomes an empty block without '
       'aborting the import', () async {
     final importer = ScannedPdfImporter(
-      const FakeOcrEngine(
+      () => const FakeOcrEngine(
         defaultRegions: [
           OcrRegionResult(
             text: 'ok.',
@@ -268,7 +268,7 @@ void main() {
   test('an OCR engine that throws does not abort the import -- affected pages '
       'become empty blocks', () async {
     final importer = ScannedPdfImporter(
-      _ThrowingOcrEngine(),
+      _ThrowingOcrEngine.new,
       rasterizer: FakePdfPageRasterizer(pageCount: 2),
       cacheDirectory: cacheDir,
     );

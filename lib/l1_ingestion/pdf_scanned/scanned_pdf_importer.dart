@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
@@ -9,6 +8,7 @@ import 'package:path/path.dart' as p;
 
 import 'ocr_engine.dart';
 import 'ocr_result_cache.dart';
+import 'ocr_worker.dart';
 import 'pdf_page_rasterizer.dart';
 
 /// Imports a scanned (image-only) PDF by rasterizing each page and running
@@ -38,26 +38,19 @@ import 'pdf_page_rasterizer.dart';
 /// importer's vertical-reading-order reconstruction (spec §4), not
 /// duplicate it here.
 ///
-/// **Background isolate.** Each page's OCR call runs via `Isolate.run`, so
-/// a slow or hung recognition call never blocks the isolate driving
-/// [import]'s `onProgress` callback (see docs/research/r3-ocr.md finding 3,
-/// whose standalone spike at research/r3_ocr/isolate_progress_demo.dart
-/// validated the underlying spawn/report/recover mechanics this leans on).
-/// One caveat worth flagging for later: `Isolate.run` spawns a *fresh*
-/// isolate per call and sends a **copy** of the injected [OcrEngine] into
-/// it each time. That's free for a pure-data fake engine (nothing worth
-/// preserving across pages), but a real engine wrapping an ONNX session or
-/// a Tesseract native handle would almost certainly not survive being
-/// constructed on the calling isolate and then re-sent per page like this
-/// -- worse, even if it somehow did, reloading a ~450MB model on every
-/// single page would be a serious performance bug. A real backend will
-/// likely need the engine constructed *inside* a single long-lived worker
-/// isolate instead (closer to the spike's `Isolate.spawn` +
-/// long-lived-worker shape than this pass's simpler per-page
-/// `Isolate.run`), which would mean injecting an engine *factory* rather
-/// than a ready-made instance. Left as-is here since it's a real design
-/// fork that depends on how the eventual real engine is packaged, not
-/// something to guess at now.
+/// **Background isolate.** All of one import's OCR calls run inside a
+/// single long-lived worker isolate ([OcrWorker]), spawned once per [import]
+/// call and holding one constructed [OcrEngine] instance for every page --
+/// see that class's own doc comment for why (in short: an earlier version of
+/// this importer used `Isolate.run` per page, which spawns a *fresh* isolate
+/// and sends a *copy* of the engine each time; harmless for a stateless
+/// fake, but wrong for a real engine wrapping loaded ONNX Runtime sessions,
+/// which shouldn't be reloaded every single page). A slow or hung
+/// recognition call still never blocks the isolate driving [import]'s
+/// `onProgress` callback (see docs/research/r3-ocr.md finding 3, whose
+/// standalone spike at research/r3_ocr/isolate_progress_demo.dart validated
+/// the underlying spawn/report/recover mechanics this leans on) -- that
+/// property doesn't depend on whether the worker is short- or long-lived.
 ///
 /// **Per-page resilience.** A page that fails to rasterize or OCR does not
 /// abort the whole import (mirroring the spike's per-chapter recovery) --
@@ -66,16 +59,25 @@ import 'pdf_page_rasterizer.dart';
 ///
 /// **Disk cache.** Results are cached per source file (see
 /// [OcrResultCache]) so re-opening the same, unchanged document skips both
-/// OCR and rasterization entirely.
+/// OCR and rasterization entirely -- and, since the cache hit path never
+/// spawns [OcrWorker] at all, skips paying for engine construction (a real
+/// engine's ONNX session loading) too.
 class ScannedPdfImporter implements Importer {
   ScannedPdfImporter(
-    this.ocrEngine, {
+    this.ocrEngineFactory, {
     this.rasterizer = const PdfrxPageRasterizer(),
     Directory? cacheDirectory,
     this.assumeVertical = false,
   }) : cache = OcrResultCache(directoryOverride: cacheDirectory);
 
-  final OcrEngine ocrEngine;
+  /// Constructs the [OcrEngine] to use for this import -- called once,
+  /// inside [OcrWorker]'s worker isolate, not on the calling isolate. See
+  /// [OcrWorker]'s own doc comment for why this is a factory rather than a
+  /// ready instance, and prefer a bare constructor tear-off (e.g.
+  /// `MyEngine.new`) or a closure that captures no mutable state when
+  /// supplying one, since that's what's actually been verified to cross the
+  /// isolate boundary cleanly (`ocr_worker_test.dart`).
+  final OcrEngineFactory ocrEngineFactory;
   final PdfPageRasterizer rasterizer;
   final OcrResultCache cache;
 
@@ -132,21 +134,27 @@ class ScannedPdfImporter implements Importer {
     void Function(ImportProgress progress) onProgress,
   ) async {
     final session = await rasterizer.open(file);
+    // One worker for the whole import (all pages share the one constructed
+    // engine instance) -- see [OcrWorker]'s and this class's own doc
+    // comments for why that matters for a real engine.
+    final worker = await OcrWorker.spawn(ocrEngineFactory);
     try {
       final pageCount = session.pageCount;
       final results = <PageOcrResult>[];
       for (var i = 0; i < pageCount; i++) {
-        results.add(await _ocrOnePage(session, i));
+        results.add(await _ocrOnePage(session, worker, i));
         _reportPageProgress(i, pageCount, onProgress);
       }
       return results;
     } finally {
+      worker.dispose();
       await session.close();
     }
   }
 
   Future<PageOcrResult> _ocrOnePage(
     PdfPageRasterizerSession session,
+    OcrWorker worker,
     int pageIndex,
   ) async {
     try {
@@ -154,24 +162,15 @@ class ScannedPdfImporter implements Importer {
       if (page == null) {
         return const PageOcrResult(pageWidth: 0, pageHeight: 0, regions: []);
       }
-      // Captured explicitly (rather than closing over `this`) so only what
-      // actually needs to cross the isolate boundary does.
-      final engine = ocrEngine;
-      final vertical = assumeVertical;
-      final pixels = page.pixels;
-      final width = page.width;
-      final height = page.height;
-      final regions = await Isolate.run(
-        () => engine.recognize(
-          pixels,
-          width: width,
-          height: height,
-          vertical: vertical,
-        ),
+      final regions = await worker.recognize(
+        page.pixels,
+        width: page.width,
+        height: page.height,
+        vertical: assumeVertical,
       );
       return PageOcrResult(
-        pageWidth: width.toDouble(),
-        pageHeight: height.toDouble(),
+        pageWidth: page.width.toDouble(),
+        pageHeight: page.height.toDouble(),
         regions: regions,
       );
     } catch (_) {

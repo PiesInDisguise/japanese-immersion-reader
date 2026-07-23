@@ -23,7 +23,7 @@ void main() {
 
     // Default `rasterizer` -- exercises PdfrxPageRasterizer for real.
     final importer = ScannedPdfImporter(
-      const FakeOcrEngine(),
+      FakeOcrEngine.new,
       cacheDirectory: Directory('${tempDir.path}/cache'),
     );
 
