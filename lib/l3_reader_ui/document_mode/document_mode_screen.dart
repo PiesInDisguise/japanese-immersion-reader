@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 
 import '../card_mode/card_mode_screen.dart';
+import '../card_mode/grammar_point_sheet.dart';
 import '../card_mode/token_gloss_view.dart';
 import '../card_mode/word_lookup_sheet.dart';
 import '../vertical_text/vertical_text.dart';
@@ -13,8 +15,8 @@ import 'document_mode_controller.dart';
 /// interaction layer as Card Mode overlaid per-token. See
 /// [DocumentModeController]'s own scope-note doc comment for what's
 /// deliberately not implemented this pass (drag-to-override the tokenizer
-/// boundary; matched grammar points/LLM explanation beyond layer-1 token
-/// gloss). Vertical-text rendering (also mentioned in spec §7) *is* wired up
+/// boundary; the LLM explanation layer beyond layers 1/2). Vertical-text
+/// rendering (also mentioned in spec §7) *is* wired up
 /// this pass: each row renders horizontally or vertically per its
 /// containing `Block.direction` (see `_flattenDocument`/`_SentenceRow` and
 /// `_SentenceRowView`'s own doc comment) -- vertical rows delegate to
@@ -341,15 +343,25 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
   /// Double-tap (spec §7): grammar breakdown of the *containing sentence*,
   /// as a popup -- not a flip, since Document Mode has no card to flip.
   /// [tokens] are whatever the double-tapped row already fetched via
-  /// `DocumentModeController.tokensFor`, so this never re-tokenizes.
-  void _handleSentenceDoubleTap(List<Token> tokens) {
+  /// `DocumentModeController.tokensFor`, so this never re-tokenizes. Grammar
+  /// matches (spec §8 layer 2) are fetched fresh here (also memoized on the
+  /// controller, see `matchGrammarFor`) since unlike tokens, no row
+  /// pre-fetches them until a double-tap actually asks for them.
+  Future<void> _handleSentenceDoubleTap(
+    Sentence sentence,
+    List<Token> tokens,
+  ) async {
+    final controller = ref.read(documentModeControllerProvider.notifier);
+    final grammarMatches = await controller.matchGrammarFor(sentence);
+    if (!mounted) return;
+
     showDialog<void>(
       context: context,
       builder: (dialogContext) => Dialog(
         child: ConstrainedBox(
-          // TokenGlossView uses a ListView.separated internally, which
-          // needs a bounded height from an ancestor -- a Dialog's child
-          // otherwise sizes to content, which is unbounded for a list.
+          // TokenGlossView needs a bounded height from an ancestor -- a
+          // Dialog's child otherwise sizes to content, which is unbounded
+          // for a list.
           constraints: const BoxConstraints(maxWidth: 420, maxHeight: 480),
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -362,7 +374,15 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
                   style: Theme.of(dialogContext).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 12),
-                Flexible(child: TokenGlossView(tokens: tokens)),
+                Flexible(
+                  child: TokenGlossView(
+                    tokens: tokens,
+                    grammarMatches: grammarMatches,
+                    onGrammarPointTap: (match) =>
+                        _handleGrammarPointTap(sentence.id, match),
+                    onGrammarPointLongPress: _handleGrammarPointLongPress,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerRight,
@@ -374,6 +394,51 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleGrammarPointTap(
+    String sentenceId,
+    GrammarMatch match,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final controller = ref.read(documentModeControllerProvider.notifier);
+    final mined = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => GrammarPointSheet(
+        match: match,
+        mine: () =>
+            controller.mineGrammarPoint(match.point, sentenceId: sentenceId),
+      ),
+    );
+    if (mined == true && mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Added "${match.point.pattern}" to your collection'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => ref
+                .read(documentModeControllerProvider.notifier)
+                .undoLastMining(),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleGrammarPointLongPress(GrammarMatch match) async {
+    final messenger = ScaffoldMessenger.of(context);
+    await ref
+        .read(documentModeControllerProvider.notifier)
+        .removeGrammarPoint(match.point.id);
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Removed "${match.point.pattern}" from your collection',
         ),
       ),
     );
@@ -402,7 +467,8 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
                       .tokensFor(row.sentence),
                   onWordTap: (token) => _handleWordTap(row.sentence.id, token),
                   onWordLongPress: _handleWordLongPress,
-                  onSentenceDoubleTap: _handleSentenceDoubleTap,
+                  onSentenceDoubleTap: (tokens) =>
+                      _handleSentenceDoubleTap(row.sentence, tokens),
                 ),
               };
             },

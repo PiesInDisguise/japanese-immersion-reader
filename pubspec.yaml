@@ -101,6 +101,7 @@ flutter:
   # from https://huggingface.co/kha-white/manga-ocr-base/raw/main/vocab.txt.
   assets:
     - assets/manga_ocr/vocab.txt
+    - assets/grammar/grammar_points.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

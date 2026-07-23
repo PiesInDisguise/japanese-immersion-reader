@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_point.dart';
 
 import '../reader_mining_session.dart';
 import '../reading_position.dart';
@@ -27,6 +29,7 @@ class CardModeState {
     required this.totalCards,
     required this.sentence,
     required this.tokens,
+    required this.grammarMatches,
     required this.isFlipped,
   });
 
@@ -35,6 +38,10 @@ class CardModeState {
   final int totalCards;
   final Sentence sentence;
   final List<Token> tokens;
+
+  /// Spec §8 layer 2: grammar points matched against [sentence], shown on
+  /// the flip side alongside [tokens]' layer-1 gloss.
+  final List<GrammarMatch> grammarMatches;
   final bool isFlipped;
 
   bool get hasNext => cardIndex < totalCards - 1;
@@ -43,6 +50,7 @@ class CardModeState {
   CardModeState copyWith({
     int? cardIndex,
     List<Token>? tokens,
+    List<GrammarMatch>? grammarMatches,
     bool? isFlipped,
   }) => CardModeState(
     document: document,
@@ -50,6 +58,7 @@ class CardModeState {
     totalCards: totalCards,
     sentence: sentence,
     tokens: tokens ?? this.tokens,
+    grammarMatches: grammarMatches ?? this.grammarMatches,
     isFlipped: isFlipped ?? this.isFlipped,
   );
 }
@@ -98,6 +107,7 @@ class CardModeController extends AsyncNotifier<CardModeState> {
   Future<CardModeState> _loadCard(Document document, int index) async {
     final position = _positions[index];
     final tokens = await _mining.tokenizeSentence(position.sentence);
+    final grammarMatches = await _mining.matchGrammar(position.sentence);
     ref.read(currentSentencePositionProvider.notifier).set(position.sentence.id);
     return CardModeState(
       document: document,
@@ -105,6 +115,7 @@ class CardModeController extends AsyncNotifier<CardModeState> {
       totalCards: _positions.length,
       sentence: position.sentence,
       tokens: tokens,
+      grammarMatches: grammarMatches,
       isFlipped: false,
     );
   }
@@ -125,11 +136,10 @@ class CardModeController extends AsyncNotifier<CardModeState> {
     state = AsyncData(await _loadCard(current.document, current.cardIndex - 1));
   }
 
-  /// Tap-empty-card-space (spec §6): flips to the grammar/token-gloss side.
-  /// Only layer 1 of spec §8's three-layer grammar breakdown (token gloss:
-  /// surface/dictForm/reading/pos/inflection, already on [CardModeState]'s
-  /// tokens) is available this pass -- matched grammar points (layer 2) and
-  /// the LLM explanation (layer 3) are later phases.
+  /// Tap-empty-card-space (spec §6): flips to the grammar/token-gloss side,
+  /// showing spec §8's layer 1 (token gloss) and layer 2 (matched grammar
+  /// points, [CardModeState.grammarMatches]) together. The LLM explanation
+  /// (layer 3) is a later, network-dependent phase.
   void toggleFlip() {
     final current = state.value;
     if (current == null) return;
@@ -152,6 +162,19 @@ class CardModeController extends AsyncNotifier<CardModeState> {
 
   Future<void> removeWord(String dictForm, String reading) =>
       _mining.removeWord(dictForm, reading);
+
+  Future<void> mineGrammarPoint(GrammarPoint point) {
+    final current = state.value;
+    if (current == null) return Future.value();
+    return _mining.mineGrammarPoint(
+      point,
+      workId: current.document.id,
+      sentenceId: current.sentence.id,
+    );
+  }
+
+  Future<void> removeGrammarPoint(String grammarPointId) =>
+      _mining.removeGrammarPoint(grammarPointId);
 
   Future<void> undoLastMining() => _mining.undoLastMining();
 }

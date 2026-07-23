@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_point.dart';
 
 import '../reader_mining_session.dart';
 import '../reading_position.dart';
@@ -46,13 +48,14 @@ final documentModeControllerProvider =
 /// **Scope note** (mirrors `CardModeController`'s own): the spec's
 /// drag-across-characters tokenizer-boundary override isn't implemented
 /// this pass -- no importer/tokenizer surface yet exists for a user
-/// override to feed back into. Double-tap's grammar breakdown popup this
-/// pass shows the same layer-1 token gloss Card Mode's flip side shows
-/// (surface/dictForm/reading/pos/inflection); matched grammar points and
-/// the LLM explanation layer are later phases, same as Card Mode.
+/// override to feed back into. Double-tap's grammar breakdown popup shows
+/// spec §8's layer 1 (token gloss) and layer 2 (matched grammar points,
+/// [matchGrammarFor]) together; the LLM explanation layer is a later,
+/// network-dependent phase, same as Card Mode.
 class DocumentModeController extends AsyncNotifier<DocumentModeState> {
   late ReaderMiningSession _mining;
   final Map<String, List<Token>> _tokenCache = {};
+  final Map<String, List<GrammarMatch>> _grammarMatchCache = {};
 
   @override
   Future<DocumentModeState> build() async {
@@ -65,6 +68,7 @@ class DocumentModeController extends AsyncNotifier<DocumentModeState> {
     }
     _mining = ReaderMiningSession(ref);
     _tokenCache.clear();
+    _grammarMatchCache.clear();
 
     final storedSentenceId = ref.read(currentSentencePositionProvider);
     final initialSentenceId =
@@ -114,6 +118,16 @@ class DocumentModeController extends AsyncNotifier<DocumentModeState> {
     return tokens;
   }
 
+  /// Spec §8 layer 2's matches for [sentence], memoized per controller
+  /// instance -- same reasoning as [tokensFor].
+  Future<List<GrammarMatch>> matchGrammarFor(Sentence sentence) async {
+    final cached = _grammarMatchCache[sentence.id];
+    if (cached != null) return cached;
+    final matches = await _mining.matchGrammar(sentence);
+    _grammarMatchCache[sentence.id] = matches;
+    return matches;
+  }
+
   /// Called by the reader view as the reader scrolls (spec §5's shared
   /// position sync) -- whichever sentence it considers "currently being
   /// read" (e.g. topmost visible), so switching to Card Mode resumes there.
@@ -146,6 +160,25 @@ class DocumentModeController extends AsyncNotifier<DocumentModeState> {
 
   Future<void> removeWord(String dictForm, String reading) =>
       _mining.removeWord(dictForm, reading);
+
+  /// Grammar-side mirror of [mineWord] -- see that method's own doc comment
+  /// for why [sentenceId] is required here (no single "current sentence" in
+  /// a continuous view).
+  Future<void> mineGrammarPoint(
+    GrammarPoint point, {
+    required String sentenceId,
+  }) async {
+    final document = state.value?.document;
+    if (document == null) return;
+    await _mining.mineGrammarPoint(
+      point,
+      workId: document.id,
+      sentenceId: sentenceId,
+    );
+  }
+
+  Future<void> removeGrammarPoint(String grammarPointId) =>
+      _mining.removeGrammarPoint(grammarPointId);
 
   Future<void> undoLastMining() => _mining.undoLastMining();
 }

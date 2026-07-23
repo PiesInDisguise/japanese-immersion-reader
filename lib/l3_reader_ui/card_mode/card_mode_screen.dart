@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 
 import '../document_mode/document_mode_screen.dart';
 import 'card_mode_controller.dart';
+import 'grammar_point_sheet.dart';
 import 'token_gloss_view.dart';
 import 'word_lookup_sheet.dart';
 
 /// Card Mode's screen (spec §6): a vertical feed, one sentence per card,
 /// built directly on [cardModeControllerProvider]. See that provider's own
 /// scope-note doc comment for what's deliberately not implemented this pass
-/// (drag-to-override the tokenizer boundary, grammar-point popups on the
-/// flip side, and auto-add-OFF's +/- toggle).
+/// (drag-to-override the tokenizer boundary, and auto-add-OFF's +/- toggle).
 class CardModeScreen extends ConsumerWidget {
   const CardModeScreen({super.key});
 
@@ -224,6 +225,46 @@ class _CardAreaState extends ConsumerState<_CardArea> {
     );
   }
 
+  Future<void> _handleGrammarPointTap(GrammarMatch match) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final controller = ref.read(cardModeControllerProvider.notifier);
+    final mined = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => GrammarPointSheet(
+        match: match,
+        mine: () => controller.mineGrammarPoint(match.point),
+      ),
+    );
+    if (mined == true && mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Added "${match.point.pattern}" to your collection'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () =>
+                ref.read(cardModeControllerProvider.notifier).undoLastMining(),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleGrammarPointLongPress(GrammarMatch match) async {
+    final messenger = ScaffoldMessenger.of(context);
+    await ref
+        .read(cardModeControllerProvider.notifier)
+        .removeGrammarPoint(match.point.id);
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Removed "${match.point.pattern}" from your collection',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
@@ -257,6 +298,9 @@ class _CardAreaState extends ConsumerState<_CardArea> {
                   ? TokenGlossView(
                       key: ValueKey('${state.cardIndex}-back'),
                       tokens: state.tokens,
+                      grammarMatches: state.grammarMatches,
+                      onGrammarPointTap: _handleGrammarPointTap,
+                      onGrammarPointLongPress: _handleGrammarPointLongPress,
                     )
                   : _FrontFace(
                       key: ValueKey('${state.cardIndex}-front'),

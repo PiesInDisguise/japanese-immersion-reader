@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_database.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/native_library_loader.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/sudachi_tokenizer.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/tokenizer.dart';
@@ -55,3 +57,13 @@ final grammarCollectionRepositoryProvider =
     Provider<GrammarCollectionRepository>((ref) {
       return GrammarCollectionRepository(ref.watch(appDatabaseProvider));
     });
+
+/// Spec §8 layer 2's grammar-point database, loaded once from the bundled
+/// asset (`assets/grammar/grammar_points.json`) and compiled into a ready
+/// [GrammarMatcher] -- async (`FutureProvider`, matching [tokenizerProvider]'s
+/// own shape) since asset loading is genuinely async, even though this
+/// particular asset is small enough to resolve near-instantly.
+final grammarDatabaseProvider = FutureProvider<GrammarMatcher>((ref) async {
+  final points = await loadGrammarPoints();
+  return GrammarMatcher(points);
+});
