@@ -3,22 +3,9 @@ import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
 
 import '../reader_mining_session.dart';
+import '../reading_position.dart';
 
-/// The `Document` Card Mode is currently showing, or `null` before any book
-/// is opened. Deliberately a plain [Notifier] holding one value (not a
-/// family parameter on [CardModeController]) since only one document is
-/// ever open at a time in this app -- [CardModeController] just watches
-/// this rather than needing per-document controller instances.
-class CurrentDocument extends Notifier<Document?> {
-  @override
-  Document? build() => null;
-
-  void set(Document? document) => state = document;
-}
-
-final currentDocumentProvider = NotifierProvider<CurrentDocument, Document?>(
-  CurrentDocument.new,
-);
+export '../reading_position.dart' show CurrentDocument, currentDocumentProvider;
 
 /// A single flattened chapter/block/sentence position -- Card Mode is a
 /// linear feed of sentences (spec §6: "one sentence per card"), regardless
@@ -96,12 +83,22 @@ class CardModeController extends AsyncNotifier<CardModeState> {
         for (final block in chapter.blocks)
           for (final sentence in block.sentences) _FlatPosition(sentence),
     ];
-    return _loadCard(document, 0);
+
+    // Spec §5: mode switches preserve position via the shared Sentence ID --
+    // resume where Document Mode (or a prior Card Mode session) left off,
+    // rather than always restarting at card 0.
+    final startSentenceId = ref.read(currentSentencePositionProvider);
+    final startIndex = startSentenceId == null
+        ? 0
+        : _positions.indexWhere((p) => p.sentence.id == startSentenceId);
+
+    return _loadCard(document, startIndex < 0 ? 0 : startIndex);
   }
 
   Future<CardModeState> _loadCard(Document document, int index) async {
     final position = _positions[index];
     final tokens = await _mining.tokenizeSentence(position.sentence);
+    ref.read(currentSentencePositionProvider.notifier).set(position.sentence.id);
     return CardModeState(
       document: document,
       cardIndex: index,
