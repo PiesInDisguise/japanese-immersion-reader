@@ -107,6 +107,39 @@ void main() {
     },
   );
 
+  test(
+    'an async factory (e.g. a real engine awaiting model download + ONNX '
+    'session creation) is awaited before spawn() resolves',
+    () async {
+      final worker = await OcrWorker.spawn(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        return _CountingOcrEngine();
+      });
+      try {
+        final regions = await worker.recognize(
+          Uint8List(4),
+          width: 1,
+          height: 1,
+          vertical: false,
+        );
+        expect(regions.single.text, 'call-1');
+      } finally {
+        worker.dispose();
+      }
+    },
+  );
+
+  test(
+    'spawn() rethrows a factory that fails to construct, rather than '
+    'surfacing it confusingly on the first recognize() call',
+    () async {
+      await expectLater(
+        OcrWorker.spawn(() => throw StateError('model download failed')),
+        throwsA(isA<StateError>()),
+      );
+    },
+  );
+
   test('an engine that throws surfaces as a StateError to the caller, '
       'without crashing the worker', () async {
     final worker = await OcrWorker.spawn(_ThrowingOcrEngine.new);

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l1_ingestion/epub/epub_importer.dart';
+import 'package:japanese_immersion_reader/l1_ingestion/pdf_scanned/real_ocr_engine.dart';
+import 'package:japanese_immersion_reader/l1_ingestion/pdf_scanned/scanned_pdf_importer.dart';
 import 'package:japanese_immersion_reader/l1_ingestion/pdf_text/pdf_text_importer.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
@@ -80,6 +82,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return PdfTextImporter().import(File(path), onProgress: (_) {});
   });
 
+  /// Real OCR (docs/research/r3-ocr.md, r6-manga-text-detection.md):
+  /// [RealOcrEngine.create] downloads and loads both real ONNX models
+  /// (comic-text-detector region detection + Manga OCR recognition) on
+  /// first use -- ~550MB combined, so the first import via this button can
+  /// take a while with only the bare spinner below for feedback (no
+  /// per-step progress UI exists yet, matching every other import button on
+  /// this placeholder screen -- see class doc comment). Subsequent imports
+  /// reuse the cached models.
+  Future<void> _importScannedPdf() => _openDocument(() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+    final path = result?.files.single.path;
+    if (path == null) throw StateError('No file selected.');
+    return ScannedPdfImporter(
+      RealOcrEngine.create,
+    ).import(File(path), onProgress: (_) {});
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,6 +125,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               OutlinedButton(
                 onPressed: _importPdf,
                 child: const Text('Import PDF...'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: _importScannedPdf,
+                child: const Text('Import Scanned PDF (OCR)...'),
               ),
               const SizedBox(height: 12),
               // Not a polished library entry -- like the rest of this

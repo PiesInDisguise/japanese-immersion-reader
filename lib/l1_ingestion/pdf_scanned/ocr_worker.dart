@@ -7,7 +7,18 @@ import 'ocr_engine.dart';
 /// Constructs an [OcrEngine]. Called exactly once, *inside* the worker
 /// isolate [OcrWorker] spawns -- see that class's doc comment for why this
 /// is a factory rather than a ready instance.
-typedef OcrEngineFactory = OcrEngine Function();
+///
+/// `FutureOr`, not a bare `OcrEngine`, so a factory can do real async setup
+/// (a real engine's ONNX session loading, itself possibly gated on a
+/// first-run model download -- see `ComicTextDetector`/`MangaOcrRecognizer`)
+/// without forcing that work to complete before the factory is even handed
+/// to [OcrWorker.spawn]. That's not just convenience: the constructed engine
+/// (e.g. holding a loaded `OrtSession`) must never exist anywhere *except*
+/// inside the worker isolate, since a real session almost certainly can't
+/// survive being sent across the isolate boundary -- so the async
+/// construction has to happen after the factory itself has already crossed
+/// into the worker (see [_entryPoint]), not before.
+typedef OcrEngineFactory = FutureOr<OcrEngine> Function();
 
 /// A single long-lived background isolate holding one real [OcrEngine]
 /// instance for the lifetime of one import, replacing the previous
@@ -35,15 +46,21 @@ class OcrWorker {
   final SendPort _commands;
 
   /// Spawns the worker and waits for it to finish constructing its engine
-  /// (i.e. [factory] has already returned inside the worker isolate) before
+  /// (i.e. [factory] has already resolved inside the worker isolate) before
   /// resolving -- so a caller never sends work to an isolate that isn't
-  /// ready yet.
+  /// ready yet. If [factory] throws or its `Future` rejects (e.g. a
+  /// first-run model download fails), that failure is rethrown here rather
+  /// than left to surface confusingly the first time [recognize] is called.
   static Future<OcrWorker> spawn(OcrEngineFactory factory) async {
     final ready = ReceivePort();
     final isolate = await Isolate.spawn(_entryPoint, (factory, ready.sendPort));
-    final commands = await ready.first as SendPort;
+    final message = await ready.first;
     ready.close();
-    return OcrWorker._(isolate, commands);
+    if (message is String) {
+      isolate.kill(priority: Isolate.immediate);
+      throw StateError('OcrWorker: engine construction failed: $message');
+    }
+    return OcrWorker._(isolate, message as SendPort);
   }
 
   /// Recognizes text on one page via this worker's single,
@@ -75,9 +92,24 @@ class OcrWorker {
   /// loaded into it (e.g. ONNX sessions) -- leaks for the app's lifetime.
   void dispose() => _isolate.kill(priority: Isolate.immediate);
 
+  /// `Isolate.spawn` requires a plain `void Function(T)` entry point, so
+  /// this stays synchronous itself and immediately delegates to [_run] for
+  /// the actual (async) work -- see [OcrEngineFactory]'s own doc comment for
+  /// why that work has to happen here, inside the worker, rather than
+  /// before spawning it.
   static void _entryPoint((OcrEngineFactory, SendPort) args) {
     final (factory, readyPort) = args;
-    final engine = factory();
+    _run(factory, readyPort);
+  }
+
+  static Future<void> _run(OcrEngineFactory factory, SendPort readyPort) async {
+    final OcrEngine engine;
+    try {
+      engine = await factory();
+    } catch (e) {
+      readyPort.send(e.toString());
+      return;
+    }
     final commands = ReceivePort();
     readyPort.send(commands.sendPort);
     commands.listen((message) async {

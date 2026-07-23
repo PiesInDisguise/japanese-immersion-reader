@@ -20,5 +20,8 @@ void main() {
     // FilePicker test infrastructure this suite doesn't have set up yet).
     expect(find.text('Import PDF...'), findsOneWidget);
     expect(find.text('Load Sample Vertical PDF'), findsOneWidget);
+    // ScannedPdfImporter + RealOcrEngine wiring (see home_screen.dart's
+    // _importScannedPdf) -- same render-only check as the others above.
+    expect(find.text('Import Scanned PDF (OCR)...'), findsOneWidget);
   });
 }
