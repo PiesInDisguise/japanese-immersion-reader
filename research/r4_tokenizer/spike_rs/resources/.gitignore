@@ -1,0 +1,4 @@
+# The compiled SudachiDict binary is ~118MB (small edition) and freely
+# re-fetchable (Apache-2.0) -- see docs/research/r4-tokenizer.md for the
+# exact fetch command. Not worth committing to git.
+*.dic

@@ -1,0 +1,28 @@
+name: r2_pdf_text
+description: >
+  THROWAWAY research spike project. Not part of the main app. Investigates
+  whether pdfrx/pdfrx_engine exposes character-level bounding boxes and
+  text-direction data sufficient to populate SourceRect and reconstruct
+  vertical (縦書き) Japanese reading order. See ../../docs/research/r2-pdf-text.md
+  for findings. Safe to delete this whole directory once that doc is read.
+publish_to: 'none'
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  # The actual text-extraction primitives (PdfDocument, PdfPage.loadText(),
+  # PdfPageText, PdfPageTextFragment, PdfTextDirection, PdfRect) live in
+  # pdfrx_engine, a pure-Dart package with no Flutter dependency. The Flutter
+  # package `pdfrx` (what the main app would eventually depend on for a PDF
+  # *viewer* widget) re-exports the same engine for its text APIs, so testing
+  # against pdfrx_engine directly via plain `dart run` is a faithful test of
+  # the same extraction code path without needing a Flutter build.
+  pdfrx_engine: ^0.4.6
+  # Used only to *generate* synthetic Japanese-text PDF fixtures to extract
+  # from, since assets/fixtures/ in the main repo starts empty. Not related
+  # to extraction.
+  pdf: ^3.13.0
+
+dev_dependencies:
+  lints: ^5.0.0

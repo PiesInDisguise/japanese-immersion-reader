@@ -1,0 +1,16 @@
+name: r4_tokenizer_dart_spike
+description: >
+  R4 research spike: plain Dart consumer proving flutter_rust_bridge can call
+  sudachi.rs. Deliberately NOT a Flutter app -- this machine is missing the
+  Visual Studio "Desktop development with C++" workload (and the Android
+  SDK/NDK) needed for a full Flutter GUI build. flutter_rust_bridge's Dart
+  runtime package has no Flutter SDK constraint, so a plain Dart CLI is
+  enough to prove the FFI round-trip; see docs/research/r4-tokenizer.md.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter_rust_bridge: ^2.12.0

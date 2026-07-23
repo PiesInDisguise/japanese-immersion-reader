@@ -1,0 +1,22 @@
+[package]
+name = "r4_tokenizer_spike"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Research spike only. Pinned to the latest tagged release of sudachi.rs at
+# time of writing (2026-07-22) for reproducibility, since sudachi.rs is not
+# published on crates.io (git dependency is the only option today).
+[lib]
+name = "r4_tokenizer_spike"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "r4_tokenizer_spike_cli"
+path = "src/main.rs"
+
+[dependencies]
+sudachi = { git = "https://github.com/WorksApplications/sudachi.rs", tag = "v0.6.11" }
+# Must match the flutter_rust_bridge Dart package version in ../dart_spike/pubspec.yaml
+# exactly (codegen embeds a content hash both sides check at init time).
+flutter_rust_bridge = "=2.12.0"

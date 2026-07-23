@@ -1,0 +1,15 @@
+name: r1_epub
+description: >
+  THROWAWAY research spike (not part of the main app). Proves that
+  package:xml + package:archive give enough low-level control to parse
+  EPUB OPF/NCX/nav.xhtml and to preserve author-supplied <ruby> furigana
+  verbatim. See docs/research/r1-epub.md at the repo root for findings.
+  Safe to delete this whole directory once the real importer is written.
+publish_to: 'none'
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  archive: ^4.0.9
+  xml: ^7.0.1
+  html: ^0.15.6
