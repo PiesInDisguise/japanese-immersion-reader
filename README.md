@@ -24,7 +24,7 @@ Full product/engineering spec: [docs/spec.md](docs/spec.md).
 
 ```
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs   # generates *.g.dart / *.freezed.dart
+dart run build_runner build   # generates *.g.dart / *.freezed.dart
 flutter test
 ```
 

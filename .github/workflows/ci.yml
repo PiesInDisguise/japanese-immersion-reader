@@ -25,7 +25,7 @@ jobs:
         run: flutter analyze
 
       - name: Generate code (drift/freezed/json_serializable)
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: Fail if generated code is stale
         run: git diff --exit-code
