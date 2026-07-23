@@ -4,7 +4,7 @@ part of 'database.dart';
 
 // ignore_for_file: type=lint
 class $DocumentsTable extends Documents
-    with TableInfo<$DocumentsTable, Document> {
+    with TableInfo<$DocumentsTable, DocumentRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -75,7 +75,7 @@ class $DocumentsTable extends Documents
   static const String $name = 'documents';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Document> instance, {
+    Insertable<DocumentRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -123,9 +123,9 @@ class $DocumentsTable extends Documents
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Document map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DocumentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Document(
+    return DocumentRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -155,13 +155,13 @@ class $DocumentsTable extends Documents
   }
 }
 
-class Document extends DataClass implements Insertable<Document> {
+class DocumentRow extends DataClass implements Insertable<DocumentRow> {
   final String id;
   final String title;
   final String sourceType;
   final DateTime addedAt;
   final DateTime updatedAt;
-  const Document({
+  const DocumentRow({
     required this.id,
     required this.title,
     required this.sourceType,
@@ -189,12 +189,12 @@ class Document extends DataClass implements Insertable<Document> {
     );
   }
 
-  factory Document.fromJson(
+  factory DocumentRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Document(
+    return DocumentRow(
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       sourceType: serializer.fromJson<String>(json['sourceType']),
@@ -214,21 +214,21 @@ class Document extends DataClass implements Insertable<Document> {
     };
   }
 
-  Document copyWith({
+  DocumentRow copyWith({
     String? id,
     String? title,
     String? sourceType,
     DateTime? addedAt,
     DateTime? updatedAt,
-  }) => Document(
+  }) => DocumentRow(
     id: id ?? this.id,
     title: title ?? this.title,
     sourceType: sourceType ?? this.sourceType,
     addedAt: addedAt ?? this.addedAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
-  Document copyWithCompanion(DocumentsCompanion data) {
-    return Document(
+  DocumentRow copyWithCompanion(DocumentsCompanion data) {
+    return DocumentRow(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       sourceType: data.sourceType.present
@@ -241,7 +241,7 @@ class Document extends DataClass implements Insertable<Document> {
 
   @override
   String toString() {
-    return (StringBuffer('Document(')
+    return (StringBuffer('DocumentRow(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('sourceType: $sourceType, ')
@@ -256,7 +256,7 @@ class Document extends DataClass implements Insertable<Document> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Document &&
+      (other is DocumentRow &&
           other.id == this.id &&
           other.title == this.title &&
           other.sourceType == this.sourceType &&
@@ -264,7 +264,7 @@ class Document extends DataClass implements Insertable<Document> {
           other.updatedAt == this.updatedAt);
 }
 
-class DocumentsCompanion extends UpdateCompanion<Document> {
+class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
   final Value<String> id;
   final Value<String> title;
   final Value<String> sourceType;
@@ -291,7 +291,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
        sourceType = Value(sourceType),
        addedAt = Value(addedAt),
        updatedAt = Value(updatedAt);
-  static Insertable<Document> custom({
+  static Insertable<DocumentRow> custom({
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? sourceType,
@@ -365,7 +365,8 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
   }
 }
 
-class $ChaptersTable extends Chapters with TableInfo<$ChaptersTable, Chapter> {
+class $ChaptersTable extends Chapters
+    with TableInfo<$ChaptersTable, ChapterRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -439,7 +440,7 @@ class $ChaptersTable extends Chapters with TableInfo<$ChaptersTable, Chapter> {
   static const String $name = 'chapters';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Chapter> instance, {
+    Insertable<ChapterRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -488,9 +489,9 @@ class $ChaptersTable extends Chapters with TableInfo<$ChaptersTable, Chapter> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Chapter map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ChapterRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Chapter(
+    return ChapterRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -520,13 +521,13 @@ class $ChaptersTable extends Chapters with TableInfo<$ChaptersTable, Chapter> {
   }
 }
 
-class Chapter extends DataClass implements Insertable<Chapter> {
+class ChapterRow extends DataClass implements Insertable<ChapterRow> {
   final String id;
   final String documentId;
   final int chapterIndex;
   final String? title;
   final String blocksJson;
-  const Chapter({
+  const ChapterRow({
     required this.id,
     required this.documentId,
     required this.chapterIndex,
@@ -558,12 +559,12 @@ class Chapter extends DataClass implements Insertable<Chapter> {
     );
   }
 
-  factory Chapter.fromJson(
+  factory ChapterRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Chapter(
+    return ChapterRow(
       id: serializer.fromJson<String>(json['id']),
       documentId: serializer.fromJson<String>(json['documentId']),
       chapterIndex: serializer.fromJson<int>(json['chapterIndex']),
@@ -583,21 +584,21 @@ class Chapter extends DataClass implements Insertable<Chapter> {
     };
   }
 
-  Chapter copyWith({
+  ChapterRow copyWith({
     String? id,
     String? documentId,
     int? chapterIndex,
     Value<String?> title = const Value.absent(),
     String? blocksJson,
-  }) => Chapter(
+  }) => ChapterRow(
     id: id ?? this.id,
     documentId: documentId ?? this.documentId,
     chapterIndex: chapterIndex ?? this.chapterIndex,
     title: title.present ? title.value : this.title,
     blocksJson: blocksJson ?? this.blocksJson,
   );
-  Chapter copyWithCompanion(ChaptersCompanion data) {
-    return Chapter(
+  ChapterRow copyWithCompanion(ChaptersCompanion data) {
+    return ChapterRow(
       id: data.id.present ? data.id.value : this.id,
       documentId: data.documentId.present
           ? data.documentId.value
@@ -614,7 +615,7 @@ class Chapter extends DataClass implements Insertable<Chapter> {
 
   @override
   String toString() {
-    return (StringBuffer('Chapter(')
+    return (StringBuffer('ChapterRow(')
           ..write('id: $id, ')
           ..write('documentId: $documentId, ')
           ..write('chapterIndex: $chapterIndex, ')
@@ -630,7 +631,7 @@ class Chapter extends DataClass implements Insertable<Chapter> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Chapter &&
+      (other is ChapterRow &&
           other.id == this.id &&
           other.documentId == this.documentId &&
           other.chapterIndex == this.chapterIndex &&
@@ -638,7 +639,7 @@ class Chapter extends DataClass implements Insertable<Chapter> {
           other.blocksJson == this.blocksJson);
 }
 
-class ChaptersCompanion extends UpdateCompanion<Chapter> {
+class ChaptersCompanion extends UpdateCompanion<ChapterRow> {
   final Value<String> id;
   final Value<String> documentId;
   final Value<int> chapterIndex;
@@ -664,7 +665,7 @@ class ChaptersCompanion extends UpdateCompanion<Chapter> {
        documentId = Value(documentId),
        chapterIndex = Value(chapterIndex),
        blocksJson = Value(blocksJson);
-  static Insertable<Chapter> custom({
+  static Insertable<ChapterRow> custom({
     Expression<String>? id,
     Expression<String>? documentId,
     Expression<int>? chapterIndex,
@@ -739,7 +740,7 @@ class ChaptersCompanion extends UpdateCompanion<Chapter> {
 }
 
 class $SentencesTable extends Sentences
-    with TableInfo<$SentencesTable, Sentence> {
+    with TableInfo<$SentencesTable, SentenceRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -842,7 +843,7 @@ class $SentencesTable extends Sentences
   static const String $name = 'sentences';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Sentence> instance, {
+    Insertable<SentenceRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -912,9 +913,9 @@ class $SentencesTable extends Sentences
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Sentence map(Map<String, dynamic> data, {String? tablePrefix}) {
+  SentenceRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Sentence(
+    return SentenceRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -952,7 +953,7 @@ class $SentencesTable extends Sentences
   }
 }
 
-class Sentence extends DataClass implements Insertable<Sentence> {
+class SentenceRow extends DataClass implements Insertable<SentenceRow> {
   final String id;
   final String documentId;
   final String chapterId;
@@ -960,7 +961,7 @@ class Sentence extends DataClass implements Insertable<Sentence> {
   final int blockIndex;
   final int sentenceIndex;
   final String content;
-  const Sentence({
+  const SentenceRow({
     required this.id,
     required this.documentId,
     required this.chapterId,
@@ -994,12 +995,12 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     );
   }
 
-  factory Sentence.fromJson(
+  factory SentenceRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Sentence(
+    return SentenceRow(
       id: serializer.fromJson<String>(json['id']),
       documentId: serializer.fromJson<String>(json['documentId']),
       chapterId: serializer.fromJson<String>(json['chapterId']),
@@ -1023,7 +1024,7 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     };
   }
 
-  Sentence copyWith({
+  SentenceRow copyWith({
     String? id,
     String? documentId,
     String? chapterId,
@@ -1031,7 +1032,7 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     int? blockIndex,
     int? sentenceIndex,
     String? content,
-  }) => Sentence(
+  }) => SentenceRow(
     id: id ?? this.id,
     documentId: documentId ?? this.documentId,
     chapterId: chapterId ?? this.chapterId,
@@ -1040,8 +1041,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     sentenceIndex: sentenceIndex ?? this.sentenceIndex,
     content: content ?? this.content,
   );
-  Sentence copyWithCompanion(SentencesCompanion data) {
-    return Sentence(
+  SentenceRow copyWithCompanion(SentencesCompanion data) {
+    return SentenceRow(
       id: data.id.present ? data.id.value : this.id,
       documentId: data.documentId.present
           ? data.documentId.value
@@ -1062,7 +1063,7 @@ class Sentence extends DataClass implements Insertable<Sentence> {
 
   @override
   String toString() {
-    return (StringBuffer('Sentence(')
+    return (StringBuffer('SentenceRow(')
           ..write('id: $id, ')
           ..write('documentId: $documentId, ')
           ..write('chapterId: $chapterId, ')
@@ -1087,7 +1088,7 @@ class Sentence extends DataClass implements Insertable<Sentence> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Sentence &&
+      (other is SentenceRow &&
           other.id == this.id &&
           other.documentId == this.documentId &&
           other.chapterId == this.chapterId &&
@@ -1097,7 +1098,7 @@ class Sentence extends DataClass implements Insertable<Sentence> {
           other.content == this.content);
 }
 
-class SentencesCompanion extends UpdateCompanion<Sentence> {
+class SentencesCompanion extends UpdateCompanion<SentenceRow> {
   final Value<String> id;
   final Value<String> documentId;
   final Value<String> chapterId;
@@ -1132,7 +1133,7 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
        blockIndex = Value(blockIndex),
        sentenceIndex = Value(sentenceIndex),
        content = Value(content);
-  static Insertable<Sentence> custom({
+  static Insertable<SentenceRow> custom({
     Expression<String>? id,
     Expression<String>? documentId,
     Expression<String>? chapterId,
@@ -3843,12 +3844,11 @@ typedef $$DocumentsTableUpdateCompanionBuilder =
     });
 
 final class $$DocumentsTableReferences
-    extends BaseReferences<_$AppDatabase, $DocumentsTable, Document> {
+    extends BaseReferences<_$AppDatabase, $DocumentsTable, DocumentRow> {
   $$DocumentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$ChaptersTable, List<Chapter>> _chaptersRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$ChaptersTable, List<ChapterRow>>
+  _chaptersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.chapters,
     aliasName: 'documents__id__chapters__document_id',
   );
@@ -3865,7 +3865,7 @@ final class $$DocumentsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$SentencesTable, List<Sentence>>
+  static MultiTypedResultKey<$SentencesTable, List<SentenceRow>>
   _sentencesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.sentences,
     aliasName: 'documents__id__sentences__document_id',
@@ -4086,14 +4086,14 @@ class $$DocumentsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $DocumentsTable,
-          Document,
+          DocumentRow,
           $$DocumentsTableFilterComposer,
           $$DocumentsTableOrderingComposer,
           $$DocumentsTableAnnotationComposer,
           $$DocumentsTableCreateCompanionBuilder,
           $$DocumentsTableUpdateCompanionBuilder,
-          (Document, $$DocumentsTableReferences),
-          Document,
+          (DocumentRow, $$DocumentsTableReferences),
+          DocumentRow,
           PrefetchHooks Function({bool chaptersRefs, bool sentencesRefs})
         > {
   $$DocumentsTableTableManager(_$AppDatabase db, $DocumentsTable table)
@@ -4160,9 +4160,9 @@ class $$DocumentsTableTableManager
                     return [
                       if (chaptersRefs)
                         await $_getPrefetchedData<
-                          Document,
+                          DocumentRow,
                           $DocumentsTable,
-                          Chapter
+                          ChapterRow
                         >(
                           currentTable: table,
                           referencedTable: $$DocumentsTableReferences
@@ -4181,9 +4181,9 @@ class $$DocumentsTableTableManager
                         ),
                       if (sentencesRefs)
                         await $_getPrefetchedData<
-                          Document,
+                          DocumentRow,
                           $DocumentsTable,
-                          Sentence
+                          SentenceRow
                         >(
                           currentTable: table,
                           referencedTable: $$DocumentsTableReferences
@@ -4212,14 +4212,14 @@ typedef $$DocumentsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $DocumentsTable,
-      Document,
+      DocumentRow,
       $$DocumentsTableFilterComposer,
       $$DocumentsTableOrderingComposer,
       $$DocumentsTableAnnotationComposer,
       $$DocumentsTableCreateCompanionBuilder,
       $$DocumentsTableUpdateCompanionBuilder,
-      (Document, $$DocumentsTableReferences),
-      Document,
+      (DocumentRow, $$DocumentsTableReferences),
+      DocumentRow,
       PrefetchHooks Function({bool chaptersRefs, bool sentencesRefs})
     >;
 typedef $$ChaptersTableCreateCompanionBuilder =
@@ -4242,7 +4242,7 @@ typedef $$ChaptersTableUpdateCompanionBuilder =
     });
 
 final class $$ChaptersTableReferences
-    extends BaseReferences<_$AppDatabase, $ChaptersTable, Chapter> {
+    extends BaseReferences<_$AppDatabase, $ChaptersTable, ChapterRow> {
   $$ChaptersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $DocumentsTable _documentIdTable(_$AppDatabase db) =>
@@ -4262,7 +4262,7 @@ final class $$ChaptersTableReferences
     );
   }
 
-  static MultiTypedResultKey<$SentencesTable, List<Sentence>>
+  static MultiTypedResultKey<$SentencesTable, List<SentenceRow>>
   _sentencesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.sentences,
     aliasName: 'chapters__id__sentences__chapter_id',
@@ -4491,14 +4491,14 @@ class $$ChaptersTableTableManager
         RootTableManager<
           _$AppDatabase,
           $ChaptersTable,
-          Chapter,
+          ChapterRow,
           $$ChaptersTableFilterComposer,
           $$ChaptersTableOrderingComposer,
           $$ChaptersTableAnnotationComposer,
           $$ChaptersTableCreateCompanionBuilder,
           $$ChaptersTableUpdateCompanionBuilder,
-          (Chapter, $$ChaptersTableReferences),
-          Chapter,
+          (ChapterRow, $$ChaptersTableReferences),
+          ChapterRow,
           PrefetchHooks Function({bool documentId, bool sentencesRefs})
         > {
   $$ChaptersTableTableManager(_$AppDatabase db, $ChaptersTable table)
@@ -4592,9 +4592,9 @@ class $$ChaptersTableTableManager
                 return [
                   if (sentencesRefs)
                     await $_getPrefetchedData<
-                      Chapter,
+                      ChapterRow,
                       $ChaptersTable,
-                      Sentence
+                      SentenceRow
                     >(
                       currentTable: table,
                       referencedTable: $$ChaptersTableReferences
@@ -4620,14 +4620,14 @@ typedef $$ChaptersTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $ChaptersTable,
-      Chapter,
+      ChapterRow,
       $$ChaptersTableFilterComposer,
       $$ChaptersTableOrderingComposer,
       $$ChaptersTableAnnotationComposer,
       $$ChaptersTableCreateCompanionBuilder,
       $$ChaptersTableUpdateCompanionBuilder,
-      (Chapter, $$ChaptersTableReferences),
-      Chapter,
+      (ChapterRow, $$ChaptersTableReferences),
+      ChapterRow,
       PrefetchHooks Function({bool documentId, bool sentencesRefs})
     >;
 typedef $$SentencesTableCreateCompanionBuilder =
@@ -4654,7 +4654,7 @@ typedef $$SentencesTableUpdateCompanionBuilder =
     });
 
 final class $$SentencesTableReferences
-    extends BaseReferences<_$AppDatabase, $SentencesTable, Sentence> {
+    extends BaseReferences<_$AppDatabase, $SentencesTable, SentenceRow> {
   $$SentencesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $DocumentsTable _documentIdTable(_$AppDatabase db) =>
@@ -4936,14 +4936,14 @@ class $$SentencesTableTableManager
         RootTableManager<
           _$AppDatabase,
           $SentencesTable,
-          Sentence,
+          SentenceRow,
           $$SentencesTableFilterComposer,
           $$SentencesTableOrderingComposer,
           $$SentencesTableAnnotationComposer,
           $$SentencesTableCreateCompanionBuilder,
           $$SentencesTableUpdateCompanionBuilder,
-          (Sentence, $$SentencesTableReferences),
-          Sentence,
+          (SentenceRow, $$SentencesTableReferences),
+          SentenceRow,
           PrefetchHooks Function({bool documentId, bool chapterId})
         > {
   $$SentencesTableTableManager(_$AppDatabase db, $SentencesTable table)
@@ -5067,14 +5067,14 @@ typedef $$SentencesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $SentencesTable,
-      Sentence,
+      SentenceRow,
       $$SentencesTableFilterComposer,
       $$SentencesTableOrderingComposer,
       $$SentencesTableAnnotationComposer,
       $$SentencesTableCreateCompanionBuilder,
       $$SentencesTableUpdateCompanionBuilder,
-      (Sentence, $$SentencesTableReferences),
-      Sentence,
+      (SentenceRow, $$SentencesTableReferences),
+      SentenceRow,
       PrefetchHooks Function({bool documentId, bool chapterId})
     >;
 typedef $$DictionariesTableCreateCompanionBuilder =

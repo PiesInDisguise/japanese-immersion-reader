@@ -3,6 +3,17 @@ import 'package:drift/drift.dart';
 /// One row per imported work. `updatedAt` is sync-ready per spec §13 (every
 /// mutable row carries a stable ID + updatedAt so an optional sync layer can
 /// use last-write-wins/CRDT later without a schema change).
+///
+/// `@DataClassName('DocumentRow')`: Drift's default data-class name is the
+/// singular of the table name -- `Document`, `Chapter`, `Sentence` here --
+/// which collides with this project's own frozen domain models of the exact
+/// same names (`lib/core/models/`). That collision was latent until a
+/// dictionary-lookup function needed both `package:.../core/models/models.dart`
+/// and this file in one import, at which point `Document`/`Chapter`/`Sentence`
+/// became ambiguous. `Row` suffixes disambiguate "a raw DB row" from "the
+/// domain model" everywhere both are needed together, rather than requiring
+/// import prefixes at every future call site that needs both.
+@DataClassName('DocumentRow')
 class Documents extends Table {
   TextColumn get id => text()();
   TextColumn get title => text()();
@@ -18,6 +29,7 @@ class Documents extends Table {
 /// than normalized rows: OCR background jobs write per-chapter, and a fully
 /// normalized per-token table would be expensive to write during that job.
 /// The `sentences` table below is the queryable index over this blob.
+@DataClassName('ChapterRow')
 class Chapters extends Table {
   TextColumn get id => text()();
   TextColumn get documentId => text().references(Documents, #id)();
@@ -32,6 +44,7 @@ class Chapters extends Table {
 /// Flat, queryable index over sentences so Card Mode/Document Mode can
 /// resolve a stable Sentence ID to its chapter/position in O(1) instead of
 /// scanning every chapter's blocksJson blob.
+@DataClassName('SentenceRow')
 class Sentences extends Table {
   TextColumn get id => text()();
   TextColumn get documentId => text().references(Documents, #id)();
