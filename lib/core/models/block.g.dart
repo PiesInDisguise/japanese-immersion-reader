@@ -13,6 +13,9 @@ _Block _$BlockFromJson(Map<String, dynamic> json) => _Block(
   sentences: (json['sentences'] as List<dynamic>)
       .map((e) => Sentence.fromJson(e as Map<String, dynamic>))
       .toList(),
+  direction:
+      $enumDecodeNullable(_$WritingDirectionEnumMap, json['direction']) ??
+      WritingDirection.horizontal,
 );
 
 Map<String, dynamic> _$BlockToJson(_Block instance) => <String, dynamic>{
@@ -20,6 +23,7 @@ Map<String, dynamic> _$BlockToJson(_Block instance) => <String, dynamic>{
   'index': instance.index,
   'kind': _$BlockKindEnumMap[instance.kind]!,
   'sentences': instance.sentences.map((e) => e.toJson()).toList(),
+  'direction': _$WritingDirectionEnumMap[instance.direction]!,
 };
 
 const _$BlockKindEnumMap = {
@@ -27,4 +31,9 @@ const _$BlockKindEnumMap = {
   BlockKind.page: 'page',
   BlockKind.speechBubble: 'speechBubble',
   BlockKind.subtitleLine: 'subtitleLine',
+};
+
+const _$WritingDirectionEnumMap = {
+  WritingDirection.horizontal: 'horizontal',
+  WritingDirection.vertical: 'vertical',
 };

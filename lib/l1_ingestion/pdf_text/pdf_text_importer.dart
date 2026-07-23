@@ -20,7 +20,11 @@ import 'reading_order.dart';
 /// Reading order within a page is reconstructed geometrically, not trusted
 /// from extraction order -- see `reading_order.dart` and
 /// docs/research/r2-pdf-text.md §3.4 for why that matters for vertical
-/// (縦書き) text. Every sentence's single token gets a `sourceRect` that is
+/// (縦書き) text. Each page's resolved `ReadingRegime` is also recorded on
+/// its `Block.direction` (`core/models/block.dart`'s `WritingDirection`),
+/// so the reader UI can render vertical pages with a vertical layout rather
+/// than defaulting to horizontal for everything. Every sentence's single
+/// token gets a `sourceRect` that is
 /// the aggregate bounding box of every character in that sentence (per
 /// `lib/core/models/sentence.dart`'s doc comment: PDF text has no ruby-like
 /// evidence to pre-split on, so each sentence is exactly one token), flipped
@@ -95,6 +99,9 @@ class PdfTextImporter implements Importer {
     final orderedChars = reconstructReadingOrder(pageText);
     final pageReadingOrderText = orderedChars.map((c) => c.char).join();
     final spans = splitIntoSentenceSpans(pageReadingOrderText);
+    final direction = regimeOf(pageText) == ReadingRegime.vertical
+        ? WritingDirection.vertical
+        : WritingDirection.horizontal;
 
     final sentences = <Sentence>[
       for (var sentenceIndex = 0; sentenceIndex < spans.length; sentenceIndex++)
@@ -113,6 +120,7 @@ class PdfTextImporter implements Importer {
       index: pageIndex,
       kind: BlockKind.page,
       sentences: sentences,
+      direction: direction,
     );
   }
 

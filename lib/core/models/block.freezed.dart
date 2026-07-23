@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Block {
 
- String get id; int get index; BlockKind get kind; List<Sentence> get sentences;
+ String get id; int get index; BlockKind get kind; List<Sentence> get sentences; WritingDirection get direction;
 /// Create a copy of Block
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $BlockCopyWith<Block> get copyWith => _$BlockCopyWithImpl<Block>(this as Block, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Block&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&(identical(other.kind, kind) || other.kind == kind)&&const DeepCollectionEquality().equals(other.sentences, sentences));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Block&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&(identical(other.kind, kind) || other.kind == kind)&&const DeepCollectionEquality().equals(other.sentences, sentences)&&(identical(other.direction, direction) || other.direction == direction));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,index,kind,const DeepCollectionEquality().hash(sentences));
+int get hashCode => Object.hash(runtimeType,id,index,kind,const DeepCollectionEquality().hash(sentences),direction);
 
 @override
 String toString() {
-  return 'Block(id: $id, index: $index, kind: $kind, sentences: $sentences)';
+  return 'Block(id: $id, index: $index, kind: $kind, sentences: $sentences, direction: $direction)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $BlockCopyWith<$Res>  {
   factory $BlockCopyWith(Block value, $Res Function(Block) _then) = _$BlockCopyWithImpl;
 @useResult
 $Res call({
- String id, int index, BlockKind kind, List<Sentence> sentences
+ String id, int index, BlockKind kind, List<Sentence> sentences, WritingDirection direction
 });
 
 
@@ -65,13 +65,14 @@ class _$BlockCopyWithImpl<$Res>
 
 /// Create a copy of Block
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? index = null,Object? kind = null,Object? sentences = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? index = null,Object? kind = null,Object? sentences = null,Object? direction = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
 as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as BlockKind,sentences: null == sentences ? _self.sentences : sentences // ignore: cast_nullable_to_non_nullable
-as List<Sentence>,
+as List<Sentence>,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
+as WritingDirection,
   ));
 }
 
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int index,  BlockKind kind,  List<Sentence> sentences)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int index,  BlockKind kind,  List<Sentence> sentences,  WritingDirection direction)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Block() when $default != null:
-return $default(_that.id,_that.index,_that.kind,_that.sentences);case _:
+return $default(_that.id,_that.index,_that.kind,_that.sentences,_that.direction);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.id,_that.index,_that.kind,_that.sentences);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int index,  BlockKind kind,  List<Sentence> sentences)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int index,  BlockKind kind,  List<Sentence> sentences,  WritingDirection direction)  $default,) {final _that = this;
 switch (_that) {
 case _Block():
-return $default(_that.id,_that.index,_that.kind,_that.sentences);case _:
+return $default(_that.id,_that.index,_that.kind,_that.sentences,_that.direction);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.id,_that.index,_that.kind,_that.sentences);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int index,  BlockKind kind,  List<Sentence> sentences)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int index,  BlockKind kind,  List<Sentence> sentences,  WritingDirection direction)?  $default,) {final _that = this;
 switch (_that) {
 case _Block() when $default != null:
-return $default(_that.id,_that.index,_that.kind,_that.sentences);case _:
+return $default(_that.id,_that.index,_that.kind,_that.sentences,_that.direction);case _:
   return null;
 
 }
@@ -212,7 +213,7 @@ return $default(_that.id,_that.index,_that.kind,_that.sentences);case _:
 @JsonSerializable()
 
 class _Block implements Block {
-  const _Block({required this.id, required this.index, required this.kind, required final  List<Sentence> sentences}): _sentences = sentences;
+  const _Block({required this.id, required this.index, required this.kind, required final  List<Sentence> sentences, this.direction = WritingDirection.horizontal}): _sentences = sentences;
   factory _Block.fromJson(Map<String, dynamic> json) => _$BlockFromJson(json);
 
 @override final  String id;
@@ -225,6 +226,7 @@ class _Block implements Block {
   return EqualUnmodifiableListView(_sentences);
 }
 
+@override@JsonKey() final  WritingDirection direction;
 
 /// Create a copy of Block
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Block&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&(identical(other.kind, kind) || other.kind == kind)&&const DeepCollectionEquality().equals(other._sentences, _sentences));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Block&&(identical(other.id, id) || other.id == id)&&(identical(other.index, index) || other.index == index)&&(identical(other.kind, kind) || other.kind == kind)&&const DeepCollectionEquality().equals(other._sentences, _sentences)&&(identical(other.direction, direction) || other.direction == direction));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,index,kind,const DeepCollectionEquality().hash(_sentences));
+int get hashCode => Object.hash(runtimeType,id,index,kind,const DeepCollectionEquality().hash(_sentences),direction);
 
 @override
 String toString() {
-  return 'Block(id: $id, index: $index, kind: $kind, sentences: $sentences)';
+  return 'Block(id: $id, index: $index, kind: $kind, sentences: $sentences, direction: $direction)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$BlockCopyWith<$Res> implements $BlockCopyWith<$Res> {
   factory _$BlockCopyWith(_Block value, $Res Function(_Block) _then) = __$BlockCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int index, BlockKind kind, List<Sentence> sentences
+ String id, int index, BlockKind kind, List<Sentence> sentences, WritingDirection direction
 });
 
 
@@ -276,13 +278,14 @@ class __$BlockCopyWithImpl<$Res>
 
 /// Create a copy of Block
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? index = null,Object? kind = null,Object? sentences = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? index = null,Object? kind = null,Object? sentences = null,Object? direction = null,}) {
   return _then(_Block(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,index: null == index ? _self.index : index // ignore: cast_nullable_to_non_nullable
 as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as BlockKind,sentences: null == sentences ? _self._sentences : sentences // ignore: cast_nullable_to_non_nullable
-as List<Sentence>,
+as List<Sentence>,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
+as WritingDirection,
   ));
 }
 

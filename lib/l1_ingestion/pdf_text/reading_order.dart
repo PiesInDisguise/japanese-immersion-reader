@@ -44,7 +44,7 @@ List<PositionedChar> reconstructReadingOrder(PdfPageText pageText) {
   final chars = _realChars(pageText);
   if (chars.isEmpty) return const [];
 
-  return _regimeOf(pageText) == ReadingRegime.vertical
+  return regimeOf(pageText) == ReadingRegime.vertical
       ? _byColumnsThenTopToBottom(chars)
       : _byRowsThenLeftToRight(chars);
 }
@@ -75,7 +75,12 @@ List<PositionedChar> _realChars(PdfPageText pageText) {
 /// found anywhere on the page. A page with no resolved direction at all
 /// (e.g. no text) defaults to horizontal; moot, since there are then no
 /// characters to order either way.
-ReadingRegime _regimeOf(PdfPageText pageText) {
+///
+/// Public (not `_`-prefixed) so `pdf_text_importer.dart` can call this
+/// directly to set `Block.direction` -- the same regime this function
+/// already computes for [reconstructReadingOrder]'s own dispatch, just
+/// surfaced instead of discarded.
+ReadingRegime regimeOf(PdfPageText pageText) {
   final resolved = <PdfTextDirection>[];
   PdfTextDirection? lastResolved;
   for (final fragment in pageText.fragments) {

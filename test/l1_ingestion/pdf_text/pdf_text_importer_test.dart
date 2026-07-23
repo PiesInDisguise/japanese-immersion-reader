@@ -33,6 +33,10 @@ void main() {
       expect(document.chapters.single.index, 0);
       expect(document.chapters.single.blocks, hasLength(1));
       expect(document.chapters.single.blocks.single.kind, BlockKind.page);
+      expect(
+        document.chapters.single.blocks.single.direction,
+        WritingDirection.horizontal,
+      );
     });
 
     test('splits the page into the three period-terminated sentences', () {
@@ -103,6 +107,10 @@ void main() {
       // so the whole page is exactly one unterminated sentence span.
       expect(sentences, hasLength(1));
       expect(sentences.single.surfaceText, '吾輩は猫である名前はまだ無いどこで生れたかとんと見当がつかぬ');
+      expect(
+        sim.chapters.single.blocks.single.direction,
+        WritingDirection.vertical,
+      );
     });
 
     test('scrambled paint-order fixture reconstructs the SAME text as the sim '
@@ -120,6 +128,10 @@ void main() {
       expect(
         scrambledSentences.single.surfaceText,
         '吾輩は猫である名前はまだ無いどこで生れたかとんと見当がつかぬ',
+      );
+      expect(
+        scrambled.chapters.single.blocks.single.direction,
+        WritingDirection.vertical,
       );
 
       // The two fixtures are pixel-identical (same glyph positions; only
