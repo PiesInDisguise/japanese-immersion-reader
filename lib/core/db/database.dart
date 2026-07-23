@@ -9,7 +9,19 @@ import 'tables.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Documents, Chapters, Sentences])
+@DriftDatabase(
+  tables: [
+    Documents,
+    Chapters,
+    Sentences,
+    // Dictionary import/lookup (spec §10) -- see
+    // docs/research/r5-dictionary.md for the schema design.
+    Dictionaries,
+    DictionaryTagEntries,
+    DictionaryTermEntries,
+    DictionaryTermMetaEntries,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);

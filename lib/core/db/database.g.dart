@@ -1222,12 +1222,2588 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
   }
 }
 
+class $DictionariesTable extends Dictionaries
+    with TableInfo<$DictionariesTable, Dictionary> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DictionariesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<String> revision = GeneratedColumn<String>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _formatVersionMeta = const VerificationMeta(
+    'formatVersion',
+  );
+  @override
+  late final GeneratedColumn<int> formatVersion = GeneratedColumn<int>(
+    'format_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorMeta = const VerificationMeta('author');
+  @override
+  late final GeneratedColumn<String> author = GeneratedColumn<String>(
+    'author',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _attributionMeta = const VerificationMeta(
+    'attribution',
+  );
+  @override
+  late final GeneratedColumn<String> attribution = GeneratedColumn<String>(
+    'attribution',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceLanguageMeta = const VerificationMeta(
+    'sourceLanguage',
+  );
+  @override
+  late final GeneratedColumn<String> sourceLanguage = GeneratedColumn<String>(
+    'source_language',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetLanguageMeta = const VerificationMeta(
+    'targetLanguage',
+  );
+  @override
+  late final GeneratedColumn<String> targetLanguage = GeneratedColumn<String>(
+    'target_language',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _frequencyModeMeta = const VerificationMeta(
+    'frequencyMode',
+  );
+  @override
+  late final GeneratedColumn<String> frequencyMode = GeneratedColumn<String>(
+    'frequency_mode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sequencedMeta = const VerificationMeta(
+    'sequenced',
+  );
+  @override
+  late final GeneratedColumn<bool> sequenced = GeneratedColumn<bool>(
+    'sequenced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("sequenced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<int> priority = GeneratedColumn<int>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    revision,
+    formatVersion,
+    author,
+    url,
+    description,
+    attribution,
+    sourceLanguage,
+    targetLanguage,
+    frequencyMode,
+    sequenced,
+    priority,
+    enabled,
+    addedAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dictionaries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Dictionary> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_revisionMeta);
+    }
+    if (data.containsKey('format_version')) {
+      context.handle(
+        _formatVersionMeta,
+        formatVersion.isAcceptableOrUnknown(
+          data['format_version']!,
+          _formatVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_formatVersionMeta);
+    }
+    if (data.containsKey('author')) {
+      context.handle(
+        _authorMeta,
+        author.isAcceptableOrUnknown(data['author']!, _authorMeta),
+      );
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('attribution')) {
+      context.handle(
+        _attributionMeta,
+        attribution.isAcceptableOrUnknown(
+          data['attribution']!,
+          _attributionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('source_language')) {
+      context.handle(
+        _sourceLanguageMeta,
+        sourceLanguage.isAcceptableOrUnknown(
+          data['source_language']!,
+          _sourceLanguageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('target_language')) {
+      context.handle(
+        _targetLanguageMeta,
+        targetLanguage.isAcceptableOrUnknown(
+          data['target_language']!,
+          _targetLanguageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('frequency_mode')) {
+      context.handle(
+        _frequencyModeMeta,
+        frequencyMode.isAcceptableOrUnknown(
+          data['frequency_mode']!,
+          _frequencyModeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sequenced')) {
+      context.handle(
+        _sequencedMeta,
+        sequenced.isAcceptableOrUnknown(data['sequenced']!, _sequencedMeta),
+      );
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_priorityMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_addedAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Dictionary map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Dictionary(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}revision'],
+      )!,
+      formatVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}format_version'],
+      )!,
+      author: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author'],
+      ),
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      ),
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      attribution: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}attribution'],
+      ),
+      sourceLanguage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_language'],
+      ),
+      targetLanguage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_language'],
+      ),
+      frequencyMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}frequency_mode'],
+      ),
+      sequenced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}sequenced'],
+      )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DictionariesTable createAlias(String alias) {
+    return $DictionariesTable(attachedDatabase, alias);
+  }
+}
+
+class Dictionary extends DataClass implements Insertable<Dictionary> {
+  final String id;
+  final String title;
+  final String revision;
+  final int formatVersion;
+  final String? author;
+  final String? url;
+  final String? description;
+  final String? attribution;
+  final String? sourceLanguage;
+  final String? targetLanguage;
+
+  /// `index.json`'s `frequencyMode`: `occurrence-based` | `rank-based`.
+  /// Affects how a frequency-dictionary number should be displayed; not
+  /// interpreted by storage/lookup, just carried through for the popup UI.
+  final String? frequencyMode;
+
+  /// Whether term entries carry meaningful `sequence` numbers for
+  /// `resultOutputMode: merge` display (`index.json`'s `sequenced`).
+  final bool sequenced;
+
+  /// User-ordered lookup priority. Lower = higher priority = preferred for
+  /// the popup's default definition. Dense (0..N-1) and fully renumbered on
+  /// every reorder rather than left sparse -- the dictionary count is small
+  /// (tens, not thousands), so a full renumber on drag-reorder is cheap and
+  /// keeps queries simple (no gap-management logic).
+  final int priority;
+  final bool enabled;
+  final DateTime addedAt;
+  final DateTime updatedAt;
+  const Dictionary({
+    required this.id,
+    required this.title,
+    required this.revision,
+    required this.formatVersion,
+    this.author,
+    this.url,
+    this.description,
+    this.attribution,
+    this.sourceLanguage,
+    this.targetLanguage,
+    this.frequencyMode,
+    required this.sequenced,
+    required this.priority,
+    required this.enabled,
+    required this.addedAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['revision'] = Variable<String>(revision);
+    map['format_version'] = Variable<int>(formatVersion);
+    if (!nullToAbsent || author != null) {
+      map['author'] = Variable<String>(author);
+    }
+    if (!nullToAbsent || url != null) {
+      map['url'] = Variable<String>(url);
+    }
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || attribution != null) {
+      map['attribution'] = Variable<String>(attribution);
+    }
+    if (!nullToAbsent || sourceLanguage != null) {
+      map['source_language'] = Variable<String>(sourceLanguage);
+    }
+    if (!nullToAbsent || targetLanguage != null) {
+      map['target_language'] = Variable<String>(targetLanguage);
+    }
+    if (!nullToAbsent || frequencyMode != null) {
+      map['frequency_mode'] = Variable<String>(frequencyMode);
+    }
+    map['sequenced'] = Variable<bool>(sequenced);
+    map['priority'] = Variable<int>(priority);
+    map['enabled'] = Variable<bool>(enabled);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DictionariesCompanion toCompanion(bool nullToAbsent) {
+    return DictionariesCompanion(
+      id: Value(id),
+      title: Value(title),
+      revision: Value(revision),
+      formatVersion: Value(formatVersion),
+      author: author == null && nullToAbsent
+          ? const Value.absent()
+          : Value(author),
+      url: url == null && nullToAbsent ? const Value.absent() : Value(url),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      attribution: attribution == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attribution),
+      sourceLanguage: sourceLanguage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceLanguage),
+      targetLanguage: targetLanguage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetLanguage),
+      frequencyMode: frequencyMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(frequencyMode),
+      sequenced: Value(sequenced),
+      priority: Value(priority),
+      enabled: Value(enabled),
+      addedAt: Value(addedAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Dictionary.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Dictionary(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      revision: serializer.fromJson<String>(json['revision']),
+      formatVersion: serializer.fromJson<int>(json['formatVersion']),
+      author: serializer.fromJson<String?>(json['author']),
+      url: serializer.fromJson<String?>(json['url']),
+      description: serializer.fromJson<String?>(json['description']),
+      attribution: serializer.fromJson<String?>(json['attribution']),
+      sourceLanguage: serializer.fromJson<String?>(json['sourceLanguage']),
+      targetLanguage: serializer.fromJson<String?>(json['targetLanguage']),
+      frequencyMode: serializer.fromJson<String?>(json['frequencyMode']),
+      sequenced: serializer.fromJson<bool>(json['sequenced']),
+      priority: serializer.fromJson<int>(json['priority']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'revision': serializer.toJson<String>(revision),
+      'formatVersion': serializer.toJson<int>(formatVersion),
+      'author': serializer.toJson<String?>(author),
+      'url': serializer.toJson<String?>(url),
+      'description': serializer.toJson<String?>(description),
+      'attribution': serializer.toJson<String?>(attribution),
+      'sourceLanguage': serializer.toJson<String?>(sourceLanguage),
+      'targetLanguage': serializer.toJson<String?>(targetLanguage),
+      'frequencyMode': serializer.toJson<String?>(frequencyMode),
+      'sequenced': serializer.toJson<bool>(sequenced),
+      'priority': serializer.toJson<int>(priority),
+      'enabled': serializer.toJson<bool>(enabled),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Dictionary copyWith({
+    String? id,
+    String? title,
+    String? revision,
+    int? formatVersion,
+    Value<String?> author = const Value.absent(),
+    Value<String?> url = const Value.absent(),
+    Value<String?> description = const Value.absent(),
+    Value<String?> attribution = const Value.absent(),
+    Value<String?> sourceLanguage = const Value.absent(),
+    Value<String?> targetLanguage = const Value.absent(),
+    Value<String?> frequencyMode = const Value.absent(),
+    bool? sequenced,
+    int? priority,
+    bool? enabled,
+    DateTime? addedAt,
+    DateTime? updatedAt,
+  }) => Dictionary(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    revision: revision ?? this.revision,
+    formatVersion: formatVersion ?? this.formatVersion,
+    author: author.present ? author.value : this.author,
+    url: url.present ? url.value : this.url,
+    description: description.present ? description.value : this.description,
+    attribution: attribution.present ? attribution.value : this.attribution,
+    sourceLanguage: sourceLanguage.present
+        ? sourceLanguage.value
+        : this.sourceLanguage,
+    targetLanguage: targetLanguage.present
+        ? targetLanguage.value
+        : this.targetLanguage,
+    frequencyMode: frequencyMode.present
+        ? frequencyMode.value
+        : this.frequencyMode,
+    sequenced: sequenced ?? this.sequenced,
+    priority: priority ?? this.priority,
+    enabled: enabled ?? this.enabled,
+    addedAt: addedAt ?? this.addedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Dictionary copyWithCompanion(DictionariesCompanion data) {
+    return Dictionary(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      formatVersion: data.formatVersion.present
+          ? data.formatVersion.value
+          : this.formatVersion,
+      author: data.author.present ? data.author.value : this.author,
+      url: data.url.present ? data.url.value : this.url,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      attribution: data.attribution.present
+          ? data.attribution.value
+          : this.attribution,
+      sourceLanguage: data.sourceLanguage.present
+          ? data.sourceLanguage.value
+          : this.sourceLanguage,
+      targetLanguage: data.targetLanguage.present
+          ? data.targetLanguage.value
+          : this.targetLanguage,
+      frequencyMode: data.frequencyMode.present
+          ? data.frequencyMode.value
+          : this.frequencyMode,
+      sequenced: data.sequenced.present ? data.sequenced.value : this.sequenced,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Dictionary(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('revision: $revision, ')
+          ..write('formatVersion: $formatVersion, ')
+          ..write('author: $author, ')
+          ..write('url: $url, ')
+          ..write('description: $description, ')
+          ..write('attribution: $attribution, ')
+          ..write('sourceLanguage: $sourceLanguage, ')
+          ..write('targetLanguage: $targetLanguage, ')
+          ..write('frequencyMode: $frequencyMode, ')
+          ..write('sequenced: $sequenced, ')
+          ..write('priority: $priority, ')
+          ..write('enabled: $enabled, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    revision,
+    formatVersion,
+    author,
+    url,
+    description,
+    attribution,
+    sourceLanguage,
+    targetLanguage,
+    frequencyMode,
+    sequenced,
+    priority,
+    enabled,
+    addedAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Dictionary &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.revision == this.revision &&
+          other.formatVersion == this.formatVersion &&
+          other.author == this.author &&
+          other.url == this.url &&
+          other.description == this.description &&
+          other.attribution == this.attribution &&
+          other.sourceLanguage == this.sourceLanguage &&
+          other.targetLanguage == this.targetLanguage &&
+          other.frequencyMode == this.frequencyMode &&
+          other.sequenced == this.sequenced &&
+          other.priority == this.priority &&
+          other.enabled == this.enabled &&
+          other.addedAt == this.addedAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DictionariesCompanion extends UpdateCompanion<Dictionary> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> revision;
+  final Value<int> formatVersion;
+  final Value<String?> author;
+  final Value<String?> url;
+  final Value<String?> description;
+  final Value<String?> attribution;
+  final Value<String?> sourceLanguage;
+  final Value<String?> targetLanguage;
+  final Value<String?> frequencyMode;
+  final Value<bool> sequenced;
+  final Value<int> priority;
+  final Value<bool> enabled;
+  final Value<DateTime> addedAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const DictionariesCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.formatVersion = const Value.absent(),
+    this.author = const Value.absent(),
+    this.url = const Value.absent(),
+    this.description = const Value.absent(),
+    this.attribution = const Value.absent(),
+    this.sourceLanguage = const Value.absent(),
+    this.targetLanguage = const Value.absent(),
+    this.frequencyMode = const Value.absent(),
+    this.sequenced = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DictionariesCompanion.insert({
+    required String id,
+    required String title,
+    required String revision,
+    required int formatVersion,
+    this.author = const Value.absent(),
+    this.url = const Value.absent(),
+    this.description = const Value.absent(),
+    this.attribution = const Value.absent(),
+    this.sourceLanguage = const Value.absent(),
+    this.targetLanguage = const Value.absent(),
+    this.frequencyMode = const Value.absent(),
+    this.sequenced = const Value.absent(),
+    required int priority,
+    this.enabled = const Value.absent(),
+    required DateTime addedAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       revision = Value(revision),
+       formatVersion = Value(formatVersion),
+       priority = Value(priority),
+       addedAt = Value(addedAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<Dictionary> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? revision,
+    Expression<int>? formatVersion,
+    Expression<String>? author,
+    Expression<String>? url,
+    Expression<String>? description,
+    Expression<String>? attribution,
+    Expression<String>? sourceLanguage,
+    Expression<String>? targetLanguage,
+    Expression<String>? frequencyMode,
+    Expression<bool>? sequenced,
+    Expression<int>? priority,
+    Expression<bool>? enabled,
+    Expression<DateTime>? addedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (revision != null) 'revision': revision,
+      if (formatVersion != null) 'format_version': formatVersion,
+      if (author != null) 'author': author,
+      if (url != null) 'url': url,
+      if (description != null) 'description': description,
+      if (attribution != null) 'attribution': attribution,
+      if (sourceLanguage != null) 'source_language': sourceLanguage,
+      if (targetLanguage != null) 'target_language': targetLanguage,
+      if (frequencyMode != null) 'frequency_mode': frequencyMode,
+      if (sequenced != null) 'sequenced': sequenced,
+      if (priority != null) 'priority': priority,
+      if (enabled != null) 'enabled': enabled,
+      if (addedAt != null) 'added_at': addedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DictionariesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String>? revision,
+    Value<int>? formatVersion,
+    Value<String?>? author,
+    Value<String?>? url,
+    Value<String?>? description,
+    Value<String?>? attribution,
+    Value<String?>? sourceLanguage,
+    Value<String?>? targetLanguage,
+    Value<String?>? frequencyMode,
+    Value<bool>? sequenced,
+    Value<int>? priority,
+    Value<bool>? enabled,
+    Value<DateTime>? addedAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return DictionariesCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      revision: revision ?? this.revision,
+      formatVersion: formatVersion ?? this.formatVersion,
+      author: author ?? this.author,
+      url: url ?? this.url,
+      description: description ?? this.description,
+      attribution: attribution ?? this.attribution,
+      sourceLanguage: sourceLanguage ?? this.sourceLanguage,
+      targetLanguage: targetLanguage ?? this.targetLanguage,
+      frequencyMode: frequencyMode ?? this.frequencyMode,
+      sequenced: sequenced ?? this.sequenced,
+      priority: priority ?? this.priority,
+      enabled: enabled ?? this.enabled,
+      addedAt: addedAt ?? this.addedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<String>(revision.value);
+    }
+    if (formatVersion.present) {
+      map['format_version'] = Variable<int>(formatVersion.value);
+    }
+    if (author.present) {
+      map['author'] = Variable<String>(author.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (attribution.present) {
+      map['attribution'] = Variable<String>(attribution.value);
+    }
+    if (sourceLanguage.present) {
+      map['source_language'] = Variable<String>(sourceLanguage.value);
+    }
+    if (targetLanguage.present) {
+      map['target_language'] = Variable<String>(targetLanguage.value);
+    }
+    if (frequencyMode.present) {
+      map['frequency_mode'] = Variable<String>(frequencyMode.value);
+    }
+    if (sequenced.present) {
+      map['sequenced'] = Variable<bool>(sequenced.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionariesCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('revision: $revision, ')
+          ..write('formatVersion: $formatVersion, ')
+          ..write('author: $author, ')
+          ..write('url: $url, ')
+          ..write('description: $description, ')
+          ..write('attribution: $attribution, ')
+          ..write('sourceLanguage: $sourceLanguage, ')
+          ..write('targetLanguage: $targetLanguage, ')
+          ..write('frequencyMode: $frequencyMode, ')
+          ..write('sequenced: $sequenced, ')
+          ..write('priority: $priority, ')
+          ..write('enabled: $enabled, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DictionaryTagEntriesTable extends DictionaryTagEntries
+    with TableInfo<$DictionaryTagEntriesTable, DictionaryTagEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DictionaryTagEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dictionaryIdMeta = const VerificationMeta(
+    'dictionaryId',
+  );
+  @override
+  late final GeneratedColumn<String> dictionaryId = GeneratedColumn<String>(
+    'dictionary_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dictionaries (id)',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scoreMeta = const VerificationMeta('score');
+  @override
+  late final GeneratedColumn<double> score = GeneratedColumn<double>(
+    'score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dictionaryId,
+    name,
+    category,
+    sortOrder,
+    notes,
+    score,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dictionary_tag_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DictionaryTagEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('dictionary_id')) {
+      context.handle(
+        _dictionaryIdMeta,
+        dictionaryId.isAcceptableOrUnknown(
+          data['dictionary_id']!,
+          _dictionaryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dictionaryIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_notesMeta);
+    }
+    if (data.containsKey('score')) {
+      context.handle(
+        _scoreMeta,
+        score.isAcceptableOrUnknown(data['score']!, _scoreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scoreMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {dictionaryId, name},
+  ];
+  @override
+  DictionaryTagEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DictionaryTagEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      dictionaryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dictionary_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      )!,
+      score: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}score'],
+      )!,
+    );
+  }
+
+  @override
+  $DictionaryTagEntriesTable createAlias(String alias) {
+    return $DictionaryTagEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class DictionaryTagEntry extends DataClass
+    implements Insertable<DictionaryTagEntry> {
+  final int id;
+  final String dictionaryId;
+  final String name;
+  final String category;
+
+  /// `tag_bank`'s field name is `order` -- reserved in SQL, so this column
+  /// is both Dart- and SQL-renamed.
+  final int sortOrder;
+  final String notes;
+  final double score;
+  const DictionaryTagEntry({
+    required this.id,
+    required this.dictionaryId,
+    required this.name,
+    required this.category,
+    required this.sortOrder,
+    required this.notes,
+    required this.score,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['dictionary_id'] = Variable<String>(dictionaryId);
+    map['name'] = Variable<String>(name);
+    map['category'] = Variable<String>(category);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['notes'] = Variable<String>(notes);
+    map['score'] = Variable<double>(score);
+    return map;
+  }
+
+  DictionaryTagEntriesCompanion toCompanion(bool nullToAbsent) {
+    return DictionaryTagEntriesCompanion(
+      id: Value(id),
+      dictionaryId: Value(dictionaryId),
+      name: Value(name),
+      category: Value(category),
+      sortOrder: Value(sortOrder),
+      notes: Value(notes),
+      score: Value(score),
+    );
+  }
+
+  factory DictionaryTagEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DictionaryTagEntry(
+      id: serializer.fromJson<int>(json['id']),
+      dictionaryId: serializer.fromJson<String>(json['dictionaryId']),
+      name: serializer.fromJson<String>(json['name']),
+      category: serializer.fromJson<String>(json['category']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      notes: serializer.fromJson<String>(json['notes']),
+      score: serializer.fromJson<double>(json['score']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'dictionaryId': serializer.toJson<String>(dictionaryId),
+      'name': serializer.toJson<String>(name),
+      'category': serializer.toJson<String>(category),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'notes': serializer.toJson<String>(notes),
+      'score': serializer.toJson<double>(score),
+    };
+  }
+
+  DictionaryTagEntry copyWith({
+    int? id,
+    String? dictionaryId,
+    String? name,
+    String? category,
+    int? sortOrder,
+    String? notes,
+    double? score,
+  }) => DictionaryTagEntry(
+    id: id ?? this.id,
+    dictionaryId: dictionaryId ?? this.dictionaryId,
+    name: name ?? this.name,
+    category: category ?? this.category,
+    sortOrder: sortOrder ?? this.sortOrder,
+    notes: notes ?? this.notes,
+    score: score ?? this.score,
+  );
+  DictionaryTagEntry copyWithCompanion(DictionaryTagEntriesCompanion data) {
+    return DictionaryTagEntry(
+      id: data.id.present ? data.id.value : this.id,
+      dictionaryId: data.dictionaryId.present
+          ? data.dictionaryId.value
+          : this.dictionaryId,
+      name: data.name.present ? data.name.value : this.name,
+      category: data.category.present ? data.category.value : this.category,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      score: data.score.present ? data.score.value : this.score,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionaryTagEntry(')
+          ..write('id: $id, ')
+          ..write('dictionaryId: $dictionaryId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('notes: $notes, ')
+          ..write('score: $score')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, dictionaryId, name, category, sortOrder, notes, score);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DictionaryTagEntry &&
+          other.id == this.id &&
+          other.dictionaryId == this.dictionaryId &&
+          other.name == this.name &&
+          other.category == this.category &&
+          other.sortOrder == this.sortOrder &&
+          other.notes == this.notes &&
+          other.score == this.score);
+}
+
+class DictionaryTagEntriesCompanion
+    extends UpdateCompanion<DictionaryTagEntry> {
+  final Value<int> id;
+  final Value<String> dictionaryId;
+  final Value<String> name;
+  final Value<String> category;
+  final Value<int> sortOrder;
+  final Value<String> notes;
+  final Value<double> score;
+  const DictionaryTagEntriesCompanion({
+    this.id = const Value.absent(),
+    this.dictionaryId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.category = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.score = const Value.absent(),
+  });
+  DictionaryTagEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String dictionaryId,
+    required String name,
+    required String category,
+    required int sortOrder,
+    required String notes,
+    required double score,
+  }) : dictionaryId = Value(dictionaryId),
+       name = Value(name),
+       category = Value(category),
+       sortOrder = Value(sortOrder),
+       notes = Value(notes),
+       score = Value(score);
+  static Insertable<DictionaryTagEntry> custom({
+    Expression<int>? id,
+    Expression<String>? dictionaryId,
+    Expression<String>? name,
+    Expression<String>? category,
+    Expression<int>? sortOrder,
+    Expression<String>? notes,
+    Expression<double>? score,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dictionaryId != null) 'dictionary_id': dictionaryId,
+      if (name != null) 'name': name,
+      if (category != null) 'category': category,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (notes != null) 'notes': notes,
+      if (score != null) 'score': score,
+    });
+  }
+
+  DictionaryTagEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? dictionaryId,
+    Value<String>? name,
+    Value<String>? category,
+    Value<int>? sortOrder,
+    Value<String>? notes,
+    Value<double>? score,
+  }) {
+    return DictionaryTagEntriesCompanion(
+      id: id ?? this.id,
+      dictionaryId: dictionaryId ?? this.dictionaryId,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      sortOrder: sortOrder ?? this.sortOrder,
+      notes: notes ?? this.notes,
+      score: score ?? this.score,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (dictionaryId.present) {
+      map['dictionary_id'] = Variable<String>(dictionaryId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (score.present) {
+      map['score'] = Variable<double>(score.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionaryTagEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('dictionaryId: $dictionaryId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('notes: $notes, ')
+          ..write('score: $score')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DictionaryTermEntriesTable extends DictionaryTermEntries
+    with TableInfo<$DictionaryTermEntriesTable, DictionaryTermEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DictionaryTermEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dictionaryIdMeta = const VerificationMeta(
+    'dictionaryId',
+  );
+  @override
+  late final GeneratedColumn<String> dictionaryId = GeneratedColumn<String>(
+    'dictionary_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dictionaries (id)',
+    ),
+  );
+  static const VerificationMeta _headwordMeta = const VerificationMeta(
+    'headword',
+  );
+  @override
+  late final GeneratedColumn<String> headword = GeneratedColumn<String>(
+    'headword',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _readingMeta = const VerificationMeta(
+    'reading',
+  );
+  @override
+  late final GeneratedColumn<String> reading = GeneratedColumn<String>(
+    'reading',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _readingNormalizedMeta = const VerificationMeta(
+    'readingNormalized',
+  );
+  @override
+  late final GeneratedColumn<String> readingNormalized =
+      GeneratedColumn<String>(
+        'reading_normalized',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _definitionTagsMeta = const VerificationMeta(
+    'definitionTags',
+  );
+  @override
+  late final GeneratedColumn<String> definitionTags = GeneratedColumn<String>(
+    'definition_tags',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rulesMeta = const VerificationMeta('rules');
+  @override
+  late final GeneratedColumn<String> rules = GeneratedColumn<String>(
+    'rules',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scoreMeta = const VerificationMeta('score');
+  @override
+  late final GeneratedColumn<double> score = GeneratedColumn<double>(
+    'score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _definitionsJsonMeta = const VerificationMeta(
+    'definitionsJson',
+  );
+  @override
+  late final GeneratedColumn<String> definitionsJson = GeneratedColumn<String>(
+    'definitions_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sequenceMeta = const VerificationMeta(
+    'sequence',
+  );
+  @override
+  late final GeneratedColumn<int> sequence = GeneratedColumn<int>(
+    'sequence',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _termTagsMeta = const VerificationMeta(
+    'termTags',
+  );
+  @override
+  late final GeneratedColumn<String> termTags = GeneratedColumn<String>(
+    'term_tags',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _importOrderMeta = const VerificationMeta(
+    'importOrder',
+  );
+  @override
+  late final GeneratedColumn<int> importOrder = GeneratedColumn<int>(
+    'import_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dictionaryId,
+    headword,
+    reading,
+    readingNormalized,
+    definitionTags,
+    rules,
+    score,
+    definitionsJson,
+    sequence,
+    termTags,
+    importOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dictionary_term_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DictionaryTermEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('dictionary_id')) {
+      context.handle(
+        _dictionaryIdMeta,
+        dictionaryId.isAcceptableOrUnknown(
+          data['dictionary_id']!,
+          _dictionaryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dictionaryIdMeta);
+    }
+    if (data.containsKey('headword')) {
+      context.handle(
+        _headwordMeta,
+        headword.isAcceptableOrUnknown(data['headword']!, _headwordMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_headwordMeta);
+    }
+    if (data.containsKey('reading')) {
+      context.handle(
+        _readingMeta,
+        reading.isAcceptableOrUnknown(data['reading']!, _readingMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_readingMeta);
+    }
+    if (data.containsKey('reading_normalized')) {
+      context.handle(
+        _readingNormalizedMeta,
+        readingNormalized.isAcceptableOrUnknown(
+          data['reading_normalized']!,
+          _readingNormalizedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_readingNormalizedMeta);
+    }
+    if (data.containsKey('definition_tags')) {
+      context.handle(
+        _definitionTagsMeta,
+        definitionTags.isAcceptableOrUnknown(
+          data['definition_tags']!,
+          _definitionTagsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rules')) {
+      context.handle(
+        _rulesMeta,
+        rules.isAcceptableOrUnknown(data['rules']!, _rulesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rulesMeta);
+    }
+    if (data.containsKey('score')) {
+      context.handle(
+        _scoreMeta,
+        score.isAcceptableOrUnknown(data['score']!, _scoreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scoreMeta);
+    }
+    if (data.containsKey('definitions_json')) {
+      context.handle(
+        _definitionsJsonMeta,
+        definitionsJson.isAcceptableOrUnknown(
+          data['definitions_json']!,
+          _definitionsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_definitionsJsonMeta);
+    }
+    if (data.containsKey('sequence')) {
+      context.handle(
+        _sequenceMeta,
+        sequence.isAcceptableOrUnknown(data['sequence']!, _sequenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sequenceMeta);
+    }
+    if (data.containsKey('term_tags')) {
+      context.handle(
+        _termTagsMeta,
+        termTags.isAcceptableOrUnknown(data['term_tags']!, _termTagsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_termTagsMeta);
+    }
+    if (data.containsKey('import_order')) {
+      context.handle(
+        _importOrderMeta,
+        importOrder.isAcceptableOrUnknown(
+          data['import_order']!,
+          _importOrderMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_importOrderMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DictionaryTermEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DictionaryTermEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      dictionaryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dictionary_id'],
+      )!,
+      headword: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}headword'],
+      )!,
+      reading: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reading'],
+      )!,
+      readingNormalized: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reading_normalized'],
+      )!,
+      definitionTags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}definition_tags'],
+      ),
+      rules: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rules'],
+      )!,
+      score: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}score'],
+      )!,
+      definitionsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}definitions_json'],
+      )!,
+      sequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sequence'],
+      )!,
+      termTags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}term_tags'],
+      )!,
+      importOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}import_order'],
+      )!,
+    );
+  }
+
+  @override
+  $DictionaryTermEntriesTable createAlias(String alias) {
+    return $DictionaryTermEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class DictionaryTermEntry extends DataClass
+    implements Insertable<DictionaryTermEntry> {
+  final int id;
+  final String dictionaryId;
+  final String headword;
+  final String reading;
+
+  /// Normalized at import time: `reading.isEmpty ? headword : reading`, so
+  /// lookup queries never special-case the "empty reading means same as
+  /// term" schema rule -- every row has a real, non-empty reading to match
+  /// against.
+  final String readingNormalized;
+  final String? definitionTags;
+  final String rules;
+  final double score;
+  final String definitionsJson;
+  final int sequence;
+  final String termTags;
+
+  /// Position within the dictionary's term banks, counted across all
+  /// `term_bank_N.json` files in filename order (file order first, then
+  /// array order within each file). Used as the final tiebreaker when two
+  /// entries share a dictionary and a score, so results stay deterministic
+  /// and match the order the dictionary author shipped them in.
+  final int importOrder;
+  const DictionaryTermEntry({
+    required this.id,
+    required this.dictionaryId,
+    required this.headword,
+    required this.reading,
+    required this.readingNormalized,
+    this.definitionTags,
+    required this.rules,
+    required this.score,
+    required this.definitionsJson,
+    required this.sequence,
+    required this.termTags,
+    required this.importOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['dictionary_id'] = Variable<String>(dictionaryId);
+    map['headword'] = Variable<String>(headword);
+    map['reading'] = Variable<String>(reading);
+    map['reading_normalized'] = Variable<String>(readingNormalized);
+    if (!nullToAbsent || definitionTags != null) {
+      map['definition_tags'] = Variable<String>(definitionTags);
+    }
+    map['rules'] = Variable<String>(rules);
+    map['score'] = Variable<double>(score);
+    map['definitions_json'] = Variable<String>(definitionsJson);
+    map['sequence'] = Variable<int>(sequence);
+    map['term_tags'] = Variable<String>(termTags);
+    map['import_order'] = Variable<int>(importOrder);
+    return map;
+  }
+
+  DictionaryTermEntriesCompanion toCompanion(bool nullToAbsent) {
+    return DictionaryTermEntriesCompanion(
+      id: Value(id),
+      dictionaryId: Value(dictionaryId),
+      headword: Value(headword),
+      reading: Value(reading),
+      readingNormalized: Value(readingNormalized),
+      definitionTags: definitionTags == null && nullToAbsent
+          ? const Value.absent()
+          : Value(definitionTags),
+      rules: Value(rules),
+      score: Value(score),
+      definitionsJson: Value(definitionsJson),
+      sequence: Value(sequence),
+      termTags: Value(termTags),
+      importOrder: Value(importOrder),
+    );
+  }
+
+  factory DictionaryTermEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DictionaryTermEntry(
+      id: serializer.fromJson<int>(json['id']),
+      dictionaryId: serializer.fromJson<String>(json['dictionaryId']),
+      headword: serializer.fromJson<String>(json['headword']),
+      reading: serializer.fromJson<String>(json['reading']),
+      readingNormalized: serializer.fromJson<String>(json['readingNormalized']),
+      definitionTags: serializer.fromJson<String?>(json['definitionTags']),
+      rules: serializer.fromJson<String>(json['rules']),
+      score: serializer.fromJson<double>(json['score']),
+      definitionsJson: serializer.fromJson<String>(json['definitionsJson']),
+      sequence: serializer.fromJson<int>(json['sequence']),
+      termTags: serializer.fromJson<String>(json['termTags']),
+      importOrder: serializer.fromJson<int>(json['importOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'dictionaryId': serializer.toJson<String>(dictionaryId),
+      'headword': serializer.toJson<String>(headword),
+      'reading': serializer.toJson<String>(reading),
+      'readingNormalized': serializer.toJson<String>(readingNormalized),
+      'definitionTags': serializer.toJson<String?>(definitionTags),
+      'rules': serializer.toJson<String>(rules),
+      'score': serializer.toJson<double>(score),
+      'definitionsJson': serializer.toJson<String>(definitionsJson),
+      'sequence': serializer.toJson<int>(sequence),
+      'termTags': serializer.toJson<String>(termTags),
+      'importOrder': serializer.toJson<int>(importOrder),
+    };
+  }
+
+  DictionaryTermEntry copyWith({
+    int? id,
+    String? dictionaryId,
+    String? headword,
+    String? reading,
+    String? readingNormalized,
+    Value<String?> definitionTags = const Value.absent(),
+    String? rules,
+    double? score,
+    String? definitionsJson,
+    int? sequence,
+    String? termTags,
+    int? importOrder,
+  }) => DictionaryTermEntry(
+    id: id ?? this.id,
+    dictionaryId: dictionaryId ?? this.dictionaryId,
+    headword: headword ?? this.headword,
+    reading: reading ?? this.reading,
+    readingNormalized: readingNormalized ?? this.readingNormalized,
+    definitionTags: definitionTags.present
+        ? definitionTags.value
+        : this.definitionTags,
+    rules: rules ?? this.rules,
+    score: score ?? this.score,
+    definitionsJson: definitionsJson ?? this.definitionsJson,
+    sequence: sequence ?? this.sequence,
+    termTags: termTags ?? this.termTags,
+    importOrder: importOrder ?? this.importOrder,
+  );
+  DictionaryTermEntry copyWithCompanion(DictionaryTermEntriesCompanion data) {
+    return DictionaryTermEntry(
+      id: data.id.present ? data.id.value : this.id,
+      dictionaryId: data.dictionaryId.present
+          ? data.dictionaryId.value
+          : this.dictionaryId,
+      headword: data.headword.present ? data.headword.value : this.headword,
+      reading: data.reading.present ? data.reading.value : this.reading,
+      readingNormalized: data.readingNormalized.present
+          ? data.readingNormalized.value
+          : this.readingNormalized,
+      definitionTags: data.definitionTags.present
+          ? data.definitionTags.value
+          : this.definitionTags,
+      rules: data.rules.present ? data.rules.value : this.rules,
+      score: data.score.present ? data.score.value : this.score,
+      definitionsJson: data.definitionsJson.present
+          ? data.definitionsJson.value
+          : this.definitionsJson,
+      sequence: data.sequence.present ? data.sequence.value : this.sequence,
+      termTags: data.termTags.present ? data.termTags.value : this.termTags,
+      importOrder: data.importOrder.present
+          ? data.importOrder.value
+          : this.importOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionaryTermEntry(')
+          ..write('id: $id, ')
+          ..write('dictionaryId: $dictionaryId, ')
+          ..write('headword: $headword, ')
+          ..write('reading: $reading, ')
+          ..write('readingNormalized: $readingNormalized, ')
+          ..write('definitionTags: $definitionTags, ')
+          ..write('rules: $rules, ')
+          ..write('score: $score, ')
+          ..write('definitionsJson: $definitionsJson, ')
+          ..write('sequence: $sequence, ')
+          ..write('termTags: $termTags, ')
+          ..write('importOrder: $importOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    dictionaryId,
+    headword,
+    reading,
+    readingNormalized,
+    definitionTags,
+    rules,
+    score,
+    definitionsJson,
+    sequence,
+    termTags,
+    importOrder,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DictionaryTermEntry &&
+          other.id == this.id &&
+          other.dictionaryId == this.dictionaryId &&
+          other.headword == this.headword &&
+          other.reading == this.reading &&
+          other.readingNormalized == this.readingNormalized &&
+          other.definitionTags == this.definitionTags &&
+          other.rules == this.rules &&
+          other.score == this.score &&
+          other.definitionsJson == this.definitionsJson &&
+          other.sequence == this.sequence &&
+          other.termTags == this.termTags &&
+          other.importOrder == this.importOrder);
+}
+
+class DictionaryTermEntriesCompanion
+    extends UpdateCompanion<DictionaryTermEntry> {
+  final Value<int> id;
+  final Value<String> dictionaryId;
+  final Value<String> headword;
+  final Value<String> reading;
+  final Value<String> readingNormalized;
+  final Value<String?> definitionTags;
+  final Value<String> rules;
+  final Value<double> score;
+  final Value<String> definitionsJson;
+  final Value<int> sequence;
+  final Value<String> termTags;
+  final Value<int> importOrder;
+  const DictionaryTermEntriesCompanion({
+    this.id = const Value.absent(),
+    this.dictionaryId = const Value.absent(),
+    this.headword = const Value.absent(),
+    this.reading = const Value.absent(),
+    this.readingNormalized = const Value.absent(),
+    this.definitionTags = const Value.absent(),
+    this.rules = const Value.absent(),
+    this.score = const Value.absent(),
+    this.definitionsJson = const Value.absent(),
+    this.sequence = const Value.absent(),
+    this.termTags = const Value.absent(),
+    this.importOrder = const Value.absent(),
+  });
+  DictionaryTermEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String dictionaryId,
+    required String headword,
+    required String reading,
+    required String readingNormalized,
+    this.definitionTags = const Value.absent(),
+    required String rules,
+    required double score,
+    required String definitionsJson,
+    required int sequence,
+    required String termTags,
+    required int importOrder,
+  }) : dictionaryId = Value(dictionaryId),
+       headword = Value(headword),
+       reading = Value(reading),
+       readingNormalized = Value(readingNormalized),
+       rules = Value(rules),
+       score = Value(score),
+       definitionsJson = Value(definitionsJson),
+       sequence = Value(sequence),
+       termTags = Value(termTags),
+       importOrder = Value(importOrder);
+  static Insertable<DictionaryTermEntry> custom({
+    Expression<int>? id,
+    Expression<String>? dictionaryId,
+    Expression<String>? headword,
+    Expression<String>? reading,
+    Expression<String>? readingNormalized,
+    Expression<String>? definitionTags,
+    Expression<String>? rules,
+    Expression<double>? score,
+    Expression<String>? definitionsJson,
+    Expression<int>? sequence,
+    Expression<String>? termTags,
+    Expression<int>? importOrder,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dictionaryId != null) 'dictionary_id': dictionaryId,
+      if (headword != null) 'headword': headword,
+      if (reading != null) 'reading': reading,
+      if (readingNormalized != null) 'reading_normalized': readingNormalized,
+      if (definitionTags != null) 'definition_tags': definitionTags,
+      if (rules != null) 'rules': rules,
+      if (score != null) 'score': score,
+      if (definitionsJson != null) 'definitions_json': definitionsJson,
+      if (sequence != null) 'sequence': sequence,
+      if (termTags != null) 'term_tags': termTags,
+      if (importOrder != null) 'import_order': importOrder,
+    });
+  }
+
+  DictionaryTermEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? dictionaryId,
+    Value<String>? headword,
+    Value<String>? reading,
+    Value<String>? readingNormalized,
+    Value<String?>? definitionTags,
+    Value<String>? rules,
+    Value<double>? score,
+    Value<String>? definitionsJson,
+    Value<int>? sequence,
+    Value<String>? termTags,
+    Value<int>? importOrder,
+  }) {
+    return DictionaryTermEntriesCompanion(
+      id: id ?? this.id,
+      dictionaryId: dictionaryId ?? this.dictionaryId,
+      headword: headword ?? this.headword,
+      reading: reading ?? this.reading,
+      readingNormalized: readingNormalized ?? this.readingNormalized,
+      definitionTags: definitionTags ?? this.definitionTags,
+      rules: rules ?? this.rules,
+      score: score ?? this.score,
+      definitionsJson: definitionsJson ?? this.definitionsJson,
+      sequence: sequence ?? this.sequence,
+      termTags: termTags ?? this.termTags,
+      importOrder: importOrder ?? this.importOrder,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (dictionaryId.present) {
+      map['dictionary_id'] = Variable<String>(dictionaryId.value);
+    }
+    if (headword.present) {
+      map['headword'] = Variable<String>(headword.value);
+    }
+    if (reading.present) {
+      map['reading'] = Variable<String>(reading.value);
+    }
+    if (readingNormalized.present) {
+      map['reading_normalized'] = Variable<String>(readingNormalized.value);
+    }
+    if (definitionTags.present) {
+      map['definition_tags'] = Variable<String>(definitionTags.value);
+    }
+    if (rules.present) {
+      map['rules'] = Variable<String>(rules.value);
+    }
+    if (score.present) {
+      map['score'] = Variable<double>(score.value);
+    }
+    if (definitionsJson.present) {
+      map['definitions_json'] = Variable<String>(definitionsJson.value);
+    }
+    if (sequence.present) {
+      map['sequence'] = Variable<int>(sequence.value);
+    }
+    if (termTags.present) {
+      map['term_tags'] = Variable<String>(termTags.value);
+    }
+    if (importOrder.present) {
+      map['import_order'] = Variable<int>(importOrder.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionaryTermEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('dictionaryId: $dictionaryId, ')
+          ..write('headword: $headword, ')
+          ..write('reading: $reading, ')
+          ..write('readingNormalized: $readingNormalized, ')
+          ..write('definitionTags: $definitionTags, ')
+          ..write('rules: $rules, ')
+          ..write('score: $score, ')
+          ..write('definitionsJson: $definitionsJson, ')
+          ..write('sequence: $sequence, ')
+          ..write('termTags: $termTags, ')
+          ..write('importOrder: $importOrder')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DictionaryTermMetaEntriesTable extends DictionaryTermMetaEntries
+    with TableInfo<$DictionaryTermMetaEntriesTable, DictionaryTermMetaEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DictionaryTermMetaEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dictionaryIdMeta = const VerificationMeta(
+    'dictionaryId',
+  );
+  @override
+  late final GeneratedColumn<String> dictionaryId = GeneratedColumn<String>(
+    'dictionary_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dictionaries (id)',
+    ),
+  );
+  static const VerificationMeta _headwordMeta = const VerificationMeta(
+    'headword',
+  );
+  @override
+  late final GeneratedColumn<String> headword = GeneratedColumn<String>(
+    'headword',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _readingMeta = const VerificationMeta(
+    'reading',
+  );
+  @override
+  late final GeneratedColumn<String> reading = GeneratedColumn<String>(
+    'reading',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dataJsonMeta = const VerificationMeta(
+    'dataJson',
+  );
+  @override
+  late final GeneratedColumn<String> dataJson = GeneratedColumn<String>(
+    'data_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dictionaryId,
+    headword,
+    mode,
+    reading,
+    dataJson,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dictionary_term_meta_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DictionaryTermMetaEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('dictionary_id')) {
+      context.handle(
+        _dictionaryIdMeta,
+        dictionaryId.isAcceptableOrUnknown(
+          data['dictionary_id']!,
+          _dictionaryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dictionaryIdMeta);
+    }
+    if (data.containsKey('headword')) {
+      context.handle(
+        _headwordMeta,
+        headword.isAcceptableOrUnknown(data['headword']!, _headwordMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_headwordMeta);
+    }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_modeMeta);
+    }
+    if (data.containsKey('reading')) {
+      context.handle(
+        _readingMeta,
+        reading.isAcceptableOrUnknown(data['reading']!, _readingMeta),
+      );
+    }
+    if (data.containsKey('data_json')) {
+      context.handle(
+        _dataJsonMeta,
+        dataJson.isAcceptableOrUnknown(data['data_json']!, _dataJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataJsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DictionaryTermMetaEntry map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DictionaryTermMetaEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      dictionaryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dictionary_id'],
+      )!,
+      headword: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}headword'],
+      )!,
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      )!,
+      reading: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reading'],
+      ),
+      dataJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data_json'],
+      )!,
+    );
+  }
+
+  @override
+  $DictionaryTermMetaEntriesTable createAlias(String alias) {
+    return $DictionaryTermMetaEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class DictionaryTermMetaEntry extends DataClass
+    implements Insertable<DictionaryTermMetaEntry> {
+  final int id;
+  final String dictionaryId;
+  final String headword;
+  final String mode;
+  final String? reading;
+  final String dataJson;
+  const DictionaryTermMetaEntry({
+    required this.id,
+    required this.dictionaryId,
+    required this.headword,
+    required this.mode,
+    this.reading,
+    required this.dataJson,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['dictionary_id'] = Variable<String>(dictionaryId);
+    map['headword'] = Variable<String>(headword);
+    map['mode'] = Variable<String>(mode);
+    if (!nullToAbsent || reading != null) {
+      map['reading'] = Variable<String>(reading);
+    }
+    map['data_json'] = Variable<String>(dataJson);
+    return map;
+  }
+
+  DictionaryTermMetaEntriesCompanion toCompanion(bool nullToAbsent) {
+    return DictionaryTermMetaEntriesCompanion(
+      id: Value(id),
+      dictionaryId: Value(dictionaryId),
+      headword: Value(headword),
+      mode: Value(mode),
+      reading: reading == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reading),
+      dataJson: Value(dataJson),
+    );
+  }
+
+  factory DictionaryTermMetaEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DictionaryTermMetaEntry(
+      id: serializer.fromJson<int>(json['id']),
+      dictionaryId: serializer.fromJson<String>(json['dictionaryId']),
+      headword: serializer.fromJson<String>(json['headword']),
+      mode: serializer.fromJson<String>(json['mode']),
+      reading: serializer.fromJson<String?>(json['reading']),
+      dataJson: serializer.fromJson<String>(json['dataJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'dictionaryId': serializer.toJson<String>(dictionaryId),
+      'headword': serializer.toJson<String>(headword),
+      'mode': serializer.toJson<String>(mode),
+      'reading': serializer.toJson<String?>(reading),
+      'dataJson': serializer.toJson<String>(dataJson),
+    };
+  }
+
+  DictionaryTermMetaEntry copyWith({
+    int? id,
+    String? dictionaryId,
+    String? headword,
+    String? mode,
+    Value<String?> reading = const Value.absent(),
+    String? dataJson,
+  }) => DictionaryTermMetaEntry(
+    id: id ?? this.id,
+    dictionaryId: dictionaryId ?? this.dictionaryId,
+    headword: headword ?? this.headword,
+    mode: mode ?? this.mode,
+    reading: reading.present ? reading.value : this.reading,
+    dataJson: dataJson ?? this.dataJson,
+  );
+  DictionaryTermMetaEntry copyWithCompanion(
+    DictionaryTermMetaEntriesCompanion data,
+  ) {
+    return DictionaryTermMetaEntry(
+      id: data.id.present ? data.id.value : this.id,
+      dictionaryId: data.dictionaryId.present
+          ? data.dictionaryId.value
+          : this.dictionaryId,
+      headword: data.headword.present ? data.headword.value : this.headword,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      reading: data.reading.present ? data.reading.value : this.reading,
+      dataJson: data.dataJson.present ? data.dataJson.value : this.dataJson,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionaryTermMetaEntry(')
+          ..write('id: $id, ')
+          ..write('dictionaryId: $dictionaryId, ')
+          ..write('headword: $headword, ')
+          ..write('mode: $mode, ')
+          ..write('reading: $reading, ')
+          ..write('dataJson: $dataJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, dictionaryId, headword, mode, reading, dataJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DictionaryTermMetaEntry &&
+          other.id == this.id &&
+          other.dictionaryId == this.dictionaryId &&
+          other.headword == this.headword &&
+          other.mode == this.mode &&
+          other.reading == this.reading &&
+          other.dataJson == this.dataJson);
+}
+
+class DictionaryTermMetaEntriesCompanion
+    extends UpdateCompanion<DictionaryTermMetaEntry> {
+  final Value<int> id;
+  final Value<String> dictionaryId;
+  final Value<String> headword;
+  final Value<String> mode;
+  final Value<String?> reading;
+  final Value<String> dataJson;
+  const DictionaryTermMetaEntriesCompanion({
+    this.id = const Value.absent(),
+    this.dictionaryId = const Value.absent(),
+    this.headword = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.reading = const Value.absent(),
+    this.dataJson = const Value.absent(),
+  });
+  DictionaryTermMetaEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String dictionaryId,
+    required String headword,
+    required String mode,
+    this.reading = const Value.absent(),
+    required String dataJson,
+  }) : dictionaryId = Value(dictionaryId),
+       headword = Value(headword),
+       mode = Value(mode),
+       dataJson = Value(dataJson);
+  static Insertable<DictionaryTermMetaEntry> custom({
+    Expression<int>? id,
+    Expression<String>? dictionaryId,
+    Expression<String>? headword,
+    Expression<String>? mode,
+    Expression<String>? reading,
+    Expression<String>? dataJson,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dictionaryId != null) 'dictionary_id': dictionaryId,
+      if (headword != null) 'headword': headword,
+      if (mode != null) 'mode': mode,
+      if (reading != null) 'reading': reading,
+      if (dataJson != null) 'data_json': dataJson,
+    });
+  }
+
+  DictionaryTermMetaEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? dictionaryId,
+    Value<String>? headword,
+    Value<String>? mode,
+    Value<String?>? reading,
+    Value<String>? dataJson,
+  }) {
+    return DictionaryTermMetaEntriesCompanion(
+      id: id ?? this.id,
+      dictionaryId: dictionaryId ?? this.dictionaryId,
+      headword: headword ?? this.headword,
+      mode: mode ?? this.mode,
+      reading: reading ?? this.reading,
+      dataJson: dataJson ?? this.dataJson,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (dictionaryId.present) {
+      map['dictionary_id'] = Variable<String>(dictionaryId.value);
+    }
+    if (headword.present) {
+      map['headword'] = Variable<String>(headword.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (reading.present) {
+      map['reading'] = Variable<String>(reading.value);
+    }
+    if (dataJson.present) {
+      map['data_json'] = Variable<String>(dataJson.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DictionaryTermMetaEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('dictionaryId: $dictionaryId, ')
+          ..write('headword: $headword, ')
+          ..write('mode: $mode, ')
+          ..write('reading: $reading, ')
+          ..write('dataJson: $dataJson')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $DocumentsTable documents = $DocumentsTable(this);
   late final $ChaptersTable chapters = $ChaptersTable(this);
   late final $SentencesTable sentences = $SentencesTable(this);
+  late final $DictionariesTable dictionaries = $DictionariesTable(this);
+  late final $DictionaryTagEntriesTable dictionaryTagEntries =
+      $DictionaryTagEntriesTable(this);
+  late final $DictionaryTermEntriesTable dictionaryTermEntries =
+      $DictionaryTermEntriesTable(this);
+  late final $DictionaryTermMetaEntriesTable dictionaryTermMetaEntries =
+      $DictionaryTermMetaEntriesTable(this);
+  late final Index idxDictTermHeadword = Index(
+    'idx_dict_term_headword',
+    'CREATE INDEX idx_dict_term_headword ON dictionary_term_entries (headword)',
+  );
+  late final Index idxDictTermReadingNormalized = Index(
+    'idx_dict_term_reading_normalized',
+    'CREATE INDEX idx_dict_term_reading_normalized ON dictionary_term_entries (reading_normalized)',
+  );
+  late final Index idxDictTermDictionarySequence = Index(
+    'idx_dict_term_dictionary_sequence',
+    'CREATE INDEX idx_dict_term_dictionary_sequence ON dictionary_term_entries (dictionary_id, sequence)',
+  );
+  late final Index idxDictTermMetaLookup = Index(
+    'idx_dict_term_meta_lookup',
+    'CREATE INDEX idx_dict_term_meta_lookup ON dictionary_term_meta_entries (dictionary_id, headword, mode)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1236,6 +3812,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     documents,
     chapters,
     sentences,
+    dictionaries,
+    dictionaryTagEntries,
+    dictionaryTermEntries,
+    dictionaryTermMetaEntries,
+    idxDictTermHeadword,
+    idxDictTermReadingNormalized,
+    idxDictTermDictionarySequence,
+    idxDictTermMetaLookup,
   ];
 }
 
@@ -2493,6 +5077,1953 @@ typedef $$SentencesTableProcessedTableManager =
       Sentence,
       PrefetchHooks Function({bool documentId, bool chapterId})
     >;
+typedef $$DictionariesTableCreateCompanionBuilder =
+    DictionariesCompanion Function({
+      required String id,
+      required String title,
+      required String revision,
+      required int formatVersion,
+      Value<String?> author,
+      Value<String?> url,
+      Value<String?> description,
+      Value<String?> attribution,
+      Value<String?> sourceLanguage,
+      Value<String?> targetLanguage,
+      Value<String?> frequencyMode,
+      Value<bool> sequenced,
+      required int priority,
+      Value<bool> enabled,
+      required DateTime addedAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$DictionariesTableUpdateCompanionBuilder =
+    DictionariesCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String> revision,
+      Value<int> formatVersion,
+      Value<String?> author,
+      Value<String?> url,
+      Value<String?> description,
+      Value<String?> attribution,
+      Value<String?> sourceLanguage,
+      Value<String?> targetLanguage,
+      Value<String?> frequencyMode,
+      Value<bool> sequenced,
+      Value<int> priority,
+      Value<bool> enabled,
+      Value<DateTime> addedAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+final class $$DictionariesTableReferences
+    extends BaseReferences<_$AppDatabase, $DictionariesTable, Dictionary> {
+  $$DictionariesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<
+    $DictionaryTagEntriesTable,
+    List<DictionaryTagEntry>
+  >
+  _dictionaryTagEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.dictionaryTagEntries,
+        aliasName: 'dictionaries__id__dictionary_tag_entries__dictionary_id',
+      );
+
+  $$DictionaryTagEntriesTableProcessedTableManager
+  get dictionaryTagEntriesRefs {
+    final manager = $$DictionaryTagEntriesTableTableManager(
+      $_db,
+      $_db.dictionaryTagEntries,
+    ).filter((f) => f.dictionaryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _dictionaryTagEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $DictionaryTermEntriesTable,
+    List<DictionaryTermEntry>
+  >
+  _dictionaryTermEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.dictionaryTermEntries,
+        aliasName: 'dictionaries__id__dictionary_term_entries__dictionary_id',
+      );
+
+  $$DictionaryTermEntriesTableProcessedTableManager
+  get dictionaryTermEntriesRefs {
+    final manager = $$DictionaryTermEntriesTableTableManager(
+      $_db,
+      $_db.dictionaryTermEntries,
+    ).filter((f) => f.dictionaryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _dictionaryTermEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $DictionaryTermMetaEntriesTable,
+    List<DictionaryTermMetaEntry>
+  >
+  _dictionaryTermMetaEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.dictionaryTermMetaEntries,
+        aliasName:
+            'dictionaries__id__dictionary_term_meta_entries__dictionary_id',
+      );
+
+  $$DictionaryTermMetaEntriesTableProcessedTableManager
+  get dictionaryTermMetaEntriesRefs {
+    final manager = $$DictionaryTermMetaEntriesTableTableManager(
+      $_db,
+      $_db.dictionaryTermMetaEntries,
+    ).filter((f) => f.dictionaryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _dictionaryTermMetaEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$DictionariesTableFilterComposer
+    extends Composer<_$AppDatabase, $DictionariesTable> {
+  $$DictionariesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get formatVersion => $composableBuilder(
+    column: $table.formatVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get author => $composableBuilder(
+    column: $table.author,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get attribution => $composableBuilder(
+    column: $table.attribution,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceLanguage => $composableBuilder(
+    column: $table.sourceLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetLanguage => $composableBuilder(
+    column: $table.targetLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get frequencyMode => $composableBuilder(
+    column: $table.frequencyMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sequenced => $composableBuilder(
+    column: $table.sequenced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> dictionaryTagEntriesRefs(
+    Expression<bool> Function($$DictionaryTagEntriesTableFilterComposer f) f,
+  ) {
+    final $$DictionaryTagEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.dictionaryTagEntries,
+      getReferencedColumn: (t) => t.dictionaryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionaryTagEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.dictionaryTagEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> dictionaryTermEntriesRefs(
+    Expression<bool> Function($$DictionaryTermEntriesTableFilterComposer f) f,
+  ) {
+    final $$DictionaryTermEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.dictionaryTermEntries,
+          getReferencedColumn: (t) => t.dictionaryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DictionaryTermEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.dictionaryTermEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> dictionaryTermMetaEntriesRefs(
+    Expression<bool> Function($$DictionaryTermMetaEntriesTableFilterComposer f)
+    f,
+  ) {
+    final $$DictionaryTermMetaEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.dictionaryTermMetaEntries,
+          getReferencedColumn: (t) => t.dictionaryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DictionaryTermMetaEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.dictionaryTermMetaEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$DictionariesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DictionariesTable> {
+  $$DictionariesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get formatVersion => $composableBuilder(
+    column: $table.formatVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get author => $composableBuilder(
+    column: $table.author,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get attribution => $composableBuilder(
+    column: $table.attribution,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceLanguage => $composableBuilder(
+    column: $table.sourceLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetLanguage => $composableBuilder(
+    column: $table.targetLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get frequencyMode => $composableBuilder(
+    column: $table.frequencyMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sequenced => $composableBuilder(
+    column: $table.sequenced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DictionariesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DictionariesTable> {
+  $$DictionariesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<int> get formatVersion => $composableBuilder(
+    column: $table.formatVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get author =>
+      $composableBuilder(column: $table.author, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get attribution => $composableBuilder(
+    column: $table.attribution,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceLanguage => $composableBuilder(
+    column: $table.sourceLanguage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get targetLanguage => $composableBuilder(
+    column: $table.targetLanguage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get frequencyMode => $composableBuilder(
+    column: $table.frequencyMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get sequenced =>
+      $composableBuilder(column: $table.sequenced, builder: (column) => column);
+
+  GeneratedColumn<int> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> dictionaryTagEntriesRefs<T extends Object>(
+    Expression<T> Function($$DictionaryTagEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$DictionaryTagEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.dictionaryTagEntries,
+          getReferencedColumn: (t) => t.dictionaryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DictionaryTagEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.dictionaryTagEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> dictionaryTermEntriesRefs<T extends Object>(
+    Expression<T> Function($$DictionaryTermEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$DictionaryTermEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.dictionaryTermEntries,
+          getReferencedColumn: (t) => t.dictionaryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DictionaryTermEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.dictionaryTermEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> dictionaryTermMetaEntriesRefs<T extends Object>(
+    Expression<T> Function($$DictionaryTermMetaEntriesTableAnnotationComposer a)
+    f,
+  ) {
+    final $$DictionaryTermMetaEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.dictionaryTermMetaEntries,
+          getReferencedColumn: (t) => t.dictionaryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DictionaryTermMetaEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.dictionaryTermMetaEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$DictionariesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DictionariesTable,
+          Dictionary,
+          $$DictionariesTableFilterComposer,
+          $$DictionariesTableOrderingComposer,
+          $$DictionariesTableAnnotationComposer,
+          $$DictionariesTableCreateCompanionBuilder,
+          $$DictionariesTableUpdateCompanionBuilder,
+          (Dictionary, $$DictionariesTableReferences),
+          Dictionary,
+          PrefetchHooks Function({
+            bool dictionaryTagEntriesRefs,
+            bool dictionaryTermEntriesRefs,
+            bool dictionaryTermMetaEntriesRefs,
+          })
+        > {
+  $$DictionariesTableTableManager(_$AppDatabase db, $DictionariesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DictionariesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DictionariesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DictionariesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> revision = const Value.absent(),
+                Value<int> formatVersion = const Value.absent(),
+                Value<String?> author = const Value.absent(),
+                Value<String?> url = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> attribution = const Value.absent(),
+                Value<String?> sourceLanguage = const Value.absent(),
+                Value<String?> targetLanguage = const Value.absent(),
+                Value<String?> frequencyMode = const Value.absent(),
+                Value<bool> sequenced = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DictionariesCompanion(
+                id: id,
+                title: title,
+                revision: revision,
+                formatVersion: formatVersion,
+                author: author,
+                url: url,
+                description: description,
+                attribution: attribution,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage,
+                frequencyMode: frequencyMode,
+                sequenced: sequenced,
+                priority: priority,
+                enabled: enabled,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                required String revision,
+                required int formatVersion,
+                Value<String?> author = const Value.absent(),
+                Value<String?> url = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> attribution = const Value.absent(),
+                Value<String?> sourceLanguage = const Value.absent(),
+                Value<String?> targetLanguage = const Value.absent(),
+                Value<String?> frequencyMode = const Value.absent(),
+                Value<bool> sequenced = const Value.absent(),
+                required int priority,
+                Value<bool> enabled = const Value.absent(),
+                required DateTime addedAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => DictionariesCompanion.insert(
+                id: id,
+                title: title,
+                revision: revision,
+                formatVersion: formatVersion,
+                author: author,
+                url: url,
+                description: description,
+                attribution: attribution,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage,
+                frequencyMode: frequencyMode,
+                sequenced: sequenced,
+                priority: priority,
+                enabled: enabled,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DictionariesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                dictionaryTagEntriesRefs = false,
+                dictionaryTermEntriesRefs = false,
+                dictionaryTermMetaEntriesRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (dictionaryTagEntriesRefs) db.dictionaryTagEntries,
+                    if (dictionaryTermEntriesRefs) db.dictionaryTermEntries,
+                    if (dictionaryTermMetaEntriesRefs)
+                      db.dictionaryTermMetaEntries,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (dictionaryTagEntriesRefs)
+                        await $_getPrefetchedData<
+                          Dictionary,
+                          $DictionariesTable,
+                          DictionaryTagEntry
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DictionariesTableReferences
+                              ._dictionaryTagEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DictionariesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dictionaryTagEntriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.dictionaryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (dictionaryTermEntriesRefs)
+                        await $_getPrefetchedData<
+                          Dictionary,
+                          $DictionariesTable,
+                          DictionaryTermEntry
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DictionariesTableReferences
+                              ._dictionaryTermEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DictionariesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dictionaryTermEntriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.dictionaryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (dictionaryTermMetaEntriesRefs)
+                        await $_getPrefetchedData<
+                          Dictionary,
+                          $DictionariesTable,
+                          DictionaryTermMetaEntry
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DictionariesTableReferences
+                              ._dictionaryTermMetaEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DictionariesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dictionaryTermMetaEntriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.dictionaryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$DictionariesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DictionariesTable,
+      Dictionary,
+      $$DictionariesTableFilterComposer,
+      $$DictionariesTableOrderingComposer,
+      $$DictionariesTableAnnotationComposer,
+      $$DictionariesTableCreateCompanionBuilder,
+      $$DictionariesTableUpdateCompanionBuilder,
+      (Dictionary, $$DictionariesTableReferences),
+      Dictionary,
+      PrefetchHooks Function({
+        bool dictionaryTagEntriesRefs,
+        bool dictionaryTermEntriesRefs,
+        bool dictionaryTermMetaEntriesRefs,
+      })
+    >;
+typedef $$DictionaryTagEntriesTableCreateCompanionBuilder =
+    DictionaryTagEntriesCompanion Function({
+      Value<int> id,
+      required String dictionaryId,
+      required String name,
+      required String category,
+      required int sortOrder,
+      required String notes,
+      required double score,
+    });
+typedef $$DictionaryTagEntriesTableUpdateCompanionBuilder =
+    DictionaryTagEntriesCompanion Function({
+      Value<int> id,
+      Value<String> dictionaryId,
+      Value<String> name,
+      Value<String> category,
+      Value<int> sortOrder,
+      Value<String> notes,
+      Value<double> score,
+    });
+
+final class $$DictionaryTagEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $DictionaryTagEntriesTable,
+          DictionaryTagEntry
+        > {
+  $$DictionaryTagEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $DictionariesTable _dictionaryIdTable(_$AppDatabase db) => db
+      .dictionaries
+      .createAlias('dictionary_tag_entries__dictionary_id__dictionaries__id');
+
+  $$DictionariesTableProcessedTableManager get dictionaryId {
+    final $_column = $_itemColumn<String>('dictionary_id')!;
+
+    final manager = $$DictionariesTableTableManager(
+      $_db,
+      $_db.dictionaries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_dictionaryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DictionaryTagEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $DictionaryTagEntriesTable> {
+  $$DictionaryTagEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get score => $composableBuilder(
+    column: $table.score,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DictionariesTableFilterComposer get dictionaryId {
+    final $$DictionariesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableFilterComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTagEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DictionaryTagEntriesTable> {
+  $$DictionaryTagEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get score => $composableBuilder(
+    column: $table.score,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DictionariesTableOrderingComposer get dictionaryId {
+    final $$DictionariesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableOrderingComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTagEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DictionaryTagEntriesTable> {
+  $$DictionaryTagEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<double> get score =>
+      $composableBuilder(column: $table.score, builder: (column) => column);
+
+  $$DictionariesTableAnnotationComposer get dictionaryId {
+    final $$DictionariesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTagEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DictionaryTagEntriesTable,
+          DictionaryTagEntry,
+          $$DictionaryTagEntriesTableFilterComposer,
+          $$DictionaryTagEntriesTableOrderingComposer,
+          $$DictionaryTagEntriesTableAnnotationComposer,
+          $$DictionaryTagEntriesTableCreateCompanionBuilder,
+          $$DictionaryTagEntriesTableUpdateCompanionBuilder,
+          (DictionaryTagEntry, $$DictionaryTagEntriesTableReferences),
+          DictionaryTagEntry,
+          PrefetchHooks Function({bool dictionaryId})
+        > {
+  $$DictionaryTagEntriesTableTableManager(
+    _$AppDatabase db,
+    $DictionaryTagEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DictionaryTagEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DictionaryTagEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DictionaryTagEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> dictionaryId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<double> score = const Value.absent(),
+              }) => DictionaryTagEntriesCompanion(
+                id: id,
+                dictionaryId: dictionaryId,
+                name: name,
+                category: category,
+                sortOrder: sortOrder,
+                notes: notes,
+                score: score,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String dictionaryId,
+                required String name,
+                required String category,
+                required int sortOrder,
+                required String notes,
+                required double score,
+              }) => DictionaryTagEntriesCompanion.insert(
+                id: id,
+                dictionaryId: dictionaryId,
+                name: name,
+                category: category,
+                sortOrder: sortOrder,
+                notes: notes,
+                score: score,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DictionaryTagEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({dictionaryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (dictionaryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.dictionaryId,
+                                referencedTable:
+                                    $$DictionaryTagEntriesTableReferences
+                                        ._dictionaryIdTable(db),
+                                referencedColumn:
+                                    $$DictionaryTagEntriesTableReferences
+                                        ._dictionaryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DictionaryTagEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DictionaryTagEntriesTable,
+      DictionaryTagEntry,
+      $$DictionaryTagEntriesTableFilterComposer,
+      $$DictionaryTagEntriesTableOrderingComposer,
+      $$DictionaryTagEntriesTableAnnotationComposer,
+      $$DictionaryTagEntriesTableCreateCompanionBuilder,
+      $$DictionaryTagEntriesTableUpdateCompanionBuilder,
+      (DictionaryTagEntry, $$DictionaryTagEntriesTableReferences),
+      DictionaryTagEntry,
+      PrefetchHooks Function({bool dictionaryId})
+    >;
+typedef $$DictionaryTermEntriesTableCreateCompanionBuilder =
+    DictionaryTermEntriesCompanion Function({
+      Value<int> id,
+      required String dictionaryId,
+      required String headword,
+      required String reading,
+      required String readingNormalized,
+      Value<String?> definitionTags,
+      required String rules,
+      required double score,
+      required String definitionsJson,
+      required int sequence,
+      required String termTags,
+      required int importOrder,
+    });
+typedef $$DictionaryTermEntriesTableUpdateCompanionBuilder =
+    DictionaryTermEntriesCompanion Function({
+      Value<int> id,
+      Value<String> dictionaryId,
+      Value<String> headword,
+      Value<String> reading,
+      Value<String> readingNormalized,
+      Value<String?> definitionTags,
+      Value<String> rules,
+      Value<double> score,
+      Value<String> definitionsJson,
+      Value<int> sequence,
+      Value<String> termTags,
+      Value<int> importOrder,
+    });
+
+final class $$DictionaryTermEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $DictionaryTermEntriesTable,
+          DictionaryTermEntry
+        > {
+  $$DictionaryTermEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $DictionariesTable _dictionaryIdTable(_$AppDatabase db) => db
+      .dictionaries
+      .createAlias('dictionary_term_entries__dictionary_id__dictionaries__id');
+
+  $$DictionariesTableProcessedTableManager get dictionaryId {
+    final $_column = $_itemColumn<String>('dictionary_id')!;
+
+    final manager = $$DictionariesTableTableManager(
+      $_db,
+      $_db.dictionaries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_dictionaryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DictionaryTermEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $DictionaryTermEntriesTable> {
+  $$DictionaryTermEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get headword => $composableBuilder(
+    column: $table.headword,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get readingNormalized => $composableBuilder(
+    column: $table.readingNormalized,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get definitionTags => $composableBuilder(
+    column: $table.definitionTags,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rules => $composableBuilder(
+    column: $table.rules,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get score => $composableBuilder(
+    column: $table.score,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get definitionsJson => $composableBuilder(
+    column: $table.definitionsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get termTags => $composableBuilder(
+    column: $table.termTags,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get importOrder => $composableBuilder(
+    column: $table.importOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DictionariesTableFilterComposer get dictionaryId {
+    final $$DictionariesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableFilterComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTermEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DictionaryTermEntriesTable> {
+  $$DictionaryTermEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get headword => $composableBuilder(
+    column: $table.headword,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get readingNormalized => $composableBuilder(
+    column: $table.readingNormalized,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get definitionTags => $composableBuilder(
+    column: $table.definitionTags,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rules => $composableBuilder(
+    column: $table.rules,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get score => $composableBuilder(
+    column: $table.score,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get definitionsJson => $composableBuilder(
+    column: $table.definitionsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get termTags => $composableBuilder(
+    column: $table.termTags,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get importOrder => $composableBuilder(
+    column: $table.importOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DictionariesTableOrderingComposer get dictionaryId {
+    final $$DictionariesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableOrderingComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTermEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DictionaryTermEntriesTable> {
+  $$DictionaryTermEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get headword =>
+      $composableBuilder(column: $table.headword, builder: (column) => column);
+
+  GeneratedColumn<String> get reading =>
+      $composableBuilder(column: $table.reading, builder: (column) => column);
+
+  GeneratedColumn<String> get readingNormalized => $composableBuilder(
+    column: $table.readingNormalized,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get definitionTags => $composableBuilder(
+    column: $table.definitionTags,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rules =>
+      $composableBuilder(column: $table.rules, builder: (column) => column);
+
+  GeneratedColumn<double> get score =>
+      $composableBuilder(column: $table.score, builder: (column) => column);
+
+  GeneratedColumn<String> get definitionsJson => $composableBuilder(
+    column: $table.definitionsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sequence =>
+      $composableBuilder(column: $table.sequence, builder: (column) => column);
+
+  GeneratedColumn<String> get termTags =>
+      $composableBuilder(column: $table.termTags, builder: (column) => column);
+
+  GeneratedColumn<int> get importOrder => $composableBuilder(
+    column: $table.importOrder,
+    builder: (column) => column,
+  );
+
+  $$DictionariesTableAnnotationComposer get dictionaryId {
+    final $$DictionariesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTermEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DictionaryTermEntriesTable,
+          DictionaryTermEntry,
+          $$DictionaryTermEntriesTableFilterComposer,
+          $$DictionaryTermEntriesTableOrderingComposer,
+          $$DictionaryTermEntriesTableAnnotationComposer,
+          $$DictionaryTermEntriesTableCreateCompanionBuilder,
+          $$DictionaryTermEntriesTableUpdateCompanionBuilder,
+          (DictionaryTermEntry, $$DictionaryTermEntriesTableReferences),
+          DictionaryTermEntry,
+          PrefetchHooks Function({bool dictionaryId})
+        > {
+  $$DictionaryTermEntriesTableTableManager(
+    _$AppDatabase db,
+    $DictionaryTermEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DictionaryTermEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$DictionaryTermEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DictionaryTermEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> dictionaryId = const Value.absent(),
+                Value<String> headword = const Value.absent(),
+                Value<String> reading = const Value.absent(),
+                Value<String> readingNormalized = const Value.absent(),
+                Value<String?> definitionTags = const Value.absent(),
+                Value<String> rules = const Value.absent(),
+                Value<double> score = const Value.absent(),
+                Value<String> definitionsJson = const Value.absent(),
+                Value<int> sequence = const Value.absent(),
+                Value<String> termTags = const Value.absent(),
+                Value<int> importOrder = const Value.absent(),
+              }) => DictionaryTermEntriesCompanion(
+                id: id,
+                dictionaryId: dictionaryId,
+                headword: headword,
+                reading: reading,
+                readingNormalized: readingNormalized,
+                definitionTags: definitionTags,
+                rules: rules,
+                score: score,
+                definitionsJson: definitionsJson,
+                sequence: sequence,
+                termTags: termTags,
+                importOrder: importOrder,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String dictionaryId,
+                required String headword,
+                required String reading,
+                required String readingNormalized,
+                Value<String?> definitionTags = const Value.absent(),
+                required String rules,
+                required double score,
+                required String definitionsJson,
+                required int sequence,
+                required String termTags,
+                required int importOrder,
+              }) => DictionaryTermEntriesCompanion.insert(
+                id: id,
+                dictionaryId: dictionaryId,
+                headword: headword,
+                reading: reading,
+                readingNormalized: readingNormalized,
+                definitionTags: definitionTags,
+                rules: rules,
+                score: score,
+                definitionsJson: definitionsJson,
+                sequence: sequence,
+                termTags: termTags,
+                importOrder: importOrder,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DictionaryTermEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({dictionaryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (dictionaryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.dictionaryId,
+                                referencedTable:
+                                    $$DictionaryTermEntriesTableReferences
+                                        ._dictionaryIdTable(db),
+                                referencedColumn:
+                                    $$DictionaryTermEntriesTableReferences
+                                        ._dictionaryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DictionaryTermEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DictionaryTermEntriesTable,
+      DictionaryTermEntry,
+      $$DictionaryTermEntriesTableFilterComposer,
+      $$DictionaryTermEntriesTableOrderingComposer,
+      $$DictionaryTermEntriesTableAnnotationComposer,
+      $$DictionaryTermEntriesTableCreateCompanionBuilder,
+      $$DictionaryTermEntriesTableUpdateCompanionBuilder,
+      (DictionaryTermEntry, $$DictionaryTermEntriesTableReferences),
+      DictionaryTermEntry,
+      PrefetchHooks Function({bool dictionaryId})
+    >;
+typedef $$DictionaryTermMetaEntriesTableCreateCompanionBuilder =
+    DictionaryTermMetaEntriesCompanion Function({
+      Value<int> id,
+      required String dictionaryId,
+      required String headword,
+      required String mode,
+      Value<String?> reading,
+      required String dataJson,
+    });
+typedef $$DictionaryTermMetaEntriesTableUpdateCompanionBuilder =
+    DictionaryTermMetaEntriesCompanion Function({
+      Value<int> id,
+      Value<String> dictionaryId,
+      Value<String> headword,
+      Value<String> mode,
+      Value<String?> reading,
+      Value<String> dataJson,
+    });
+
+final class $$DictionaryTermMetaEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $DictionaryTermMetaEntriesTable,
+          DictionaryTermMetaEntry
+        > {
+  $$DictionaryTermMetaEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $DictionariesTable _dictionaryIdTable(_$AppDatabase db) =>
+      db.dictionaries.createAlias(
+        'dictionary_term_meta_entries__dictionary_id__dictionaries__id',
+      );
+
+  $$DictionariesTableProcessedTableManager get dictionaryId {
+    final $_column = $_itemColumn<String>('dictionary_id')!;
+
+    final manager = $$DictionariesTableTableManager(
+      $_db,
+      $_db.dictionaries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_dictionaryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DictionaryTermMetaEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $DictionaryTermMetaEntriesTable> {
+  $$DictionaryTermMetaEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get headword => $composableBuilder(
+    column: $table.headword,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dataJson => $composableBuilder(
+    column: $table.dataJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DictionariesTableFilterComposer get dictionaryId {
+    final $$DictionariesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableFilterComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTermMetaEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DictionaryTermMetaEntriesTable> {
+  $$DictionaryTermMetaEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get headword => $composableBuilder(
+    column: $table.headword,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dataJson => $composableBuilder(
+    column: $table.dataJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DictionariesTableOrderingComposer get dictionaryId {
+    final $$DictionariesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableOrderingComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTermMetaEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DictionaryTermMetaEntriesTable> {
+  $$DictionaryTermMetaEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get headword =>
+      $composableBuilder(column: $table.headword, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<String> get reading =>
+      $composableBuilder(column: $table.reading, builder: (column) => column);
+
+  GeneratedColumn<String> get dataJson =>
+      $composableBuilder(column: $table.dataJson, builder: (column) => column);
+
+  $$DictionariesTableAnnotationComposer get dictionaryId {
+    final $$DictionariesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dictionaryId,
+      referencedTable: $db.dictionaries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DictionariesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dictionaries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DictionaryTermMetaEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DictionaryTermMetaEntriesTable,
+          DictionaryTermMetaEntry,
+          $$DictionaryTermMetaEntriesTableFilterComposer,
+          $$DictionaryTermMetaEntriesTableOrderingComposer,
+          $$DictionaryTermMetaEntriesTableAnnotationComposer,
+          $$DictionaryTermMetaEntriesTableCreateCompanionBuilder,
+          $$DictionaryTermMetaEntriesTableUpdateCompanionBuilder,
+          (DictionaryTermMetaEntry, $$DictionaryTermMetaEntriesTableReferences),
+          DictionaryTermMetaEntry,
+          PrefetchHooks Function({bool dictionaryId})
+        > {
+  $$DictionaryTermMetaEntriesTableTableManager(
+    _$AppDatabase db,
+    $DictionaryTermMetaEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DictionaryTermMetaEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$DictionaryTermMetaEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DictionaryTermMetaEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> dictionaryId = const Value.absent(),
+                Value<String> headword = const Value.absent(),
+                Value<String> mode = const Value.absent(),
+                Value<String?> reading = const Value.absent(),
+                Value<String> dataJson = const Value.absent(),
+              }) => DictionaryTermMetaEntriesCompanion(
+                id: id,
+                dictionaryId: dictionaryId,
+                headword: headword,
+                mode: mode,
+                reading: reading,
+                dataJson: dataJson,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String dictionaryId,
+                required String headword,
+                required String mode,
+                Value<String?> reading = const Value.absent(),
+                required String dataJson,
+              }) => DictionaryTermMetaEntriesCompanion.insert(
+                id: id,
+                dictionaryId: dictionaryId,
+                headword: headword,
+                mode: mode,
+                reading: reading,
+                dataJson: dataJson,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DictionaryTermMetaEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({dictionaryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (dictionaryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.dictionaryId,
+                                referencedTable:
+                                    $$DictionaryTermMetaEntriesTableReferences
+                                        ._dictionaryIdTable(db),
+                                referencedColumn:
+                                    $$DictionaryTermMetaEntriesTableReferences
+                                        ._dictionaryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DictionaryTermMetaEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DictionaryTermMetaEntriesTable,
+      DictionaryTermMetaEntry,
+      $$DictionaryTermMetaEntriesTableFilterComposer,
+      $$DictionaryTermMetaEntriesTableOrderingComposer,
+      $$DictionaryTermMetaEntriesTableAnnotationComposer,
+      $$DictionaryTermMetaEntriesTableCreateCompanionBuilder,
+      $$DictionaryTermMetaEntriesTableUpdateCompanionBuilder,
+      (DictionaryTermMetaEntry, $$DictionaryTermMetaEntriesTableReferences),
+      DictionaryTermMetaEntry,
+      PrefetchHooks Function({bool dictionaryId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2503,4 +7034,15 @@ class $AppDatabaseManager {
       $$ChaptersTableTableManager(_db, _db.chapters);
   $$SentencesTableTableManager get sentences =>
       $$SentencesTableTableManager(_db, _db.sentences);
+  $$DictionariesTableTableManager get dictionaries =>
+      $$DictionariesTableTableManager(_db, _db.dictionaries);
+  $$DictionaryTagEntriesTableTableManager get dictionaryTagEntries =>
+      $$DictionaryTagEntriesTableTableManager(_db, _db.dictionaryTagEntries);
+  $$DictionaryTermEntriesTableTableManager get dictionaryTermEntries =>
+      $$DictionaryTermEntriesTableTableManager(_db, _db.dictionaryTermEntries);
+  $$DictionaryTermMetaEntriesTableTableManager get dictionaryTermMetaEntries =>
+      $$DictionaryTermMetaEntriesTableTableManager(
+        _db,
+        _db.dictionaryTermMetaEntries,
+      );
 }
