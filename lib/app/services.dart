@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/native_library_loader.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/sudachi_tokenizer.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/tokenizer.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/grammar_collection_repository.dart';
@@ -29,6 +30,10 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 /// this pass (see docs/research/r4-tokenizer.md §3/§6) -- this provider just
 /// wires whatever path that future resolution produces into the tokenizer.
 final tokenizerProvider = FutureProvider<Tokenizer>((ref) async {
+  // Must happen before any SudachiTokenizer is constructed -- flutter_rust_bridge
+  // throws "Bad state: flutter_rust_bridge has not been initialized" from
+  // every generated call otherwise. See native_library_loader.dart.
+  await ensureSudachiNativeLibraryInitialized();
   final paths = await resolveSudachiDictionaryPaths();
   return SudachiTokenizer.create(
     resourceDir: paths.resourceDir,

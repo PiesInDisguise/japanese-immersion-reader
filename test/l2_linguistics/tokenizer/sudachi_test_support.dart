@@ -8,8 +8,7 @@
 
 import 'dart:io';
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
-import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/rust/frb_generated.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/native_library_loader.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/sudachi_tokenizer.dart';
 import 'package:path/path.dart' as p;
 
@@ -49,49 +48,10 @@ bool get sudachiTestDictionaryAvailable =>
 ///
 /// Only call this when [sudachiTestDictionaryAvailable] is true.
 Future<SudachiTokenizer> createTestSudachiTokenizer() async {
-  if (!RustLib.instance.initialized) {
-    await RustLib.init(externalLibrary: _loadSudachiTokenizerLibrary());
-  }
+  await ensureSudachiNativeLibraryInitialized();
 
   return SudachiTokenizer.create(
     resourceDir: _researchResourceDir,
     dictionaryPath: _researchDictionaryPath,
-  );
-}
-
-/// Explicitly locates and opens the compiled native library, rather than
-/// relying on flutter_rust_bridge's generated zero-config default
-/// (`RustLib.init()` with no arguments). That default resolves
-/// `rust/target/release/` relative to the *process* working directory at
-/// runtime (see the generated `kDefaultExternalLibraryLoaderConfig` in
-/// rust/frb_generated.dart and flutter_rust_bridge's own
-/// `loadExternalLibrary`) -- correct when `flutter test` is run from the
-/// project root and `cargo build --release` was used, but this makes the
-/// dependency explicit and also works after a plain `cargo build` (debug
-/// profile), so this test doesn't silently depend on which one was last
-/// run.
-ExternalLibrary _loadSudachiTokenizerLibrary() {
-  const stem = 'sudachi_tokenizer';
-  final String fileName;
-  if (Platform.isWindows) {
-    fileName = '$stem.dll';
-  } else if (Platform.isMacOS || Platform.isIOS) {
-    fileName = 'lib$stem.dylib';
-  } else {
-    fileName = 'lib$stem.so';
-  }
-
-  final rustTargetDir = p.join(Directory.current.path, 'rust', 'target');
-  for (final profile in ['release', 'debug']) {
-    final candidate = p.join(rustTargetDir, profile, fileName);
-    if (File(candidate).existsSync()) {
-      return ExternalLibrary.open(candidate);
-    }
-  }
-
-  throw StateError(
-    'Compiled $fileName not found under $rustTargetDir (checked '
-    'release/ and debug/). Run `cargo build` (or `cargo build --release`) '
-    'in rust/ before running this test.',
   );
 }
