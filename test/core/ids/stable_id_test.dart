@@ -22,4 +22,37 @@ void main() {
       isNot(equals(stableNodeId('doc-2', [0, 2, 5]))),
     );
   });
+
+  test(
+    'contentDerivedDocumentId is the same for identical bytes regardless of prefix casing of the call site',
+    () {
+      final bytesA = [1, 2, 3, 4];
+      final bytesB = [1, 2, 3, 4];
+      expect(
+        contentDerivedDocumentId('epub', bytesA),
+        equals(contentDerivedDocumentId('epub', bytesB)),
+      );
+    },
+  );
+
+  test(
+    'contentDerivedDocumentId differs for different bytes with the same prefix',
+    () {
+      expect(
+        contentDerivedDocumentId('epub', [1, 2, 3]),
+        isNot(equals(contentDerivedDocumentId('epub', [1, 2, 4]))),
+      );
+    },
+  );
+
+  test(
+    'contentDerivedDocumentId differs across source-type prefixes even for identical bytes',
+    () {
+      final bytes = [1, 2, 3, 4];
+      expect(
+        contentDerivedDocumentId('epub', bytes),
+        isNot(equals(contentDerivedDocumentId('pdfText', bytes))),
+      );
+    },
+  );
 }

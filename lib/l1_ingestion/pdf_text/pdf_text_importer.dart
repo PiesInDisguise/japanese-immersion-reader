@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:pdfrx_engine/pdfrx_engine.dart';
 
@@ -39,7 +37,7 @@ class PdfTextImporter implements Importer {
     await pdfrxInitialize();
     final pdfDocument = await PdfDocument.openFile(file.path);
     try {
-      final documentId = _documentIdFor(file);
+      final documentId = await _documentIdFor(file);
       final pageCount = pdfDocument.pages.length;
       final blocks = <Block>[];
 
@@ -166,11 +164,11 @@ class PdfTextImporter implements Importer {
     );
   }
 
-  /// Hashes the file's absolute path so re-importing the same source yields
-  /// the same `Document.id` (and therefore, via `stableNodeId`, the same
-  /// Chapter/Block/Sentence IDs) -- consistent with how every ID downstream
-  /// of this one is derived, and required for Card/Document Mode position
-  /// sync and mining/SRS rows to survive a re-import.
-  String _documentIdFor(File file) =>
-      sha1.convert(utf8.encode(file.absolute.path)).toString();
+  /// Content-derived via `contentDerivedDocumentId`, not path-derived: the
+  /// same PDF re-imported from a different location must resolve to the
+  /// same `Document` rather than a duplicate. See that function's doc
+  /// comment; every importer must use it rather than inventing its own
+  /// scheme, so `Document.id` derivation stays consistent across sources.
+  Future<String> _documentIdFor(File file) async =>
+      contentDerivedDocumentId('pdfText', await file.readAsBytes());
 }

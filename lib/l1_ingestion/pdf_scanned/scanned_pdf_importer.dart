@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:crypto/crypto.dart';
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/core/util/sentence_splitter.dart';
@@ -99,7 +97,7 @@ class ScannedPdfImporter implements Importer {
   }) async {
     onProgress(const ImportProgress(fraction: 0.0, stage: ImportStage.parsing));
 
-    final documentId = _documentIdFor(file);
+    final documentId = await _documentIdFor(file);
 
     var pages = await cache.read(file);
     if (pages == null) {
@@ -267,16 +265,19 @@ class ScannedPdfImporter implements Importer {
   }
 }
 
-/// Deterministic, path-derived document identity -- deliberately *not*
-/// content-hashed, mirroring `stableNodeId`'s own position-derived (not
-/// content-hashed) philosophy: see `core/ids/stable_id.dart`. Every
-/// Chapter/Block/Sentence ID is derived from this, and those must not shift
-/// across re-imports of what's conceptually the same document just because
-/// re-running OCR recognized some token's text slightly differently.
+/// Content-derived via `contentDerivedDocumentId`, hashing the source PDF's
+/// own bytes -- not OCR's recognized text, and not the file path. Hashing
+/// the source bytes (rather than the path) means the same scan re-imported
+/// from a different location resolves to the same `Document`; hashing the
+/// source bytes (rather than OCR's output) means every
+/// Chapter/Block/Sentence ID derived from this stays stable across
+/// re-imports even if re-running OCR recognizes some token's text slightly
+/// differently, since the underlying scan hasn't changed. Every importer
+/// must use `contentDerivedDocumentId` rather than inventing its own scheme,
+/// so `Document.id` derivation stays consistent across sources.
 ///
-/// The OCR disk cache ([OcrResultCache]) intentionally uses a *different*,
-/// content-aware key (source file size + modified time) for its own,
-/// unrelated purpose of invalidating stale cached OCR output when the
-/// source file itself has changed.
-String _documentIdFor(File file) =>
-    sha1.convert(utf8.encode(file.absolute.path)).toString();
+/// The OCR disk cache ([OcrResultCache]) intentionally uses a *different*
+/// key (source file size + modified time) for its own, unrelated purpose of
+/// invalidating stale cached OCR output when the source file itself changes.
+Future<String> _documentIdFor(File file) async =>
+    contentDerivedDocumentId('pdfScanned', await file.readAsBytes());

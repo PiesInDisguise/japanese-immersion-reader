@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:crypto/crypto.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
@@ -31,11 +30,7 @@ class EpubImporter implements Importer {
     final bytes = await file.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
 
-    // Content-derived, not random: re-importing the same file must reproduce
-    // the same Document.id, since every Chapter/Block/Sentence ID is derived
-    // from it via stableNodeId, and Card/Document Mode position-sync plus
-    // mining/SRS rows key off those staying stable across re-imports.
-    final documentId = 'epub-${sha1.convert(bytes)}';
+    final documentId = contentDerivedDocumentId('epub', bytes);
 
     final opfPath = readOpfPath(archive);
     final opfBasePath = dirnameOf(opfPath);
