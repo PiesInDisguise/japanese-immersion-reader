@@ -17,6 +17,7 @@ import 'dictionary_paths.dart';
 import 'document_repository.dart';
 import 'explanation_repository.dart';
 import 'settings_repository.dart';
+import 'stats/reading_activity_repository.dart';
 
 /// One shared [AppDatabase] for the app's lifetime. Riverpod keeps this
 /// alive for as long as anything is watching it (every other provider below
@@ -86,6 +87,11 @@ final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
   return DocumentRepository(ref.watch(appDatabaseProvider));
 });
+
+final readingActivityRepositoryProvider =
+    Provider<ReadingActivityRepository>((ref) {
+      return ReadingActivityRepository(ref.watch(appDatabaseProvider));
+    });
 
 /// Spec §8 layer 3's live settings row, watchable so UI (the on/off toggle,
 /// whether the explanation section even attempts a call) updates the moment

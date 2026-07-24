@@ -29,6 +29,9 @@ part 'database.g.dart';
     // added in schemaVersion 2, see `migration` below.
     Settings,
     SentenceExplanations,
+    // Reading stats (spec §15) -- added in schemaVersion 5, see `migration`
+    // below.
+    ReadingActivity,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -36,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -72,6 +75,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.addColumn(settings, settings.ttsEnabled);
         await m.addColumn(settings, settings.pitchAccentAudioEnabled);
+      }
+      // schemaVersion 5 (spec §15): reading stats.
+      if (from < 5) {
+        await m.createTable(readingActivity);
       }
     },
   );

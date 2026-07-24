@@ -138,6 +138,29 @@ class WordCollectionRepository {
     final row = await query.getSingleOrNull();
     return row?.sentenceId;
   }
+
+  /// Spec §15's comprehension %: "share of words already known/collected"
+  /// -- a direct primary-key existence check via [contentDerivedWordId],
+  /// same identity rule [mine]/[remove] use.
+  Future<bool> isCollected({
+    required String dictForm,
+    required String reading,
+  }) async {
+    final id = contentDerivedWordId(dictForm: dictForm, reading: reading);
+    final row = await (_db.select(
+      _db.collectedWords,
+    )..where((w) => w.id.equals(id))).getSingleOrNull();
+    return row != null;
+  }
+
+  /// Spec §15's "words-mined count".
+  Future<int> count() async {
+    final countColumn = _db.collectedWords.id.count();
+    final query = _db.selectOnly(_db.collectedWords)
+      ..addColumns([countColumn]);
+    final row = await query.getSingle();
+    return row.read(countColumn) ?? 0;
+  }
 }
 
 /// Drift-backed [MiningStore] for `CollectedWords`/`CollectedWordSources`.

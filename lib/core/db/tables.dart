@@ -415,3 +415,21 @@ class SentenceExplanations extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// One row per calendar day (UTC midnight) that had any active reading time
+/// -- spec §15's "reading streak / heatmap" and "time read". Written to by
+/// `ReadingTimeTracker` (`lib/l3_reader_ui/reading_time_tracker.dart`),
+/// which accumulates elapsed time while a reader screen is open and
+/// periodically flushes it here, rather than every screen tick writing its
+/// own row. A day with no reading simply has no row (not a zero row) --
+/// streak/heatmap queries treat "missing" and "zero" identically, so this
+/// avoids writing a row for every day the app was never opened.
+@DataClassName('ReadingActivityRow')
+class ReadingActivity extends Table {
+  DateTimeColumn get date => dateTime()();
+  IntColumn get secondsRead =>
+      integer().withDefault(const Constant(0)).named('seconds_read')();
+
+  @override
+  Set<Column> get primaryKey => {date};
+}

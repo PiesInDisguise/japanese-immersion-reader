@@ -115,6 +115,16 @@ class GrammarCollectionRepository {
     final row = await query.getSingleOrNull();
     return row?.sentenceId;
   }
+
+  /// Spec §15's "words-mined count" -- grammar-side count, for stats that
+  /// want to report both totals.
+  Future<int> count() async {
+    final countColumn = _db.collectedGrammars.id.count();
+    final query = _db.selectOnly(_db.collectedGrammars)
+      ..addColumns([countColumn]);
+    final row = await query.getSingle();
+    return row.read(countColumn) ?? 0;
+  }
 }
 
 /// Drift-backed [MiningStore] for `CollectedGrammars`/

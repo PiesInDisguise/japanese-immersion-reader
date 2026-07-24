@@ -6,6 +6,7 @@ import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_point.d
 
 import '../reader_mining_session.dart';
 import '../reading_position.dart';
+import '../reading_time_tracker.dart';
 
 export '../reading_position.dart' show CurrentDocument, currentDocumentProvider;
 
@@ -86,6 +87,11 @@ class CardModeController extends AsyncNotifier<CardModeState> {
         'currentDocumentProvider before watching cardModeControllerProvider.',
       );
     }
+
+    // Spec §15: counts as active reading time for as long as this
+    // controller (i.e. a real document loaded in this screen) is alive --
+    // see ReadingTimeTracker's own doc comment.
+    ReadingTimeTracker(ref);
     _mining = ReaderMiningSession(ref);
     _positions = [
       for (final chapter in document.chapters)

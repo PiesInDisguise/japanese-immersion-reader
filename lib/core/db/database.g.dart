@@ -6688,6 +6688,226 @@ class SentenceExplanationsCompanion
   }
 }
 
+class $ReadingActivityTable extends ReadingActivity
+    with TableInfo<$ReadingActivityTable, ReadingActivityRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReadingActivityTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _secondsReadMeta = const VerificationMeta(
+    'secondsRead',
+  );
+  @override
+  late final GeneratedColumn<int> secondsRead = GeneratedColumn<int>(
+    'seconds_read',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [date, secondsRead];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reading_activity';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReadingActivityRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('seconds_read')) {
+      context.handle(
+        _secondsReadMeta,
+        secondsRead.isAcceptableOrUnknown(
+          data['seconds_read']!,
+          _secondsReadMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  ReadingActivityRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReadingActivityRow(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      secondsRead: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seconds_read'],
+      )!,
+    );
+  }
+
+  @override
+  $ReadingActivityTable createAlias(String alias) {
+    return $ReadingActivityTable(attachedDatabase, alias);
+  }
+}
+
+class ReadingActivityRow extends DataClass
+    implements Insertable<ReadingActivityRow> {
+  final DateTime date;
+  final int secondsRead;
+  const ReadingActivityRow({required this.date, required this.secondsRead});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<DateTime>(date);
+    map['seconds_read'] = Variable<int>(secondsRead);
+    return map;
+  }
+
+  ReadingActivityCompanion toCompanion(bool nullToAbsent) {
+    return ReadingActivityCompanion(
+      date: Value(date),
+      secondsRead: Value(secondsRead),
+    );
+  }
+
+  factory ReadingActivityRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReadingActivityRow(
+      date: serializer.fromJson<DateTime>(json['date']),
+      secondsRead: serializer.fromJson<int>(json['secondsRead']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<DateTime>(date),
+      'secondsRead': serializer.toJson<int>(secondsRead),
+    };
+  }
+
+  ReadingActivityRow copyWith({DateTime? date, int? secondsRead}) =>
+      ReadingActivityRow(
+        date: date ?? this.date,
+        secondsRead: secondsRead ?? this.secondsRead,
+      );
+  ReadingActivityRow copyWithCompanion(ReadingActivityCompanion data) {
+    return ReadingActivityRow(
+      date: data.date.present ? data.date.value : this.date,
+      secondsRead: data.secondsRead.present
+          ? data.secondsRead.value
+          : this.secondsRead,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReadingActivityRow(')
+          ..write('date: $date, ')
+          ..write('secondsRead: $secondsRead')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, secondsRead);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReadingActivityRow &&
+          other.date == this.date &&
+          other.secondsRead == this.secondsRead);
+}
+
+class ReadingActivityCompanion extends UpdateCompanion<ReadingActivityRow> {
+  final Value<DateTime> date;
+  final Value<int> secondsRead;
+  final Value<int> rowid;
+  const ReadingActivityCompanion({
+    this.date = const Value.absent(),
+    this.secondsRead = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReadingActivityCompanion.insert({
+    required DateTime date,
+    this.secondsRead = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : date = Value(date);
+  static Insertable<ReadingActivityRow> custom({
+    Expression<DateTime>? date,
+    Expression<int>? secondsRead,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (secondsRead != null) 'seconds_read': secondsRead,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReadingActivityCompanion copyWith({
+    Value<DateTime>? date,
+    Value<int>? secondsRead,
+    Value<int>? rowid,
+  }) {
+    return ReadingActivityCompanion(
+      date: date ?? this.date,
+      secondsRead: secondsRead ?? this.secondsRead,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (secondsRead.present) {
+      map['seconds_read'] = Variable<int>(secondsRead.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReadingActivityCompanion(')
+          ..write('date: $date, ')
+          ..write('secondsRead: $secondsRead, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6711,6 +6931,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettingsTable settings = $SettingsTable(this);
   late final $SentenceExplanationsTable sentenceExplanations =
       $SentenceExplanationsTable(this);
+  late final $ReadingActivityTable readingActivity = $ReadingActivityTable(
+    this,
+  );
   late final Index idxDictTermHeadword = Index(
     'idx_dict_term_headword',
     'CREATE INDEX idx_dict_term_headword ON dictionary_term_entries (headword)',
@@ -6753,6 +6976,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     collectedGrammarSources,
     settings,
     sentenceExplanations,
+    readingActivity,
     idxDictTermHeadword,
     idxDictTermReadingNormalized,
     idxDictTermDictionarySequence,
@@ -12750,6 +12974,161 @@ typedef $$SentenceExplanationsTableProcessedTableManager =
       SentenceExplanationRow,
       PrefetchHooks Function()
     >;
+typedef $$ReadingActivityTableCreateCompanionBuilder =
+    ReadingActivityCompanion Function({
+      required DateTime date,
+      Value<int> secondsRead,
+      Value<int> rowid,
+    });
+typedef $$ReadingActivityTableUpdateCompanionBuilder =
+    ReadingActivityCompanion Function({
+      Value<DateTime> date,
+      Value<int> secondsRead,
+      Value<int> rowid,
+    });
+
+class $$ReadingActivityTableFilterComposer
+    extends Composer<_$AppDatabase, $ReadingActivityTable> {
+  $$ReadingActivityTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get secondsRead => $composableBuilder(
+    column: $table.secondsRead,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReadingActivityTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReadingActivityTable> {
+  $$ReadingActivityTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get secondsRead => $composableBuilder(
+    column: $table.secondsRead,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReadingActivityTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReadingActivityTable> {
+  $$ReadingActivityTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get secondsRead => $composableBuilder(
+    column: $table.secondsRead,
+    builder: (column) => column,
+  );
+}
+
+class $$ReadingActivityTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReadingActivityTable,
+          ReadingActivityRow,
+          $$ReadingActivityTableFilterComposer,
+          $$ReadingActivityTableOrderingComposer,
+          $$ReadingActivityTableAnnotationComposer,
+          $$ReadingActivityTableCreateCompanionBuilder,
+          $$ReadingActivityTableUpdateCompanionBuilder,
+          (
+            ReadingActivityRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ReadingActivityTable,
+              ReadingActivityRow
+            >,
+          ),
+          ReadingActivityRow,
+          PrefetchHooks Function()
+        > {
+  $$ReadingActivityTableTableManager(
+    _$AppDatabase db,
+    $ReadingActivityTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReadingActivityTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReadingActivityTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReadingActivityTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<DateTime> date = const Value.absent(),
+                Value<int> secondsRead = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReadingActivityCompanion(
+                date: date,
+                secondsRead: secondsRead,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required DateTime date,
+                Value<int> secondsRead = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReadingActivityCompanion.insert(
+                date: date,
+                secondsRead: secondsRead,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReadingActivityTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReadingActivityTable,
+      ReadingActivityRow,
+      $$ReadingActivityTableFilterComposer,
+      $$ReadingActivityTableOrderingComposer,
+      $$ReadingActivityTableAnnotationComposer,
+      $$ReadingActivityTableCreateCompanionBuilder,
+      $$ReadingActivityTableUpdateCompanionBuilder,
+      (
+        ReadingActivityRow,
+        BaseReferences<
+          _$AppDatabase,
+          $ReadingActivityTable,
+          ReadingActivityRow
+        >,
+      ),
+      ReadingActivityRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12786,4 +13165,6 @@ class $AppDatabaseManager {
       $$SettingsTableTableManager(_db, _db.settings);
   $$SentenceExplanationsTableTableManager get sentenceExplanations =>
       $$SentenceExplanationsTableTableManager(_db, _db.sentenceExplanations);
+  $$ReadingActivityTableTableManager get readingActivity =>
+      $$ReadingActivityTableTableManager(_db, _db.readingActivity);
 }
