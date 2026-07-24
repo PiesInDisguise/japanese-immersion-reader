@@ -9,6 +9,9 @@ import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/sudachi_token
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/tokenizer.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/grammar_collection_repository.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/word_collection_repository.dart';
+import 'package:japanese_immersion_reader/l6_audio/pitch_accent/pitch_accent_audio_provider.dart';
+import 'package:japanese_immersion_reader/l6_audio/pitch_accent/pitch_accent_player.dart';
+import 'package:japanese_immersion_reader/l6_audio/tts/tts_service.dart';
 
 import 'dictionary_paths.dart';
 import 'document_repository.dart';
@@ -103,3 +106,15 @@ final grammarExplanationClientFactoryProvider =
     Provider<GrammarExplanationClient Function(String apiKey)>((ref) {
       return (apiKey) => AnthropicGrammarExplanationClient(apiKey: apiKey);
     });
+
+/// Spec §9's on-device TTS. A single shared instance for the app's
+/// lifetime -- unlike the LLM client, there's no per-call configuration
+/// (API key etc.) that would call for a factory seam instead.
+final ttsServiceProvider = Provider<TtsService>((ref) => FlutterTtsService());
+
+/// Spec §9's downloadable pitch-accent audio. One shared instance so its
+/// underlying `AudioPlayer` isn't recreated (and any in-flight playback
+/// isn't orphaned) every time a widget rebuilds and re-reads this provider.
+final pitchAccentPlayerProvider = Provider<PitchAccentPlayer>((ref) {
+  return PitchAccentPlayer(LanguagePod101AudioProvider());
+});

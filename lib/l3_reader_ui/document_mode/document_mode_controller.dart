@@ -206,4 +206,21 @@ class DocumentModeController extends AsyncNotifier<DocumentModeState> {
     ];
     return _mining.explainSentence(sentence, contextSentences: context);
   }
+
+  /// Spec §9 gate -- see `ReaderMiningSession.ttsActive`'s own doc comment.
+  Future<bool> ttsActive() => _mining.ttsActive();
+
+  /// Spec §9: speaks [text] (a word or a whole sentence) aloud.
+  Future<void> speak(String text) => _mining.speak(text);
+
+  /// Spec §9 gate -- see `ReaderMiningSession.pitchAccentAudioActive`'s own
+  /// doc comment.
+  Future<bool> pitchAccentAudioActive() => _mining.pitchAccentAudioActive();
+
+  /// Spec §9: plays a word's real downloadable pitch-accent recording, if
+  /// one exists.
+  Future<bool> playPitchAccentAudio({
+    required String expression,
+    required String reading,
+  }) => _mining.playPitchAccentAudio(expression: expression, reading: reading);
 }

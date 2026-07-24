@@ -218,4 +218,56 @@ class ReaderMiningSession {
       await explanationRepository.write(cacheId, latest);
     }
   }
+
+  /// Spec §9 gate: whether TTS is on. Callers should check this before
+  /// calling [speak], so UI can hide/disable the speaker button entirely
+  /// rather than call in and have it silently do nothing -- same pattern as
+  /// [explanationsActive]/[explainSentence].
+  Future<bool> ttsActive() async {
+    final settings = await _ref.read(settingsRepositoryProvider).read();
+    return settings.ttsEnabled;
+  }
+
+  /// Spec §9: speaks [text] aloud -- [text] can be a single word or a whole
+  /// sentence, "for words and full sentences" per spec, since `TtsService`
+  /// itself has no separate mode for either. Callers must check [ttsActive]
+  /// first -- this throws [StateError] if the toggle is off, mirroring
+  /// [explainSentence]'s own contract.
+  Future<void> speak(String text) async {
+    if (!await ttsActive()) {
+      throw StateError(
+        'speak called with TTS disabled -- callers must check ttsActive() '
+        'first.',
+      );
+    }
+    await _ref.read(ttsServiceProvider).speak(text);
+  }
+
+  /// Spec §9 gate: whether pitch-accent audio is on. Same reasoning as
+  /// [ttsActive], just for [playPitchAccentAudio].
+  Future<bool> pitchAccentAudioActive() async {
+    final settings = await _ref.read(settingsRepositoryProvider).read();
+    return settings.pitchAccentAudioEnabled;
+  }
+
+  /// Spec §9: plays [expression]/[reading]'s real downloadable pitch-accent
+  /// recording (fetched once, then cached -- see `PitchAccentPlayer`'s own
+  /// doc comment). Returns `false` if no recording exists for this word --
+  /// callers should treat that as "nothing to play", not an error. Callers
+  /// must check [pitchAccentAudioActive] first -- this throws [StateError]
+  /// if the toggle is off, mirroring [speak]'s own contract.
+  Future<bool> playPitchAccentAudio({
+    required String expression,
+    required String reading,
+  }) async {
+    if (!await pitchAccentAudioActive()) {
+      throw StateError(
+        'playPitchAccentAudio called with pitch-accent audio disabled -- '
+        'callers must check pitchAccentAudioActive() first.',
+      );
+    }
+    return _ref
+        .read(pitchAccentPlayerProvider)
+        .play(expression: expression, reading: reading);
+  }
 }
