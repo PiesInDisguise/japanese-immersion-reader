@@ -378,6 +378,21 @@ class Settings extends Table {
   BoolColumn get llmExplanationsEnabled =>
       boolean().withDefault(const Constant(true)).named('llm_explanations_enabled')();
 
+  /// Spec §9/§14: "TTS on/off" -- unlike [llmExplanationsEnabled], this
+  /// defaults *off*: spec §9 states audio is "optional, off by default" and
+  /// "fully skippable" outright, not just gated behind a separate
+  /// prerequisite the way layer 3 is gated behind an API key.
+  BoolColumn get ttsEnabled =>
+      boolean().withDefault(const Constant(false)).named('tts_enabled')();
+
+  /// Spec §9/§14: "pitch-accent audio on/off" -- same off-by-default
+  /// reasoning as [ttsEnabled]. Kept as its own toggle rather than folded
+  /// into [ttsEnabled] since a user might want synthesized speech but not
+  /// the network-fetched pitch-accent clips, or vice versa.
+  BoolColumn get pitchAccentAudioEnabled => boolean()
+      .withDefault(const Constant(false))
+      .named('pitch_accent_audio_enabled')();
+
   @override
   Set<Column> get primaryKey => {id};
 }

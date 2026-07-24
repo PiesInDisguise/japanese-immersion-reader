@@ -6048,8 +6048,44 @@ class $SettingsTable extends Settings
         ),
         defaultValue: const Constant(true),
       );
+  static const VerificationMeta _ttsEnabledMeta = const VerificationMeta(
+    'ttsEnabled',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, llmApiKey, llmExplanationsEnabled];
+  late final GeneratedColumn<bool> ttsEnabled = GeneratedColumn<bool>(
+    'tts_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tts_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _pitchAccentAudioEnabledMeta =
+      const VerificationMeta('pitchAccentAudioEnabled');
+  @override
+  late final GeneratedColumn<bool> pitchAccentAudioEnabled =
+      GeneratedColumn<bool>(
+        'pitch_accent_audio_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("pitch_accent_audio_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    llmApiKey,
+    llmExplanationsEnabled,
+    ttsEnabled,
+    pitchAccentAudioEnabled,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -6080,6 +6116,21 @@ class $SettingsTable extends Settings
         ),
       );
     }
+    if (data.containsKey('tts_enabled')) {
+      context.handle(
+        _ttsEnabledMeta,
+        ttsEnabled.isAcceptableOrUnknown(data['tts_enabled']!, _ttsEnabledMeta),
+      );
+    }
+    if (data.containsKey('pitch_accent_audio_enabled')) {
+      context.handle(
+        _pitchAccentAudioEnabledMeta,
+        pitchAccentAudioEnabled.isAcceptableOrUnknown(
+          data['pitch_accent_audio_enabled']!,
+          _pitchAccentAudioEnabledMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6100,6 +6151,14 @@ class $SettingsTable extends Settings
       llmExplanationsEnabled: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}llm_explanations_enabled'],
+      )!,
+      ttsEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tts_enabled'],
+      )!,
+      pitchAccentAudioEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pitch_accent_audio_enabled'],
       )!,
     );
   }
@@ -6127,10 +6186,24 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// so the only real gate on whether it actually runs is whether an API key
   /// is present, not this toggle needing an extra opt-in step too.
   final bool llmExplanationsEnabled;
+
+  /// Spec §9/§14: "TTS on/off" -- unlike [llmExplanationsEnabled], this
+  /// defaults *off*: spec §9 states audio is "optional, off by default" and
+  /// "fully skippable" outright, not just gated behind a separate
+  /// prerequisite the way layer 3 is gated behind an API key.
+  final bool ttsEnabled;
+
+  /// Spec §9/§14: "pitch-accent audio on/off" -- same off-by-default
+  /// reasoning as [ttsEnabled]. Kept as its own toggle rather than folded
+  /// into [ttsEnabled] since a user might want synthesized speech but not
+  /// the network-fetched pitch-accent clips, or vice versa.
+  final bool pitchAccentAudioEnabled;
   const SettingsRow({
     required this.id,
     this.llmApiKey,
     required this.llmExplanationsEnabled,
+    required this.ttsEnabled,
+    required this.pitchAccentAudioEnabled,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6140,6 +6213,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       map['llm_api_key'] = Variable<String>(llmApiKey);
     }
     map['llm_explanations_enabled'] = Variable<bool>(llmExplanationsEnabled);
+    map['tts_enabled'] = Variable<bool>(ttsEnabled);
+    map['pitch_accent_audio_enabled'] = Variable<bool>(pitchAccentAudioEnabled);
     return map;
   }
 
@@ -6150,6 +6225,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ? const Value.absent()
           : Value(llmApiKey),
       llmExplanationsEnabled: Value(llmExplanationsEnabled),
+      ttsEnabled: Value(ttsEnabled),
+      pitchAccentAudioEnabled: Value(pitchAccentAudioEnabled),
     );
   }
 
@@ -6164,6 +6241,10 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       llmExplanationsEnabled: serializer.fromJson<bool>(
         json['llmExplanationsEnabled'],
       ),
+      ttsEnabled: serializer.fromJson<bool>(json['ttsEnabled']),
+      pitchAccentAudioEnabled: serializer.fromJson<bool>(
+        json['pitchAccentAudioEnabled'],
+      ),
     );
   }
   @override
@@ -6173,6 +6254,10 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'id': serializer.toJson<int>(id),
       'llmApiKey': serializer.toJson<String?>(llmApiKey),
       'llmExplanationsEnabled': serializer.toJson<bool>(llmExplanationsEnabled),
+      'ttsEnabled': serializer.toJson<bool>(ttsEnabled),
+      'pitchAccentAudioEnabled': serializer.toJson<bool>(
+        pitchAccentAudioEnabled,
+      ),
     };
   }
 
@@ -6180,11 +6265,16 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     int? id,
     Value<String?> llmApiKey = const Value.absent(),
     bool? llmExplanationsEnabled,
+    bool? ttsEnabled,
+    bool? pitchAccentAudioEnabled,
   }) => SettingsRow(
     id: id ?? this.id,
     llmApiKey: llmApiKey.present ? llmApiKey.value : this.llmApiKey,
     llmExplanationsEnabled:
         llmExplanationsEnabled ?? this.llmExplanationsEnabled,
+    ttsEnabled: ttsEnabled ?? this.ttsEnabled,
+    pitchAccentAudioEnabled:
+        pitchAccentAudioEnabled ?? this.pitchAccentAudioEnabled,
   );
   SettingsRow copyWithCompanion(SettingsCompanion data) {
     return SettingsRow(
@@ -6193,6 +6283,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       llmExplanationsEnabled: data.llmExplanationsEnabled.present
           ? data.llmExplanationsEnabled.value
           : this.llmExplanationsEnabled,
+      ttsEnabled: data.ttsEnabled.present
+          ? data.ttsEnabled.value
+          : this.ttsEnabled,
+      pitchAccentAudioEnabled: data.pitchAccentAudioEnabled.present
+          ? data.pitchAccentAudioEnabled.value
+          : this.pitchAccentAudioEnabled,
     );
   }
 
@@ -6201,46 +6297,67 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     return (StringBuffer('SettingsRow(')
           ..write('id: $id, ')
           ..write('llmApiKey: $llmApiKey, ')
-          ..write('llmExplanationsEnabled: $llmExplanationsEnabled')
+          ..write('llmExplanationsEnabled: $llmExplanationsEnabled, ')
+          ..write('ttsEnabled: $ttsEnabled, ')
+          ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, llmApiKey, llmExplanationsEnabled);
+  int get hashCode => Object.hash(
+    id,
+    llmApiKey,
+    llmExplanationsEnabled,
+    ttsEnabled,
+    pitchAccentAudioEnabled,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SettingsRow &&
           other.id == this.id &&
           other.llmApiKey == this.llmApiKey &&
-          other.llmExplanationsEnabled == this.llmExplanationsEnabled);
+          other.llmExplanationsEnabled == this.llmExplanationsEnabled &&
+          other.ttsEnabled == this.ttsEnabled &&
+          other.pitchAccentAudioEnabled == this.pitchAccentAudioEnabled);
 }
 
 class SettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<int> id;
   final Value<String?> llmApiKey;
   final Value<bool> llmExplanationsEnabled;
+  final Value<bool> ttsEnabled;
+  final Value<bool> pitchAccentAudioEnabled;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.llmApiKey = const Value.absent(),
     this.llmExplanationsEnabled = const Value.absent(),
+    this.ttsEnabled = const Value.absent(),
+    this.pitchAccentAudioEnabled = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
     this.llmApiKey = const Value.absent(),
     this.llmExplanationsEnabled = const Value.absent(),
+    this.ttsEnabled = const Value.absent(),
+    this.pitchAccentAudioEnabled = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
     Expression<String>? llmApiKey,
     Expression<bool>? llmExplanationsEnabled,
+    Expression<bool>? ttsEnabled,
+    Expression<bool>? pitchAccentAudioEnabled,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (llmApiKey != null) 'llm_api_key': llmApiKey,
       if (llmExplanationsEnabled != null)
         'llm_explanations_enabled': llmExplanationsEnabled,
+      if (ttsEnabled != null) 'tts_enabled': ttsEnabled,
+      if (pitchAccentAudioEnabled != null)
+        'pitch_accent_audio_enabled': pitchAccentAudioEnabled,
     });
   }
 
@@ -6248,12 +6365,17 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<int>? id,
     Value<String?>? llmApiKey,
     Value<bool>? llmExplanationsEnabled,
+    Value<bool>? ttsEnabled,
+    Value<bool>? pitchAccentAudioEnabled,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
       llmApiKey: llmApiKey ?? this.llmApiKey,
       llmExplanationsEnabled:
           llmExplanationsEnabled ?? this.llmExplanationsEnabled,
+      ttsEnabled: ttsEnabled ?? this.ttsEnabled,
+      pitchAccentAudioEnabled:
+          pitchAccentAudioEnabled ?? this.pitchAccentAudioEnabled,
     );
   }
 
@@ -6271,6 +6393,14 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
         llmExplanationsEnabled.value,
       );
     }
+    if (ttsEnabled.present) {
+      map['tts_enabled'] = Variable<bool>(ttsEnabled.value);
+    }
+    if (pitchAccentAudioEnabled.present) {
+      map['pitch_accent_audio_enabled'] = Variable<bool>(
+        pitchAccentAudioEnabled.value,
+      );
+    }
     return map;
   }
 
@@ -6279,7 +6409,9 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     return (StringBuffer('SettingsCompanion(')
           ..write('id: $id, ')
           ..write('llmApiKey: $llmApiKey, ')
-          ..write('llmExplanationsEnabled: $llmExplanationsEnabled')
+          ..write('llmExplanationsEnabled: $llmExplanationsEnabled, ')
+          ..write('ttsEnabled: $ttsEnabled, ')
+          ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled')
           ..write(')'))
         .toString();
   }
@@ -12246,12 +12378,16 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<int> id,
       Value<String?> llmApiKey,
       Value<bool> llmExplanationsEnabled,
+      Value<bool> ttsEnabled,
+      Value<bool> pitchAccentAudioEnabled,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
       Value<int> id,
       Value<String?> llmApiKey,
       Value<bool> llmExplanationsEnabled,
+      Value<bool> ttsEnabled,
+      Value<bool> pitchAccentAudioEnabled,
     });
 
 class $$SettingsTableFilterComposer
@@ -12275,6 +12411,16 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get llmExplanationsEnabled => $composableBuilder(
     column: $table.llmExplanationsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ttsEnabled => $composableBuilder(
+    column: $table.ttsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pitchAccentAudioEnabled => $composableBuilder(
+    column: $table.pitchAccentAudioEnabled,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -12302,6 +12448,16 @@ class $$SettingsTableOrderingComposer
     column: $table.llmExplanationsEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get ttsEnabled => $composableBuilder(
+    column: $table.ttsEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pitchAccentAudioEnabled => $composableBuilder(
+    column: $table.pitchAccentAudioEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -12321,6 +12477,16 @@ class $$SettingsTableAnnotationComposer
 
   GeneratedColumn<bool> get llmExplanationsEnabled => $composableBuilder(
     column: $table.llmExplanationsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get ttsEnabled => $composableBuilder(
+    column: $table.ttsEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get pitchAccentAudioEnabled => $composableBuilder(
+    column: $table.pitchAccentAudioEnabled,
     builder: (column) => column,
   );
 }
@@ -12359,20 +12525,28 @@ class $$SettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String?> llmApiKey = const Value.absent(),
                 Value<bool> llmExplanationsEnabled = const Value.absent(),
+                Value<bool> ttsEnabled = const Value.absent(),
+                Value<bool> pitchAccentAudioEnabled = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 llmApiKey: llmApiKey,
                 llmExplanationsEnabled: llmExplanationsEnabled,
+                ttsEnabled: ttsEnabled,
+                pitchAccentAudioEnabled: pitchAccentAudioEnabled,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String?> llmApiKey = const Value.absent(),
                 Value<bool> llmExplanationsEnabled = const Value.absent(),
+                Value<bool> ttsEnabled = const Value.absent(),
+                Value<bool> pitchAccentAudioEnabled = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 llmApiKey: llmApiKey,
                 llmExplanationsEnabled: llmExplanationsEnabled,
+                ttsEnabled: ttsEnabled,
+                pitchAccentAudioEnabled: pitchAccentAudioEnabled,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

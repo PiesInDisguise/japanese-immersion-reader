@@ -20,6 +20,21 @@ void main() {
       expect(settings.llmApiKey, isNull);
       expect(settings.llmExplanationsEnabled, isTrue);
       expect(settings.llmExplanationsActive, isFalse);
+      expect(settings.ttsEnabled, isFalse);
+      expect(settings.pitchAccentAudioEnabled, isFalse);
+    });
+
+    test('update() writes the audio toggles independently of the LLM ones', () async {
+      await repository.update(ttsEnabled: true);
+      var settings = await repository.read();
+      expect(settings.ttsEnabled, isTrue);
+      expect(settings.pitchAccentAudioEnabled, isFalse);
+      expect(settings.llmExplanationsEnabled, isTrue, reason: 'untouched default');
+
+      await repository.update(pitchAccentAudioEnabled: true);
+      settings = await repository.read();
+      expect(settings.ttsEnabled, isTrue, reason: 'earlier field preserved');
+      expect(settings.pitchAccentAudioEnabled, isTrue);
     });
 
     test('update() writes just the given field, preserving the other', () async {

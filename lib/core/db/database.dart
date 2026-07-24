@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,6 +66,12 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(collectedGrammars, collectedGrammars.lastReviewedAt);
         await m.dropColumn(collectedGrammars, 'srs_interval');
         await m.dropColumn(collectedGrammars, 'srs_ease');
+      }
+      // schemaVersion 4 (spec §9/§14): audio on/off toggles, both
+      // off-by-default per spec §9's "optional, off by default".
+      if (from < 4) {
+        await m.addColumn(settings, settings.ttsEnabled);
+        await m.addColumn(settings, settings.pitchAccentAudioEnabled);
       }
     },
   );

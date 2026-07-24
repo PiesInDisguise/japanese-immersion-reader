@@ -61,6 +61,8 @@ dependencies:
   image: ^4.9.1
   http: ^1.6.0
   meta: ^1.16.0
+  flutter_tts: ^4.2.5
+  audioplayers: ^6.8.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

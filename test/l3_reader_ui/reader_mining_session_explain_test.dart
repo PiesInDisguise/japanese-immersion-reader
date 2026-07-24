@@ -38,11 +38,16 @@ class FakeSettingsRepository extends SettingsRepository {
   Future<void> update({
     String? llmApiKey,
     bool? llmExplanationsEnabled,
+    bool? ttsEnabled,
+    bool? pitchAccentAudioEnabled,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
       llmExplanationsEnabled:
           llmExplanationsEnabled ?? _settings.llmExplanationsEnabled,
+      ttsEnabled: ttsEnabled ?? _settings.ttsEnabled,
+      pitchAccentAudioEnabled:
+          pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
     );
   }
 }
@@ -102,6 +107,8 @@ void main() {
               const AppSettings(
                 llmApiKey: 'sk-key',
                 llmExplanationsEnabled: true,
+                ttsEnabled: false,
+                pitchAccentAudioEnabled: false,
               ),
             ),
           ),
@@ -146,6 +153,8 @@ void main() {
               const AppSettings(
                 llmApiKey: 'sk-key',
                 llmExplanationsEnabled: true,
+                ttsEnabled: false,
+                pitchAccentAudioEnabled: false,
               ),
             ),
           ),
@@ -180,6 +189,8 @@ void main() {
                 const AppSettings(
                   llmApiKey: 'sk-key',
                   llmExplanationsEnabled: true,
+                  ttsEnabled: false,
+                  pitchAccentAudioEnabled: false,
                 ),
               ),
             ),
@@ -220,6 +231,8 @@ void main() {
               const AppSettings(
                 llmApiKey: 'sk-key',
                 llmExplanationsEnabled: true,
+                ttsEnabled: false,
+                pitchAccentAudioEnabled: false,
               ),
             ),
           ),
