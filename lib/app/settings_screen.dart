@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'services.dart';
 
-/// Spec §14's only real settings surface so far: the BYO Anthropic API key
-/// and the grammar-explanation (spec §8 layer 3) on/off toggle. Reachable
-/// from [HomeScreen]'s app bar.
+/// Spec §14's real settings surface so far: the BYO Anthropic API key and
+/// grammar-explanation (spec §8 layer 3) toggle, plus spec §9's TTS/
+/// pitch-accent-audio toggles. Reachable from [HomeScreen]'s app bar.
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -94,6 +94,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: (value) => ref
                     .read(settingsRepositoryProvider)
                     .update(llmExplanationsEnabled: value),
+              ),
+              const Divider(height: 32),
+              const Text(
+                'Audio (spec §9)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Both are optional and off by default. Pitch-accent audio '
+                'downloads a real recording for each word the first time '
+                'it\'s played, then reuses that local copy afterward.',
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Text-to-speech'),
+                subtitle: const Text(
+                  'On-device speech for words and sentences.',
+                ),
+                value: settings.ttsEnabled,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(ttsEnabled: value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Pitch-accent audio'),
+                subtitle: const Text(
+                  'Downloadable real pronunciation recordings.',
+                ),
+                value: settings.pitchAccentAudioEnabled,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(pitchAccentAudioEnabled: value),
               ),
             ],
           );

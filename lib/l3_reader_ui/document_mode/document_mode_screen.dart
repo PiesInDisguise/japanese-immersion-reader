@@ -309,6 +309,10 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
         lookup: () => controller.lookupWord(token),
         mine: (senses) =>
             controller.mineWord(token, senses, sentenceId: sentenceId),
+        checkTtsActive: controller.ttsActive,
+        speak: controller.speak,
+        checkPitchAccentActive: controller.pitchAccentAudioActive,
+        playPitchAccentAudio: controller.playPitchAccentAudio,
       ),
     );
     if (mined == true && mounted) {
@@ -369,9 +373,31 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Grammar breakdown',
-                  style: Theme.of(dialogContext).textTheme.titleMedium,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Grammar breakdown',
+                      style: Theme.of(dialogContext).textTheme.titleMedium,
+                    ),
+                    // Spec §9: TTS is off by default -- checked fresh each
+                    // time this dialog opens so the button only appears
+                    // once the setting is actually on.
+                    FutureBuilder<bool>(
+                      future: controller.ttsActive(),
+                      builder: (context, snapshot) {
+                        if (snapshot.data != true) {
+                          return const SizedBox.shrink();
+                        }
+                        return IconButton(
+                          icon: const Icon(Icons.volume_up_outlined),
+                          tooltip: 'Speak sentence',
+                          onPressed: () =>
+                              controller.speak(sentence.surfaceText),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Flexible(

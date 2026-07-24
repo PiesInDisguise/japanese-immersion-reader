@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
+import 'package:japanese_immersion_reader/app/settings_repository.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
@@ -126,6 +127,42 @@ class FakeWordCollectionRepository extends WordCollectionRepository {
   @override
   Future<void> undo(MineResult result) async {
     undoCalls.add(result);
+  }
+}
+
+/// A [SettingsRepository] that never touches a database -- both TTS and
+/// pitch-accent audio default off, matching spec §9's real defaults, so
+/// widget tests that don't care about audio (most of them) see the speaker/
+/// pitch-accent buttons and app-bar action simply not appear, same as a
+/// fresh install would.
+class FakeSettingsRepository extends SettingsRepository {
+  FakeSettingsRepository([AppSettings? settings])
+    : _settings = settings ?? AppSettings.defaults,
+      super(_inertDatabase());
+
+  AppSettings _settings;
+
+  @override
+  Future<AppSettings> read() async => _settings;
+
+  @override
+  Stream<AppSettings> watch() => Stream.value(_settings);
+
+  @override
+  Future<void> update({
+    String? llmApiKey,
+    bool? llmExplanationsEnabled,
+    bool? ttsEnabled,
+    bool? pitchAccentAudioEnabled,
+  }) async {
+    _settings = AppSettings(
+      llmApiKey: llmApiKey ?? _settings.llmApiKey,
+      llmExplanationsEnabled:
+          llmExplanationsEnabled ?? _settings.llmExplanationsEnabled,
+      ttsEnabled: ttsEnabled ?? _settings.ttsEnabled,
+      pitchAccentAudioEnabled:
+          pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
+    );
   }
 }
 
@@ -323,6 +360,9 @@ Future<void> pumpCardModeScreen(
         wordCollectionRepositoryProvider.overrideWithValue(
           wordCollectionRepository,
         ),
+        settingsRepositoryProvider.overrideWithValue(
+          FakeSettingsRepository(),
+        ),
       ],
       child: const MaterialApp(home: CardModeScreen()),
     ),
@@ -352,6 +392,9 @@ Future<void> pumpDocumentModeScreen(
         dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
         wordCollectionRepositoryProvider.overrideWithValue(
           wordCollectionRepository,
+        ),
+        settingsRepositoryProvider.overrideWithValue(
+          FakeSettingsRepository(),
         ),
       ],
       child: const MaterialApp(home: DocumentModeScreen()),

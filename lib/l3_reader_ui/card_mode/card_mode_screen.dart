@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:japanese_immersion_reader/app/services.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 
@@ -19,6 +20,10 @@ class CardModeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncState = ref.watch(cardModeControllerProvider);
+    // Spec §9: TTS is off by default -- only show the "speak this sentence"
+    // action once the toggle is actually on, rather than a button that
+    // silently does nothing.
+    final ttsEnabled = ref.watch(appSettingsProvider).value?.ttsEnabled ?? false;
     return Scaffold(
       appBar: AppBar(
         title: Text(_titleFor(asyncState)),
@@ -30,6 +35,14 @@ class CardModeScreen extends ConsumerWidget {
               MaterialPageRoute(builder: (_) => const DocumentModeScreen()),
             ),
           ),
+          if (asyncState.hasValue && ttsEnabled)
+            IconButton(
+              icon: const Icon(Icons.volume_up_outlined),
+              tooltip: 'Speak sentence',
+              onPressed: () => ref
+                  .read(cardModeControllerProvider.notifier)
+                  .speak(asyncState.value!.sentence.surfaceText),
+            ),
           if (asyncState.hasValue)
             IconButton(
               icon: const Icon(Icons.flip_camera_android_outlined),
@@ -195,6 +208,10 @@ class _CardAreaState extends ConsumerState<_CardArea> {
         token: token,
         lookup: () => controller.lookupWord(token),
         mine: (senses) => controller.mineWord(token, senses),
+        checkTtsActive: controller.ttsActive,
+        speak: controller.speak,
+        checkPitchAccentActive: controller.pitchAccentAudioActive,
+        playPitchAccentAudio: controller.playPitchAccentAudio,
       ),
     );
     if (mined == true && mounted) {

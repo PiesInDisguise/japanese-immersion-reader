@@ -27,15 +27,22 @@ import 'definition_rendering.dart';
 /// outside this sheet, since spec's undo toast is meant to keep working even
 /// after this popup has closed.
 ///
-/// Optional popup fields from spec §10 (example sentences, pitch accent,
-/// conjugation table) aren't shown -- they're settings-gated and no
-/// settings screen exists yet, matching this pass's scope.
+/// Spec §10's example-sentences/conjugation-table optional popup fields
+/// aren't shown -- no settings toggle exists for them yet. Spec §9's audio
+/// fields (TTS, pitch-accent recording) *are* wired, via
+/// [checkTtsActive]/[speak]/[checkPitchAccentActive]/[playPitchAccentAudio]
+/// -- all optional so any caller that doesn't pass them just gets no audio
+/// buttons, matching how [TokenGlossView]'s layer-3 params work.
 class WordLookupSheet extends StatefulWidget {
   const WordLookupSheet({
     super.key,
     required this.token,
     required this.lookup,
     required this.mine,
+    this.checkTtsActive,
+    this.speak,
+    this.checkPitchAccentActive,
+    this.playPitchAccentAudio,
   });
 
   final Token token;
@@ -53,6 +60,24 @@ class WordLookupSheet extends StatefulWidget {
   /// contains [token].
   final Future<void> Function(List<DictionaryLookupHit> senses) mine;
 
+  /// `ReaderMiningSession.ttsActive` (via whichever mode controller owns
+  /// this session), checked once at open so the speaker button can be
+  /// omitted entirely when TTS is off, rather than shown and silently
+  /// doing nothing.
+  final Future<bool> Function()? checkTtsActive;
+
+  /// `ReaderMiningSession.speak` -- given the text to speak (this sheet
+  /// always passes [token]'s own surface).
+  final Future<void> Function(String text)? speak;
+
+  /// `ReaderMiningSession.pitchAccentAudioActive` -- same "check once at
+  /// open" reasoning as [checkTtsActive].
+  final Future<bool> Function()? checkPitchAccentActive;
+
+  /// `ReaderMiningSession.playPitchAccentAudio`.
+  final Future<bool> Function({required String expression, required String reading})?
+  playPitchAccentAudio;
+
   @override
   State<WordLookupSheet> createState() => _WordLookupSheetState();
 }
@@ -60,6 +85,9 @@ class WordLookupSheet extends StatefulWidget {
 class _WordLookupSheetState extends State<WordLookupSheet> {
   late final Future<List<DictionaryLookupHit>> _lookupFuture;
   bool _mining = false;
+  bool _ttsActive = false;
+  bool _pitchAccentActive = false;
+  bool _playingPitchAccent = false;
 
   @override
   void initState() {
@@ -68,12 +96,46 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
     // rebuilding this widget -- e.g. while `_mining` flips -- never
     // re-triggers the lookup.
     _lookupFuture = widget.lookup();
+    _initAudioAvailability();
+  }
+
+  Future<void> _initAudioAvailability() async {
+    final ttsActive = widget.checkTtsActive == null
+        ? false
+        : await widget.checkTtsActive!();
+    final pitchAccentActive = widget.checkPitchAccentActive == null
+        ? false
+        : await widget.checkPitchAccentActive!();
+    if (!mounted) return;
+    setState(() {
+      _ttsActive = ttsActive;
+      _pitchAccentActive = pitchAccentActive;
+    });
   }
 
   Future<void> _mine(List<DictionaryLookupHit> hits) async {
     setState(() => _mining = true);
     await widget.mine(hits);
     if (mounted) Navigator.of(context).pop(true);
+  }
+
+  Future<void> _speakWord() => widget.speak!(widget.token.surface);
+
+  Future<void> _playPitchAccent() async {
+    setState(() => _playingPitchAccent = true);
+    final played = await widget.playPitchAccentAudio!(
+      expression: widget.token.dictForm ?? widget.token.surface,
+      reading: widget.token.reading ?? widget.token.surface,
+    );
+    if (!mounted) return;
+    setState(() => _playingPitchAccent = false);
+    if (!played) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No pitch-accent recording found for this word.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -113,6 +175,34 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
                     ),
                     textAlign: TextAlign.center,
                   ),
+                ),
+              if (_ttsActive || _pitchAccentActive)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (_ttsActive)
+                      IconButton(
+                        icon: const Icon(Icons.volume_up_outlined),
+                        tooltip: 'Speak',
+                        onPressed: _speakWord,
+                      ),
+                    if (_pitchAccentActive)
+                      IconButton(
+                        icon: _playingPitchAccent
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.graphic_eq),
+                        tooltip: 'Play pitch-accent recording',
+                        onPressed: _playingPitchAccent
+                            ? null
+                            : _playPitchAccent,
+                      ),
+                  ],
                 ),
               const SizedBox(height: 16),
               FutureBuilder<List<DictionaryLookupHit>>(
