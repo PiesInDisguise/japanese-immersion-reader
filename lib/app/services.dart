@@ -11,6 +11,7 @@ import 'package:japanese_immersion_reader/l4_mining/collection/grammar_collectio
 import 'package:japanese_immersion_reader/l4_mining/collection/word_collection_repository.dart';
 
 import 'dictionary_paths.dart';
+import 'document_repository.dart';
 import 'explanation_repository.dart';
 import 'settings_repository.dart';
 
@@ -77,6 +78,10 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
 
 final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
   return ExplanationRepository(ref.watch(appDatabaseProvider));
+});
+
+final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
+  return DocumentRepository(ref.watch(appDatabaseProvider));
 });
 
 /// Spec §8 layer 3's live settings row, watchable so UI (the on/off toggle,

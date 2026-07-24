@@ -46,6 +46,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await seedSampleDictionaryIfEmpty(ref.read(appDatabaseProvider));
       final document = await load();
       ref.read(currentDocumentProvider.notifier).set(document);
+      // Mining only ever stores a sentence's id (spec §11's sourceRefs), not
+      // its text -- persisting the document here is what lets a review card
+      // resolve that id back to real content later (spec §12's "original
+      // source sentence built in as context"), long after this in-memory
+      // Document is gone. See DocumentRepository's own doc comment.
+      await ref.read(documentRepositoryProvider).save(document);
       if (mounted) {
         await Navigator.of(
           context,
