@@ -135,6 +135,28 @@ void main() {
       expect(hits.single.term.headword, '打つ');
     });
 
+    test(
+      'a katakana reading (Sudachi\'s own convention) still matches a '
+      'hiragana-only headword-less lookup, converted before comparison',
+      () async {
+        await _insertDictionary(db, id: 'dictA', priority: 0);
+        await _insertTerm(
+          db,
+          dictionaryId: 'dictA',
+          headword: '打つ',
+          reading: 'うつ',
+        );
+
+        final hits = await repo.lookup(
+          dictForm: 'NO_HEADWORD_MATCH',
+          surfaceForm: 'NO_HEADWORD_MATCH',
+          reading: 'ウツ', // katakana, as a real Sudachi token would supply
+        );
+        expect(hits, hasLength(1));
+        expect(hits.single.term.headword, '打つ');
+      },
+    );
+
     test('within one dictionary, higher score sorts first; ties break on '
         'importOrder ascending', () async {
       await _insertDictionary(db, id: 'dictA', priority: 0);

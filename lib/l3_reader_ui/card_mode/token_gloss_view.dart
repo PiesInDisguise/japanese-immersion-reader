@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/kana.dart';
 
 /// Card Mode's flip side (spec §6) and Document Mode's double-tap grammar
 /// popup (spec §7): spec §8's three-layer grammar breakdown, minus layer 3
@@ -305,7 +306,10 @@ class _TokenGlossRow extends StatelessWidget {
               if (token.dictForm != null && token.dictForm != token.surface)
                 _Field(label: 'Dictionary form', value: token.dictForm!),
               if (token.reading != null)
-                _Field(label: 'Reading', value: token.reading!),
+                _Field(
+                  label: 'Reading',
+                  value: katakanaToHiragana(token.reading!),
+                ),
               if (token.pos != null)
                 _Field(label: 'Part of speech', value: token.pos!),
               if (token.inflection != null)

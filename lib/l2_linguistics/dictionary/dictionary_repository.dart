@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/kana.dart';
 
 import 'deinflector.dart';
 
@@ -109,8 +110,13 @@ class DictionaryRepository {
     );
     if (reading == null) return byHeadword;
 
+    // Sudachi's own readings are katakana; Yomitan's `readingNormalized` is
+    // hiragana -- comparing them without converting one to match the other
+    // would silently never find a match via this branch (see kana.dart's
+    // own doc comment for how this was actually found).
     final byReading = await _enabledTermsWhere(
-      (terms) => terms.readingNormalized.equals(reading),
+      (terms) =>
+          terms.readingNormalized.equals(katakanaToHiragana(reading)),
     );
 
     final merged = <int, _MatchedRow>{

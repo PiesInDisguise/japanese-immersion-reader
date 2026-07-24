@@ -43,31 +43,98 @@ void main() {
       },
     );
 
-    test('{type: structured-content} entries fall back to a plain, '
-        'non-crashing placeholder', () {
-      final json = jsonEncode([
-        {
-          'type': 'structured-content',
-          'content': {
-            'tag': 'div',
-            'content': [
-              {
-                'tag': 'ruby',
-                'content': [
-                  '新明解',
-                  {'tag': 'rt', 'content': 'しんめいかい'},
-                ],
-              },
-            ],
+    test(
+      '{type: structured-content} entries extract their nested text',
+      () {
+        final json = jsonEncode([
+          {
+            'type': 'structured-content',
+            'content': {
+              'tag': 'div',
+              'content': [
+                {
+                  'tag': 'ruby',
+                  'content': [
+                    '新明解',
+                    {'tag': 'rt', 'content': 'しんめいかい'},
+                  ],
+                },
+              ],
+            },
           },
-        },
-      ]);
+        ]);
 
-      final result = parseDefinitionEntries(json);
+        final result = parseDefinitionEntries(json);
 
-      expect(result, hasLength(1));
-      expect(result.single, isNotEmpty);
-    });
+        expect(result, hasLength(1));
+        expect(result.single, '新明解; しんめいかい');
+      },
+    );
+
+    test(
+      'a real JMdict-shaped structured-content glossary (ul > li) renders '
+      'its text',
+      () {
+        // The exact shape a real Yomitan-converted JMdict entry uses --
+        // captured from an actual imported dictionary, not invented.
+        final json = jsonEncode([
+          {
+            'type': 'structured-content',
+            'content': {
+              'tag': 'ul',
+              'style': {'listStyleType': 'circle'},
+              'data': {'content': 'glossary'},
+              'lang': 'en',
+              'content': {'tag': 'li', 'content': 'witch'},
+            },
+          },
+        ]);
+
+        final result = parseDefinitionEntries(json);
+
+        expect(result, ['witch']);
+      },
+    );
+
+    test(
+      'multiple <li> siblings under structured-content join with "; "',
+      () {
+        final json = jsonEncode([
+          {
+            'type': 'structured-content',
+            'content': {
+              'tag': 'ul',
+              'content': [
+                {'tag': 'li', 'content': 'witch'},
+                {'tag': 'li', 'content': 'sorceress'},
+              ],
+            },
+          },
+        ]);
+
+        final result = parseDefinitionEntries(json);
+
+        expect(result, ['witch; sorceress']);
+      },
+    );
+
+    test(
+      'structured-content with no extractable text degrades to a labeled '
+      'placeholder, not an empty string',
+      () {
+        final json = jsonEncode([
+          {
+            'type': 'structured-content',
+            'content': {'tag': 'img', 'path': 'icon.png'},
+          },
+        ]);
+
+        final result = parseDefinitionEntries(json);
+
+        expect(result.single, isNotEmpty);
+        expect(result.single, isNot(''));
+      },
+    );
 
     test('a 2-tuple cross-reference entry does not crash and yields text', () {
       final json = jsonEncode([

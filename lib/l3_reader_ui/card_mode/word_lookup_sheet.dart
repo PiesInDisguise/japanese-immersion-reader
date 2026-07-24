@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/kana.dart';
 
 import 'definition_rendering.dart';
 
@@ -169,7 +170,7 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    widget.token.reading!,
+                    katakanaToHiragana(widget.token.reading!),
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.outline,
                     ),
