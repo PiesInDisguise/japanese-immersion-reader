@@ -17,6 +17,7 @@ import 'remote_browse_screen.dart';
 import 'sample_content.dart';
 import 'services.dart';
 import 'settings_screen.dart';
+import 'stats/stats_screen.dart';
 
 /// The app's entry screen: load a book (the bundled sample fixture, or a
 /// real EPUB via the system file picker) and jump into Card Mode.
@@ -195,6 +196,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: const Text('Review'),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ReviewScreen()),
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.bar_chart_outlined),
+                label: const Text('Stats'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const StatsScreen()),
                 ),
               ),
             ],
