@@ -3,22 +3,45 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
+import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
 
 import 'mining_engine.dart';
+import 'review_engine.dart';
 import 'source_ref.dart';
 import 'srs_state.dart';
+
+/// One [WordCollectionRepository.due] entry: just enough to render a review
+/// card's front/back (spec §12: recognition JP -> meaning) without a
+/// caller needing to separately query `CollectedWords` again.
+class DueWord {
+  const DueWord({
+    required this.id,
+    required this.dictForm,
+    required this.reading,
+    required this.senseIds,
+    required this.due,
+  });
+
+  final String id;
+  final String dictForm;
+  final String reading;
+  final List<int> senseIds;
+  final DateTime due;
+}
 
 /// Spec §11's `CollectedWord`: mine/remove/undo for the word side of the
 /// collection layer. This class only supplies the Drift-specific glue
 /// (`_WordMiningStore`) and the word-specific content-derived id --
 /// [MiningEngine] (see `mining_engine.dart`) owns the actual "add fresh, or
 /// reset-if-already-collected" state machine, shared verbatim with
-/// `GrammarCollectionRepository`.
+/// `GrammarCollectionRepository`; [ReviewEngine] does the same for
+/// [review]'s real-FSRS-scheduling state machine.
 class WordCollectionRepository {
   WordCollectionRepository(this._db);
 
   final AppDatabase _db;
   static const _engine = MiningEngine();
+  static const _reviewEngine = ReviewEngine();
 
   /// Spec §6's tap semantics: fresh add if `dictForm`+`reading` isn't
   /// collected yet, or a "you forgot it" reset (new sighting appended, SRS
@@ -62,6 +85,58 @@ class WordCollectionRepository {
     return _db.transaction(
       () => _engine.undo(_WordMiningStore.forId(_db, result.entryId), result),
     );
+  }
+
+  /// Spec §12's review deck: every word due on or before [now] (defaults to
+  /// the current UTC time), earliest-due first.
+  Future<List<DueWord>> due({DateTime? now}) async {
+    final cutoff = now ?? DateTime.now().toUtc();
+    final query = _db.select(_db.collectedWords)
+      ..where((w) => w.srsDue.isSmallerOrEqualValue(cutoff))
+      ..orderBy([(w) => OrderingTerm.asc(w.srsDue)]);
+    final rows = await query.get();
+    return [
+      for (final row in rows)
+        DueWord(
+          id: row.id,
+          dictForm: row.dictForm,
+          reading: row.reading,
+          senseIds: (jsonDecode(row.senseIdsJson) as List).cast<int>(),
+          due: row.srsDue,
+        ),
+    ];
+  }
+
+  /// Spec §12's rating buttons: scores [id] (a [DueWord.id]) via the real
+  /// FSRS scheduler and reschedules it.
+  Future<void> review(String id, Rating rating, {DateTime? now}) {
+    return _db.transaction(
+      () => _reviewEngine.review(
+        _WordMiningStore.forId(_db, id),
+        rating,
+        now: now,
+      ),
+    );
+  }
+
+  /// The sentence id of [id]'s most recent sighting (spec §12: "original
+  /// source sentence built in as context") -- `null` if it somehow has no
+  /// sightings at all (shouldn't happen in practice: every entry gets one
+  /// at mine-time).
+  Future<String?> latestSightingSentenceId(String id) async {
+    final query = _db.select(_db.collectedWordSources)
+      ..where((s) => s.collectedWordId.equals(id))
+      // Tie-break on the autoincrement id (higher = inserted later): two
+      // sightings can land on the exact same `minedAt` instant (e.g. two
+      // rapid mine calls within one clock tick), which would otherwise make
+      // "most recent" depend on SQLite's arbitrary tie-breaking.
+      ..orderBy([
+        (s) => OrderingTerm.desc(s.minedAt),
+        (s) => OrderingTerm.desc(s.id),
+      ])
+      ..limit(1);
+    final row = await query.getSingleOrNull();
+    return row?.sentenceId;
   }
 }
 

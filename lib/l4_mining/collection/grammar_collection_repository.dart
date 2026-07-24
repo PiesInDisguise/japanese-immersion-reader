@@ -1,22 +1,40 @@
 import 'package:drift/drift.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
+import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
 
 import 'mining_engine.dart';
+import 'review_engine.dart';
 import 'source_ref.dart';
 import 'srs_state.dart';
+
+/// One [GrammarCollectionRepository.due] entry -- grammar-side mirror of
+/// `DueWord` (`word_collection_repository.dart`).
+class DueGrammar {
+  const DueGrammar({
+    required this.id,
+    required this.grammarPointId,
+    required this.due,
+  });
+
+  final String id;
+  final String grammarPointId;
+  final DateTime due;
+}
 
 /// Spec §11's `CollectedGrammar`: mine/remove/undo for the grammar side of
 /// the collection layer -- the "grammar side behaves identically" (spec
 /// §6) mirror of `WordCollectionRepository`. This class only supplies the
 /// Drift-specific glue (`_GrammarMiningStore`) and the grammar-specific
 /// content-derived id; [MiningEngine] owns the actual shared state machine
-/// (see `mining_engine.dart`), not a re-implementation of it.
+/// (see `mining_engine.dart`), not a re-implementation of it; [ReviewEngine]
+/// does the same for [review].
 class GrammarCollectionRepository {
   GrammarCollectionRepository(this._db);
 
   final AppDatabase _db;
   static const _engine = MiningEngine();
+  static const _reviewEngine = ReviewEngine();
 
   /// Spec §6's tap semantics applied to a grammar point: fresh add if
   /// [grammarPointId] isn't collected yet, or a "you forgot it" reset (new
@@ -51,6 +69,51 @@ class GrammarCollectionRepository {
       () =>
           _engine.undo(_GrammarMiningStore.forId(_db, result.entryId), result),
     );
+  }
+
+  /// Spec §12's review deck: every grammar point due on or before [now]
+  /// (defaults to the current UTC time), earliest-due first.
+  Future<List<DueGrammar>> due({DateTime? now}) async {
+    final cutoff = now ?? DateTime.now().toUtc();
+    final query = _db.select(_db.collectedGrammars)
+      ..where((g) => g.srsDue.isSmallerOrEqualValue(cutoff))
+      ..orderBy([(g) => OrderingTerm.asc(g.srsDue)]);
+    final rows = await query.get();
+    return [
+      for (final row in rows)
+        DueGrammar(
+          id: row.id,
+          grammarPointId: row.grammarPointId,
+          due: row.srsDue,
+        ),
+    ];
+  }
+
+  /// Spec §12's rating buttons: scores [id] (a [DueGrammar.id]) via the real
+  /// FSRS scheduler and reschedules it.
+  Future<void> review(String id, Rating rating, {DateTime? now}) {
+    return _db.transaction(
+      () => _reviewEngine.review(
+        _GrammarMiningStore.forId(_db, id),
+        rating,
+        now: now,
+      ),
+    );
+  }
+
+  /// The sentence id of [id]'s most recent sighting -- grammar-side mirror
+  /// of `WordCollectionRepository.latestSightingSentenceId` (see that
+  /// method's own doc comment for why ties are broken on `id` too).
+  Future<String?> latestSightingSentenceId(String id) async {
+    final query = _db.select(_db.collectedGrammarSources)
+      ..where((s) => s.collectedGrammarId.equals(id))
+      ..orderBy([
+        (s) => OrderingTerm.desc(s.minedAt),
+        (s) => OrderingTerm.desc(s.id),
+      ])
+      ..limit(1);
+    final row = await query.getSingleOrNull();
+    return row?.sentenceId;
   }
 }
 

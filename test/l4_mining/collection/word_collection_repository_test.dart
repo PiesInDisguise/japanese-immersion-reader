@@ -9,6 +9,7 @@ import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/source_ref.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/srs_state.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/word_collection_repository.dart';
+import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
 
 const _source = SourceRef(
   workId: 'work-1',
@@ -267,5 +268,123 @@ void main() {
         expect(sightings.single.workId, 'work-1');
       },
     );
+  });
+
+  group('due', () {
+    test('returns only entries due on or before now, earliest first', () async {
+      final overdue = await repo.mine(
+        dictForm: 'A',
+        reading: 'a',
+        senseIds: const [],
+        source: _source,
+      );
+      final dueNow = await repo.mine(
+        dictForm: 'B',
+        reading: 'b',
+        senseIds: const [],
+        source: _source,
+      );
+      final notYetDue = await repo.mine(
+        dictForm: 'C',
+        reading: 'c',
+        senseIds: const [],
+        source: _source,
+      );
+
+      final now = DateTime.utc(2026, 1, 10);
+      await _forceSrsState(
+        db,
+        overdue.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2026, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+      await _forceSrsState(
+        db,
+        dueNow.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: now,
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+      await _forceSrsState(
+        db,
+        notYetDue.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2026, 2, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+
+      final due = await repo.due(now: now);
+
+      expect(due.map((d) => d.id), [overdue.entryId, dueNow.entryId]);
+    });
+  });
+
+  group('review', () {
+    test('scores a due word via the real FSRS scheduler and reschedules it', () async {
+      final result = await repo.mine(
+        dictForm: 'X',
+        reading: 'Y',
+        senseIds: const [],
+        source: _source,
+      );
+      final reviewedAt = DateTime.utc(2026, 1, 1);
+
+      await repo.review(result.entryId, Rating.good, now: reviewedAt);
+
+      final row = await (db.select(
+        db.collectedWords,
+      )..where((w) => w.id.equals(result.entryId))).getSingle();
+      expect(row.srsStatus, SrsStatus.review.name);
+      expect(row.fsrsDifficulty, isNotNull);
+      expect(row.fsrsStability, isNotNull);
+      expect(row.srsDue.isAfter(reviewedAt), isTrue);
+      expect(
+        row.lastReviewedAt!.isAtSameMomentAs(reviewedAt),
+        isTrue,
+      );
+    });
+  });
+
+  group('latestSightingSentenceId', () {
+    test('returns the most recently mined sighting\'s sentence id', () async {
+      final result = await repo.mine(
+        dictForm: 'X',
+        reading: 'Y',
+        senseIds: const [],
+        source: _source,
+      );
+      await _forceSrsState(
+        db,
+        result.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2026, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+      // A second mine-call resets and appends a second (later) sighting.
+      await repo.mine(
+        dictForm: 'X',
+        reading: 'Y',
+        senseIds: const [],
+        source: _otherSource,
+      );
+
+      expect(
+        await repo.latestSightingSentenceId(result.entryId),
+        'sentence-2',
+      );
+    });
+
+    test('returns null for an id with no sightings', () async {
+      expect(await repo.latestSightingSentenceId('no-such-id'), isNull);
+    });
   });
 }

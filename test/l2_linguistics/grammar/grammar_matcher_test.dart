@@ -62,6 +62,18 @@ void main() {
     });
   });
 
+  group('GrammarMatcher.pointById', () {
+    test('returns the point with the matching id', () {
+      final matcher = GrammarMatcher([_teIru, _tai]);
+      expect(matcher.pointById('tai-desire'), same(_tai));
+    });
+
+    test('returns null for an id not in the database', () {
+      final matcher = GrammarMatcher([_teIru]);
+      expect(matcher.pointById('no-such-id'), isNull);
+    });
+  });
+
   group('GrammarMatcher against the real bundled grammar-point database', () {
     testWidgets(
       'every seed grammar point\'s own example sentences match its own '

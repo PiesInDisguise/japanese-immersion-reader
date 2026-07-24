@@ -40,9 +40,19 @@ class GrammarMatch {
 /// per-sentence cost matters more than construction cost.
 class GrammarMatcher {
   GrammarMatcher(List<GrammarPoint> points)
-    : _compiled = [for (final point in points) (point, RegExp(point.matcher))];
+    : _compiled = [for (final point in points) (point, RegExp(point.matcher))],
+      _byId = {for (final point in points) point.id: point};
 
   final List<(GrammarPoint, RegExp)> _compiled;
+  final Map<String, GrammarPoint> _byId;
+
+  /// Looks up a single [GrammarPoint] by its own stable id -- used by the
+  /// spec §12 review deck, which only ever has a `CollectedGrammar` row's
+  /// `grammarPointId` on hand (not a matched sentence to re-run
+  /// [matchSentence] against). `null` if [id] isn't in this database
+  /// (shouldn't happen for a genuinely collected point, but a stale id from
+  /// a since-edited/removed database entry shouldn't crash the deck).
+  GrammarPoint? pointById(String id) => _byId[id];
 
   /// Every [GrammarPoint] whose [GrammarPoint.matcher] matches somewhere in
   /// [surfaceText], in the same order [GrammarMatcher] was constructed with
