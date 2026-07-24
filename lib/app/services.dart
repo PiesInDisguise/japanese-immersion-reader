@@ -3,6 +3,7 @@ import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/llm/grammar_explanation_client.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/native_library_loader.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/sudachi_tokenizer.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/tokenizer/tokenizer.dart';
@@ -10,6 +11,8 @@ import 'package:japanese_immersion_reader/l4_mining/collection/grammar_collectio
 import 'package:japanese_immersion_reader/l4_mining/collection/word_collection_repository.dart';
 
 import 'dictionary_paths.dart';
+import 'explanation_repository.dart';
+import 'settings_repository.dart';
 
 /// One shared [AppDatabase] for the app's lifetime. Riverpod keeps this
 /// alive for as long as anything is watching it (every other provider below
@@ -67,3 +70,31 @@ final grammarDatabaseProvider = FutureProvider<GrammarMatcher>((ref) async {
   final points = await loadGrammarPoints();
   return GrammarMatcher(points);
 });
+
+final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
+  return SettingsRepository(ref.watch(appDatabaseProvider));
+});
+
+final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
+  return ExplanationRepository(ref.watch(appDatabaseProvider));
+});
+
+/// Spec §8 layer 3's live settings row, watchable so UI (the on/off toggle,
+/// whether the explanation section even attempts a call) updates the moment
+/// the settings screen changes it, without needing a manual refresh.
+final appSettingsProvider = StreamProvider<AppSettings>((ref) {
+  return ref.watch(settingsRepositoryProvider).watch();
+});
+
+/// Builds a real [GrammarExplanationClient] from a live API key. Kept as a
+/// factory seam (not a single shared instance) rather than
+/// `ReaderMiningSession` constructing `AnthropicGrammarExplanationClient`
+/// directly, for the same reason `l1_ingestion/pdf_scanned` takes an
+/// `OcrEngineFactory` rather than a concrete engine: tests override this
+/// with a fake-emitting factory so nothing in the test suite ever makes a
+/// real network call, and a fresh client is built per explanation (the key
+/// can change if the user edits Settings mid-session).
+final grammarExplanationClientFactoryProvider =
+    Provider<GrammarExplanationClient Function(String apiKey)>((ref) {
+      return (apiKey) => AnthropicGrammarExplanationClient(apiKey: apiKey);
+    });

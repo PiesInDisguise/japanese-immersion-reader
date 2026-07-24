@@ -5861,6 +5861,555 @@ class CollectedGrammarSourcesCompanion
   }
 }
 
+class $SettingsTable extends Settings
+    with TableInfo<$SettingsTable, SettingsRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _llmApiKeyMeta = const VerificationMeta(
+    'llmApiKey',
+  );
+  @override
+  late final GeneratedColumn<String> llmApiKey = GeneratedColumn<String>(
+    'llm_api_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _llmExplanationsEnabledMeta =
+      const VerificationMeta('llmExplanationsEnabled');
+  @override
+  late final GeneratedColumn<bool> llmExplanationsEnabled =
+      GeneratedColumn<bool>(
+        'llm_explanations_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("llm_explanations_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  @override
+  List<GeneratedColumn> get $columns => [id, llmApiKey, llmExplanationsEnabled];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SettingsRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('llm_api_key')) {
+      context.handle(
+        _llmApiKeyMeta,
+        llmApiKey.isAcceptableOrUnknown(data['llm_api_key']!, _llmApiKeyMeta),
+      );
+    }
+    if (data.containsKey('llm_explanations_enabled')) {
+      context.handle(
+        _llmExplanationsEnabledMeta,
+        llmExplanationsEnabled.isAcceptableOrUnknown(
+          data['llm_explanations_enabled']!,
+          _llmExplanationsEnabledMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SettingsRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SettingsRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      llmApiKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}llm_api_key'],
+      ),
+      llmExplanationsEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}llm_explanations_enabled'],
+      )!,
+    );
+  }
+
+  @override
+  $SettingsTable createAlias(String alias) {
+    return $SettingsTable(attachedDatabase, alias);
+  }
+}
+
+class SettingsRow extends DataClass implements Insertable<SettingsRow> {
+  final int id;
+
+  /// The user's own Anthropic API key (spec §14: "LLM — API key entry"; spec
+  /// §2: "BYO", no hosted proxy). Stored in the same local SQLite database
+  /// as everything else in this local-first app -- not OS keychain/secure
+  /// storage, matching this project's own "local-first, no account, no
+  /// cloud" posture; a future pass could move this to a platform secure-
+  /// storage API without changing any caller of [SettingsRepository], only
+  /// this column's own storage.
+  final String? llmApiKey;
+
+  /// Spec §14: "grammar-explanation on/off". Defaults on: layer 3 is meant
+  /// to be additive/optional (spec §8: "already fully usable without it"),
+  /// so the only real gate on whether it actually runs is whether an API key
+  /// is present, not this toggle needing an extra opt-in step too.
+  final bool llmExplanationsEnabled;
+  const SettingsRow({
+    required this.id,
+    this.llmApiKey,
+    required this.llmExplanationsEnabled,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || llmApiKey != null) {
+      map['llm_api_key'] = Variable<String>(llmApiKey);
+    }
+    map['llm_explanations_enabled'] = Variable<bool>(llmExplanationsEnabled);
+    return map;
+  }
+
+  SettingsCompanion toCompanion(bool nullToAbsent) {
+    return SettingsCompanion(
+      id: Value(id),
+      llmApiKey: llmApiKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(llmApiKey),
+      llmExplanationsEnabled: Value(llmExplanationsEnabled),
+    );
+  }
+
+  factory SettingsRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SettingsRow(
+      id: serializer.fromJson<int>(json['id']),
+      llmApiKey: serializer.fromJson<String?>(json['llmApiKey']),
+      llmExplanationsEnabled: serializer.fromJson<bool>(
+        json['llmExplanationsEnabled'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'llmApiKey': serializer.toJson<String?>(llmApiKey),
+      'llmExplanationsEnabled': serializer.toJson<bool>(llmExplanationsEnabled),
+    };
+  }
+
+  SettingsRow copyWith({
+    int? id,
+    Value<String?> llmApiKey = const Value.absent(),
+    bool? llmExplanationsEnabled,
+  }) => SettingsRow(
+    id: id ?? this.id,
+    llmApiKey: llmApiKey.present ? llmApiKey.value : this.llmApiKey,
+    llmExplanationsEnabled:
+        llmExplanationsEnabled ?? this.llmExplanationsEnabled,
+  );
+  SettingsRow copyWithCompanion(SettingsCompanion data) {
+    return SettingsRow(
+      id: data.id.present ? data.id.value : this.id,
+      llmApiKey: data.llmApiKey.present ? data.llmApiKey.value : this.llmApiKey,
+      llmExplanationsEnabled: data.llmExplanationsEnabled.present
+          ? data.llmExplanationsEnabled.value
+          : this.llmExplanationsEnabled,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsRow(')
+          ..write('id: $id, ')
+          ..write('llmApiKey: $llmApiKey, ')
+          ..write('llmExplanationsEnabled: $llmExplanationsEnabled')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, llmApiKey, llmExplanationsEnabled);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SettingsRow &&
+          other.id == this.id &&
+          other.llmApiKey == this.llmApiKey &&
+          other.llmExplanationsEnabled == this.llmExplanationsEnabled);
+}
+
+class SettingsCompanion extends UpdateCompanion<SettingsRow> {
+  final Value<int> id;
+  final Value<String?> llmApiKey;
+  final Value<bool> llmExplanationsEnabled;
+  const SettingsCompanion({
+    this.id = const Value.absent(),
+    this.llmApiKey = const Value.absent(),
+    this.llmExplanationsEnabled = const Value.absent(),
+  });
+  SettingsCompanion.insert({
+    this.id = const Value.absent(),
+    this.llmApiKey = const Value.absent(),
+    this.llmExplanationsEnabled = const Value.absent(),
+  });
+  static Insertable<SettingsRow> custom({
+    Expression<int>? id,
+    Expression<String>? llmApiKey,
+    Expression<bool>? llmExplanationsEnabled,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (llmApiKey != null) 'llm_api_key': llmApiKey,
+      if (llmExplanationsEnabled != null)
+        'llm_explanations_enabled': llmExplanationsEnabled,
+    });
+  }
+
+  SettingsCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? llmApiKey,
+    Value<bool>? llmExplanationsEnabled,
+  }) {
+    return SettingsCompanion(
+      id: id ?? this.id,
+      llmApiKey: llmApiKey ?? this.llmApiKey,
+      llmExplanationsEnabled:
+          llmExplanationsEnabled ?? this.llmExplanationsEnabled,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (llmApiKey.present) {
+      map['llm_api_key'] = Variable<String>(llmApiKey.value);
+    }
+    if (llmExplanationsEnabled.present) {
+      map['llm_explanations_enabled'] = Variable<bool>(
+        llmExplanationsEnabled.value,
+      );
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('llmApiKey: $llmApiKey, ')
+          ..write('llmExplanationsEnabled: $llmExplanationsEnabled')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SentenceExplanationsTable extends SentenceExplanations
+    with TableInfo<$SentenceExplanationsTable, SentenceExplanationRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SentenceExplanationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _explanationMeta = const VerificationMeta(
+    'explanation',
+  );
+  @override
+  late final GeneratedColumn<String> explanation = GeneratedColumn<String>(
+    'explanation',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, explanation, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sentence_explanations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SentenceExplanationRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('explanation')) {
+      context.handle(
+        _explanationMeta,
+        explanation.isAcceptableOrUnknown(
+          data['explanation']!,
+          _explanationMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_explanationMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SentenceExplanationRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SentenceExplanationRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      explanation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}explanation'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SentenceExplanationsTable createAlias(String alias) {
+    return $SentenceExplanationsTable(attachedDatabase, alias);
+  }
+}
+
+class SentenceExplanationRow extends DataClass
+    implements Insertable<SentenceExplanationRow> {
+  final String id;
+  final String explanation;
+  final DateTime createdAt;
+  const SentenceExplanationRow({
+    required this.id,
+    required this.explanation,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['explanation'] = Variable<String>(explanation);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SentenceExplanationsCompanion toCompanion(bool nullToAbsent) {
+    return SentenceExplanationsCompanion(
+      id: Value(id),
+      explanation: Value(explanation),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SentenceExplanationRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SentenceExplanationRow(
+      id: serializer.fromJson<String>(json['id']),
+      explanation: serializer.fromJson<String>(json['explanation']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'explanation': serializer.toJson<String>(explanation),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SentenceExplanationRow copyWith({
+    String? id,
+    String? explanation,
+    DateTime? createdAt,
+  }) => SentenceExplanationRow(
+    id: id ?? this.id,
+    explanation: explanation ?? this.explanation,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SentenceExplanationRow copyWithCompanion(SentenceExplanationsCompanion data) {
+    return SentenceExplanationRow(
+      id: data.id.present ? data.id.value : this.id,
+      explanation: data.explanation.present
+          ? data.explanation.value
+          : this.explanation,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SentenceExplanationRow(')
+          ..write('id: $id, ')
+          ..write('explanation: $explanation, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, explanation, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SentenceExplanationRow &&
+          other.id == this.id &&
+          other.explanation == this.explanation &&
+          other.createdAt == this.createdAt);
+}
+
+class SentenceExplanationsCompanion
+    extends UpdateCompanion<SentenceExplanationRow> {
+  final Value<String> id;
+  final Value<String> explanation;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const SentenceExplanationsCompanion({
+    this.id = const Value.absent(),
+    this.explanation = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SentenceExplanationsCompanion.insert({
+    required String id,
+    required String explanation,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       explanation = Value(explanation),
+       createdAt = Value(createdAt);
+  static Insertable<SentenceExplanationRow> custom({
+    Expression<String>? id,
+    Expression<String>? explanation,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (explanation != null) 'explanation': explanation,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SentenceExplanationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? explanation,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return SentenceExplanationsCompanion(
+      id: id ?? this.id,
+      explanation: explanation ?? this.explanation,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (explanation.present) {
+      map['explanation'] = Variable<String>(explanation.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SentenceExplanationsCompanion(')
+          ..write('id: $id, ')
+          ..write('explanation: $explanation, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5881,6 +6430,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CollectedGrammarsTable(this);
   late final $CollectedGrammarSourcesTable collectedGrammarSources =
       $CollectedGrammarSourcesTable(this);
+  late final $SettingsTable settings = $SettingsTable(this);
+  late final $SentenceExplanationsTable sentenceExplanations =
+      $SentenceExplanationsTable(this);
   late final Index idxDictTermHeadword = Index(
     'idx_dict_term_headword',
     'CREATE INDEX idx_dict_term_headword ON dictionary_term_entries (headword)',
@@ -5921,6 +6473,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     collectedWordSources,
     collectedGrammars,
     collectedGrammarSources,
+    settings,
+    sentenceExplanations,
     idxDictTermHeadword,
     idxDictTermReadingNormalized,
     idxDictTermDictionarySequence,
@@ -11495,6 +12049,341 @@ typedef $$CollectedGrammarSourcesTableProcessedTableManager =
         bool sentenceId,
       })
     >;
+typedef $$SettingsTableCreateCompanionBuilder =
+    SettingsCompanion Function({
+      Value<int> id,
+      Value<String?> llmApiKey,
+      Value<bool> llmExplanationsEnabled,
+    });
+typedef $$SettingsTableUpdateCompanionBuilder =
+    SettingsCompanion Function({
+      Value<int> id,
+      Value<String?> llmApiKey,
+      Value<bool> llmExplanationsEnabled,
+    });
+
+class $$SettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $SettingsTable> {
+  $$SettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get llmApiKey => $composableBuilder(
+    column: $table.llmApiKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get llmExplanationsEnabled => $composableBuilder(
+    column: $table.llmExplanationsEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SettingsTable> {
+  $$SettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get llmApiKey => $composableBuilder(
+    column: $table.llmApiKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get llmExplanationsEnabled => $composableBuilder(
+    column: $table.llmExplanationsEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SettingsTable> {
+  $$SettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get llmApiKey =>
+      $composableBuilder(column: $table.llmApiKey, builder: (column) => column);
+
+  GeneratedColumn<bool> get llmExplanationsEnabled => $composableBuilder(
+    column: $table.llmExplanationsEnabled,
+    builder: (column) => column,
+  );
+}
+
+class $$SettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SettingsTable,
+          SettingsRow,
+          $$SettingsTableFilterComposer,
+          $$SettingsTableOrderingComposer,
+          $$SettingsTableAnnotationComposer,
+          $$SettingsTableCreateCompanionBuilder,
+          $$SettingsTableUpdateCompanionBuilder,
+          (
+            SettingsRow,
+            BaseReferences<_$AppDatabase, $SettingsTable, SettingsRow>,
+          ),
+          SettingsRow,
+          PrefetchHooks Function()
+        > {
+  $$SettingsTableTableManager(_$AppDatabase db, $SettingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> llmApiKey = const Value.absent(),
+                Value<bool> llmExplanationsEnabled = const Value.absent(),
+              }) => SettingsCompanion(
+                id: id,
+                llmApiKey: llmApiKey,
+                llmExplanationsEnabled: llmExplanationsEnabled,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> llmApiKey = const Value.absent(),
+                Value<bool> llmExplanationsEnabled = const Value.absent(),
+              }) => SettingsCompanion.insert(
+                id: id,
+                llmApiKey: llmApiKey,
+                llmExplanationsEnabled: llmExplanationsEnabled,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SettingsTable,
+      SettingsRow,
+      $$SettingsTableFilterComposer,
+      $$SettingsTableOrderingComposer,
+      $$SettingsTableAnnotationComposer,
+      $$SettingsTableCreateCompanionBuilder,
+      $$SettingsTableUpdateCompanionBuilder,
+      (SettingsRow, BaseReferences<_$AppDatabase, $SettingsTable, SettingsRow>),
+      SettingsRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SentenceExplanationsTableCreateCompanionBuilder =
+    SentenceExplanationsCompanion Function({
+      required String id,
+      required String explanation,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$SentenceExplanationsTableUpdateCompanionBuilder =
+    SentenceExplanationsCompanion Function({
+      Value<String> id,
+      Value<String> explanation,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$SentenceExplanationsTableFilterComposer
+    extends Composer<_$AppDatabase, $SentenceExplanationsTable> {
+  $$SentenceExplanationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get explanation => $composableBuilder(
+    column: $table.explanation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SentenceExplanationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SentenceExplanationsTable> {
+  $$SentenceExplanationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get explanation => $composableBuilder(
+    column: $table.explanation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SentenceExplanationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SentenceExplanationsTable> {
+  $$SentenceExplanationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get explanation => $composableBuilder(
+    column: $table.explanation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SentenceExplanationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SentenceExplanationsTable,
+          SentenceExplanationRow,
+          $$SentenceExplanationsTableFilterComposer,
+          $$SentenceExplanationsTableOrderingComposer,
+          $$SentenceExplanationsTableAnnotationComposer,
+          $$SentenceExplanationsTableCreateCompanionBuilder,
+          $$SentenceExplanationsTableUpdateCompanionBuilder,
+          (
+            SentenceExplanationRow,
+            BaseReferences<
+              _$AppDatabase,
+              $SentenceExplanationsTable,
+              SentenceExplanationRow
+            >,
+          ),
+          SentenceExplanationRow,
+          PrefetchHooks Function()
+        > {
+  $$SentenceExplanationsTableTableManager(
+    _$AppDatabase db,
+    $SentenceExplanationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SentenceExplanationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SentenceExplanationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SentenceExplanationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> explanation = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SentenceExplanationsCompanion(
+                id: id,
+                explanation: explanation,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String explanation,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SentenceExplanationsCompanion.insert(
+                id: id,
+                explanation: explanation,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SentenceExplanationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SentenceExplanationsTable,
+      SentenceExplanationRow,
+      $$SentenceExplanationsTableFilterComposer,
+      $$SentenceExplanationsTableOrderingComposer,
+      $$SentenceExplanationsTableAnnotationComposer,
+      $$SentenceExplanationsTableCreateCompanionBuilder,
+      $$SentenceExplanationsTableUpdateCompanionBuilder,
+      (
+        SentenceExplanationRow,
+        BaseReferences<
+          _$AppDatabase,
+          $SentenceExplanationsTable,
+          SentenceExplanationRow
+        >,
+      ),
+      SentenceExplanationRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11527,4 +12416,8 @@ class $AppDatabaseManager {
         _db,
         _db.collectedGrammarSources,
       );
+  $$SettingsTableTableManager get settings =>
+      $$SettingsTableTableManager(_db, _db.settings);
+  $$SentenceExplanationsTableTableManager get sentenceExplanations =>
+      $$SentenceExplanationsTableTableManager(_db, _db.sentenceExplanations);
 }

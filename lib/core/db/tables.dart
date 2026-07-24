@@ -326,3 +326,65 @@ class CollectedGrammarSources extends Table {
   TextColumn get mediaType => text().named('media_type')();
   DateTimeColumn get minedAt => dateTime().named('mined_at')();
 }
+
+// ---------------------------------------------------------------------------
+// Settings + LLM explanation cache (spec §8 layer 3, spec §14) -- added in a
+// schema migration (see database.dart's `migration` override), not just
+// appended to schemaVersion 1's table list: this project has been under
+// active local development long enough that a real on-disk dev database
+// already exists without these tables, and Drift's default `onCreate`-only
+// behavior never revisits an already-created database, so skipping a real
+// migration here would crash the very next run against that existing file.
+// ---------------------------------------------------------------------------
+
+/// Single-row table (fixed `id = 0`) for the handful of user-configurable
+/// settings spec §14 lists that this project has actually built UI for so
+/// far -- just the LLM section (API key entry, grammar-explanation on/off).
+/// The rest of spec §14's settings (reader appearance, mining auto-add,
+/// definition popup fields, audio, dictionaries, decks, UI language) have no
+/// settings UI yet and so have no columns here either; add them to this same
+/// row when their own features get built, rather than a key-value table --
+/// there's only ever one settings row per install, so a fixed schema is
+/// simpler than a generic key-value store for this project's actual needs.
+@DataClassName('SettingsRow')
+class Settings extends Table {
+  IntColumn get id => integer()();
+
+  /// The user's own Anthropic API key (spec §14: "LLM — API key entry"; spec
+  /// §2: "BYO", no hosted proxy). Stored in the same local SQLite database
+  /// as everything else in this local-first app -- not OS keychain/secure
+  /// storage, matching this project's own "local-first, no account, no
+  /// cloud" posture; a future pass could move this to a platform secure-
+  /// storage API without changing any caller of [SettingsRepository], only
+  /// this column's own storage.
+  TextColumn get llmApiKey => text().nullable().named('llm_api_key')();
+
+  /// Spec §14: "grammar-explanation on/off". Defaults on: layer 3 is meant
+  /// to be additive/optional (spec §8: "already fully usable without it"),
+  /// so the only real gate on whether it actually runs is whether an API key
+  /// is present, not this toggle needing an extra opt-in step too.
+  BoolColumn get llmExplanationsEnabled =>
+      boolean().withDefault(const Constant(true)).named('llm_explanations_enabled')();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// One row per cached LLM grammar explanation (spec §8 layer 3: "cached
+/// permanently by sentence hash so it's paid for once"), keyed by
+/// [contentDerivedExplanationId] (`core/ids/stable_id.dart`) -- a hash of the
+/// sentence's own text *and* its surrounding context, not the position-
+/// derived `Sentence.id`: the explanation depends on what was actually said,
+/// not where it appears, so identical text+context in two different books
+/// (or two editions of the same one) shares one cached call. Never updated
+/// after insert -- a cache hit is a straight primary-key read, and there's
+/// nothing to reconcile since the same key always implies the same prompt.
+@DataClassName('SentenceExplanationRow')
+class SentenceExplanations extends Table {
+  TextColumn get id => text()();
+  TextColumn get explanation => text()();
+  DateTimeColumn get createdAt => dateTime().named('created_at')();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

@@ -101,3 +101,21 @@ String contentDerivedWordId({
 /// already-unique id would add nothing.
 String contentDerivedGrammarId(String grammarPointId) =>
     'grammar-$grammarPointId';
+
+/// Deterministic id for a cached LLM grammar explanation (spec §8 layer 3:
+/// "cached permanently by sentence hash"). Hashes the sentence's own text
+/// *and* its surrounding context together (length-prefixed, same reasoning
+/// as [contentDerivedWordId]) rather than reusing the sentence's own
+/// position-derived `Sentence.id`: the explanation depends on what the
+/// sentence and its context actually say, not where it sits in a particular
+/// document, so identical text+context (e.g. the same line quoted in two
+/// books, or re-imported after a minor OCR re-run that didn't change this
+/// sentence) shares one cached call instead of paying for it twice.
+String contentDerivedExplanationId({
+  required String sentenceText,
+  required String contextText,
+}) {
+  final input =
+      '${sentenceText.length}:$sentenceText:${contextText.length}:$contextText';
+  return 'explanation-${sha1.convert(utf8.encode(input))}';
+}

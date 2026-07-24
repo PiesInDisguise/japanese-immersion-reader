@@ -25,6 +25,10 @@ part 'database.g.dart';
     CollectedWordSources,
     CollectedGrammars,
     CollectedGrammarSources,
+    // Settings + LLM explanation cache (spec §8 layer 3, spec §14) --
+    // added in schemaVersion 2, see `migration` below.
+    Settings,
+    SentenceExplanations,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -32,7 +36,22 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      // Real dev/installed databases already exist at schemaVersion 1
+      // without Settings/SentenceExplanations -- Drift's default onCreate
+      // path never revisits an already-created database, so this is a real
+      // migration, not just a formality.
+      if (from < 2) {
+        await m.createTable(settings);
+        await m.createTable(sentenceExplanations);
+      }
+    },
+  );
 
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {

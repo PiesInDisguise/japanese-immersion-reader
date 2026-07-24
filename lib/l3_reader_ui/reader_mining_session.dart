@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
@@ -148,6 +149,73 @@ class ReaderMiningSession {
       await _ref.read(grammarCollectionRepositoryProvider).undo(result);
     } else {
       await _ref.read(wordCollectionRepositoryProvider).undo(result);
+    }
+  }
+
+  /// Spec §8 layer 3: whether the reader should even attempt to show a
+  /// grammar explanation this session -- an API key is configured *and* the
+  /// toggle is on (see `AppSettings.llmExplanationsActive`). Callers should
+  /// check this before calling [explainSentence], so UI can hide the layer-3
+  /// section entirely rather than call in and immediately fail.
+  Future<bool> explanationsActive() async {
+    final settings = await _ref.read(settingsRepositoryProvider).read();
+    return settings.llmExplanationsActive;
+  }
+
+  /// Spec §8 layer 3: a natural-language grammar explanation for [sentence],
+  /// given [contextSentences] (surrounding lines, for resolving ambiguity --
+  /// callers typically pass a handful of sentences before/after). Checks the
+  /// permanent by-content cache first (`contentDerivedExplanationId`); only
+  /// calls the real LLM on a cache miss, and writes the completed result
+  /// back to the cache so the same sentence+context is never paid for
+  /// twice (spec §8: "cached permanently by sentence hash").
+  ///
+  /// Emits the *cumulative* text-so-far on every update (matching
+  /// [GrammarExplanationClient.streamExplanation]'s own contract), so a
+  /// caller can just display the latest emission directly.
+  ///
+  /// Callers must check [explanationsActive] first -- this throws
+  /// [StateError] if no API key is configured, since reaching this call at
+  /// all means the caller already decided a real attempt should happen.
+  Stream<String> explainSentence(
+    Sentence sentence, {
+    required List<Sentence> contextSentences,
+  }) async* {
+    final settings = await _ref.read(settingsRepositoryProvider).read();
+    final apiKey = settings.llmApiKey;
+    if (apiKey == null || apiKey.isEmpty) {
+      throw StateError(
+        'explainSentence called with no API key configured -- callers must '
+        'check explanationsActive() first.',
+      );
+    }
+
+    final sentenceText = sentence.surfaceText;
+    final contextText = contextSentences.map((s) => s.surfaceText).join('\n');
+    final cacheId = contentDerivedExplanationId(
+      sentenceText: sentenceText,
+      contextText: contextText,
+    );
+
+    final explanationRepository = _ref.read(explanationRepositoryProvider);
+    final cached = await explanationRepository.read(cacheId);
+    if (cached != null) {
+      yield cached;
+      return;
+    }
+
+    final buildClient = _ref.read(grammarExplanationClientFactoryProvider);
+    final client = buildClient(apiKey);
+    var latest = '';
+    await for (final chunk in client.streamExplanation(
+      sentenceText: sentenceText,
+      contextText: contextText,
+    )) {
+      latest = chunk;
+      yield chunk;
+    }
+    if (latest.isNotEmpty) {
+      await explanationRepository.write(cacheId, latest);
     }
   }
 }
