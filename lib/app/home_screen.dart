@@ -10,6 +10,7 @@ import 'package:japanese_immersion_reader/l1_ingestion/pdf_scanned/scanned_pdf_i
 import 'package:japanese_immersion_reader/l1_ingestion/pdf_text/pdf_text_importer.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
+import 'package:japanese_immersion_reader/l5_srs/review_ui/review_screen.dart';
 
 import 'sample_content.dart';
 import 'services.dart';
@@ -160,6 +161,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               TextButton(
                 onPressed: _loadSampleVerticalPdf,
                 child: const Text('Load Sample Vertical PDF'),
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.style_outlined),
+                label: const Text('Review'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ReviewScreen()),
+                ),
               ),
             ],
             if (_error != null) ...[
