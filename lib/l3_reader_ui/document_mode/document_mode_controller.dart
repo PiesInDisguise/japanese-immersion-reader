@@ -54,6 +54,7 @@ final documentModeControllerProvider =
 /// network-dependent phase, same as Card Mode.
 class DocumentModeController extends AsyncNotifier<DocumentModeState> {
   late ReaderMiningSession _mining;
+  late List<Sentence> _flatSentences;
   final Map<String, List<Token>> _tokenCache = {};
   final Map<String, List<GrammarMatch>> _grammarMatchCache = {};
 
@@ -69,6 +70,10 @@ class DocumentModeController extends AsyncNotifier<DocumentModeState> {
     _mining = ReaderMiningSession(ref);
     _tokenCache.clear();
     _grammarMatchCache.clear();
+    _flatSentences = [
+      for (final chapter in document.chapters)
+        for (final block in chapter.blocks) ...block.sentences,
+    ];
 
     final storedSentenceId = ref.read(currentSentencePositionProvider);
     final initialSentenceId =
@@ -181,4 +186,24 @@ class DocumentModeController extends AsyncNotifier<DocumentModeState> {
       _mining.removeGrammarPoint(grammarPointId);
 
   Future<void> undoLastMining() => _mining.undoLastMining();
+
+  /// Spec §8 layer 3 gate -- see `ReaderMiningSession.explanationsActive`'s
+  /// own doc comment. Checked by `TokenGlossView` before it calls
+  /// [explainSentence].
+  Future<bool> explanationsActive() => _mining.explanationsActive();
+
+  /// Spec §8 layer 3 for [sentence]: the whole-document sentence immediately
+  /// before/after it (in reading order, across block/chapter boundaries)
+  /// stand in for "surrounding context" -- the same context-window notion
+  /// as `CardModeController.explainSentence`, just derived from
+  /// [_flatSentences] instead of Card Mode's own flattened feed.
+  Stream<String> explainSentence(Sentence sentence) {
+    final index = _flatSentences.indexWhere((s) => s.id == sentence.id);
+    final context = [
+      if (index > 0) _flatSentences[index - 1],
+      if (index >= 0 && index < _flatSentences.length - 1)
+        _flatSentences[index + 1],
+    ];
+    return _mining.explainSentence(sentence, contextSentences: context);
+  }
 }

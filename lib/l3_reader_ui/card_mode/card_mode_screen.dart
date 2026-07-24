@@ -301,6 +301,13 @@ class _CardAreaState extends ConsumerState<_CardArea> {
                       grammarMatches: state.grammarMatches,
                       onGrammarPointTap: _handleGrammarPointTap,
                       onGrammarPointLongPress: _handleGrammarPointLongPress,
+                      sentence: state.sentence,
+                      checkExplanationsActive: () => ref
+                          .read(cardModeControllerProvider.notifier)
+                          .explanationsActive(),
+                      explainSentence: (sentence) => ref
+                          .read(cardModeControllerProvider.notifier)
+                          .explainSentence(sentence),
                     )
                   : _FrontFace(
                       key: ValueKey('${state.cardIndex}-front'),

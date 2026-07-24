@@ -381,6 +381,10 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
                     onGrammarPointTap: (match) =>
                         _handleGrammarPointTap(sentence.id, match),
                     onGrammarPointLongPress: _handleGrammarPointLongPress,
+                    sentence: sentence,
+                    checkExplanationsActive: () =>
+                        controller.explanationsActive(),
+                    explainSentence: (s) => controller.explainSentence(s),
                   ),
                 ),
                 const SizedBox(height: 12),

@@ -177,4 +177,23 @@ class CardModeController extends AsyncNotifier<CardModeState> {
       _mining.removeGrammarPoint(grammarPointId);
 
   Future<void> undoLastMining() => _mining.undoLastMining();
+
+  /// Spec §8 layer 3 gate -- see `ReaderMiningSession.explanationsActive`'s
+  /// own doc comment. Checked by `TokenGlossView` before it calls
+  /// [explainSentence].
+  Future<bool> explanationsActive() => _mining.explanationsActive();
+
+  /// Spec §8 layer 3 for [sentence]: the one card before and after it in
+  /// this session's flattened feed stand in for "surrounding context" (spec
+  /// §8's context window) -- Card Mode has no other notion of "nearby text"
+  /// to offer.
+  Stream<String> explainSentence(Sentence sentence) {
+    final index = _positions.indexWhere((p) => p.sentence.id == sentence.id);
+    final context = [
+      if (index > 0) _positions[index - 1].sentence,
+      if (index >= 0 && index < _positions.length - 1)
+        _positions[index + 1].sentence,
+    ];
+    return _mining.explainSentence(sentence, contextSentences: context);
+  }
 }
