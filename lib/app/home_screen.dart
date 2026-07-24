@@ -11,7 +11,9 @@ import 'package:japanese_immersion_reader/l1_ingestion/pdf_text/pdf_text_importe
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
 import 'package:japanese_immersion_reader/l5_srs/review_ui/review_screen.dart';
+import 'package:path/path.dart' as p;
 
+import 'remote_browse_screen.dart';
 import 'sample_content.dart';
 import 'services.dart';
 import 'settings_screen.dart';
@@ -110,6 +112,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ).import(File(path), onProgress: (_) {});
   });
 
+  /// Spec §5's remote book sources: [RemoteBrowseScreen] handles connecting
+  /// to/listing/downloading from a WebDAV or OPDS source and pops with the
+  /// downloaded local file -- this just picks the right importer by
+  /// extension, same as a sideloaded file would get. Scanned/image-only
+  /// PDFs aren't auto-detected here (a remote PDF is imported as
+  /// text-layer, matching the "Import PDF..." button); use the sideload
+  /// flow for a scanned PDF that needs OCR.
+  Future<void> _importFromRemote() => _openDocument(() async {
+    final file = await Navigator.of(
+      context,
+    ).push<File>(MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()));
+    if (file == null) throw StateError('No book selected.');
+    final extension = p.extension(file.path).toLowerCase();
+    return switch (extension) {
+      '.epub' => EpubImporter().import(file, onProgress: (_) {}),
+      '.pdf' => PdfTextImporter().import(file, onProgress: (_) {}),
+      _ => throw StateError('Unsupported remote file type: $extension'),
+    };
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,6 +171,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               OutlinedButton(
                 onPressed: _importScannedPdf,
                 child: const Text('Import Scanned PDF (OCR)...'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: _importFromRemote,
+                child: const Text('Browse Remote Source...'),
               ),
               const SizedBox(height: 12),
               // Not a polished library entry -- like the rest of this
