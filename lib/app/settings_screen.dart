@@ -1,11 +1,17 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:japanese_immersion_reader/core/db/database.dart';
+import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_importer.dart';
 
 import 'services.dart';
 
 /// Spec §14's real settings surface so far: the BYO Anthropic API key and
-/// grammar-explanation (spec §8 layer 3) toggle, plus spec §9's TTS/
-/// pitch-accent-audio toggles. Reachable from [HomeScreen]'s app bar.
+/// grammar-explanation (spec §8 layer 3) toggle, spec §9's TTS/
+/// pitch-accent-audio toggles, and spec §10's dictionary import/installed
+/// list. Reachable from [HomeScreen]'s app bar.
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -18,10 +24,68 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _obscureApiKey = true;
   bool _initialized = false;
 
+  bool _importingDictionary = false;
+  double _importProgress = 0;
+  late Future<List<Dictionary>> _installedDictionariesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshInstalledDictionaries();
+  }
+
   @override
   void dispose() {
     _apiKeyController.dispose();
     super.dispose();
+  }
+
+  void _refreshInstalledDictionaries() {
+    _installedDictionariesFuture = ref
+        .read(dictionaryRepositoryProvider)
+        .listInstalled();
+  }
+
+  /// Spec §10: "Import both Yomitan/Yomichan ZIP format and raw JMdict."
+  /// Only the Yomitan ZIP path is wired here -- `DictionaryImporter` (see
+  /// its own doc comment) only understands that format; raw JMdict
+  /// XML/JSON would need a separate converter this pass doesn't build.
+  /// JMdict itself is commonly redistributed pre-converted to Yomitan
+  /// format (e.g. via Yomitan's own dictionary list), which is what this
+  /// button expects.
+  Future<void> _importDictionary() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+    );
+    final path = result?.files.single.path;
+    if (path == null || !mounted) return;
+
+    setState(() {
+      _importingDictionary = true;
+      _importProgress = 0;
+    });
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await DictionaryImporter(ref.read(appDatabaseProvider)).import(
+        File(path),
+        onProgress: (progress) {
+          if (mounted) setState(() => _importProgress = progress.fraction);
+        },
+      );
+      if (!mounted) return;
+      setState(() {
+        _importingDictionary = false;
+        _refreshInstalledDictionaries();
+      });
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Dictionary imported.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _importingDictionary = false);
+      messenger.showSnackBar(SnackBar(content: Text('Import failed: $e')));
+    }
   }
 
   @override
@@ -128,6 +192,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     .read(settingsRepositoryProvider)
                     .update(pitchAccentAudioEnabled: value),
               ),
+              const Divider(height: 32),
+              const Text(
+                'Dictionaries (spec §10)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              FutureBuilder<List<Dictionary>>(
+                future: _installedDictionariesFuture,
+                builder: (context, snapshot) {
+                  final dictionaries = snapshot.data ?? const [];
+                  if (dictionaries.isEmpty) {
+                    return const Text('No dictionaries installed yet.');
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final dictionary in dictionaries)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.menu_book_outlined),
+                          title: Text(dictionary.title),
+                          subtitle: Text(
+                            'Priority ${dictionary.priority}'
+                            '${dictionary.enabled ? '' : ' (disabled)'}',
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              if (_importingDictionary) ...[
+                LinearProgressIndicator(
+                  value: _importProgress > 0 ? _importProgress : null,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Importing dictionary... a large one like JMdict can '
+                  'take a minute.',
+                ),
+              ] else
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Import Dictionary (.zip)...'),
+                  onPressed: _importDictionary,
+                ),
             ],
           );
         },

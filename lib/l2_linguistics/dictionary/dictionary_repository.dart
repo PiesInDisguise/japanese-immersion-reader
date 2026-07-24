@@ -177,6 +177,15 @@ class DictionaryRepository {
         ),
     ];
   }
+
+  /// Spec §14: "Dictionaries — installed list with priority ordering" --
+  /// every installed dictionary, highest-priority (lowest [Dictionary.priority]
+  /// value) first.
+  Future<List<Dictionary>> listInstalled() {
+    return (_db.select(
+      _db.dictionaries,
+    )..orderBy([(d) => OrderingTerm.asc(d.priority)])).get();
+  }
 }
 
 class _MatchedRow {
