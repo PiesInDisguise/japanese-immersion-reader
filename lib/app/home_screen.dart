@@ -13,6 +13,7 @@ import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_scree
 
 import 'sample_content.dart';
 import 'services.dart';
+import 'settings_screen.dart';
 
 /// The app's entry screen: load a book (the bundled sample fixture, or a
 /// real EPUB via the system file picker) and jump into Card Mode.
@@ -105,7 +106,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Japanese Immersion Reader')),
+      appBar: AppBar(
+        title: const Text('Japanese Immersion Reader'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
