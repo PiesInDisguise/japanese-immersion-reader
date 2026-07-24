@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
+import 'package:uuid/uuid.dart';
 
 import 'mining_engine.dart';
 import 'review_engine.dart';
@@ -199,6 +200,8 @@ class _GrammarMiningStore implements MiningStore {
         .into(_db.collectedGrammarSources)
         .insert(
           CollectedGrammarSourcesCompanion.insert(
+            // Spec §13 sync-readiness -- see tables.dart's own audit note.
+            uuid: Value(const Uuid().v4()),
             collectedGrammarId: id,
             workId: source.workId,
             sentenceId: source.sentenceId,

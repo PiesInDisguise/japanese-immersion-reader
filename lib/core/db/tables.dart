@@ -1,5 +1,44 @@
 import 'package:drift/drift.dart';
 
+// ---------------------------------------------------------------------------
+// Sync-readiness audit (spec §13: "every mutable row carries a stable UUID
+// and updatedAt, so an optional cloud-sync layer... can be added later
+// without reworking the data model"). Sync itself is out of scope (spec
+// §17: "explicitly deferred") -- this is a review of whether the *schema*
+// actually holds up to that promise, done once all of Phase 1-11's tables
+// existed, rather than assumed.
+//
+// Already sync-ready (stable id + addedAt/updatedAt): Documents,
+// Dictionaries, CollectedWords, CollectedGrammars.
+//
+// Fixed by this audit (schemaVersion 5->6, see database.dart): Settings had
+// no `updatedAt` at all despite being genuinely mutable, user-authored
+// state; CollectedWordSources/CollectedGrammarSources' only identity was an
+// autoincrement int, which two devices would assign colliding values to
+// independently -- both now also carry a real UUID (`uuid`), generated at
+// insert time, without disturbing the existing autoincrement `id` that
+// `MiningEngine`/`ReviewEngine`'s local undo/delete-by-id plumbing already
+// depends on.
+//
+// Deliberately left alone, and why:
+// - Chapters/Sentences: derived, regenerable content (re-importing the
+//   same source file reproduces them byte-for-byte) -- the same "large,
+//   regenerable, not worth syncing" bucket spec §13 explicitly puts
+//   dictionaries in, just never said out loud for these two.
+// - SentenceExplanations: a write-once cache keyed by content hash: never
+//   updated after insert, and regenerable (at the cost of paying for the
+//   LLM call again) -- same reasoning as Chapters/Sentences.
+// - ReadingActivity: `date` (a UTC calendar day) is already a natural,
+//   device-independent stable key -- no UUID needed. It's genuinely
+//   mutable (`secondsRead` accumulates across calls) but deliberately
+//   *doesn't* get an `updatedAt` here: the correct merge strategy across
+//   two devices that both logged reading time on the same day is to *sum*
+//   their independent contributions, not last-write-wins overwrite one
+//   with the other -- an `updatedAt` column would invite the wrong
+//   (lossy) merge strategy rather than actually preparing this table for
+//   sync.
+// ---------------------------------------------------------------------------
+
 /// One row per imported work. `updatedAt` is sync-ready per spec §13 (every
 /// mutable row carries a stable ID + updatedAt so an optional sync layer can
 /// use last-write-wins/CRDT later without a schema change).
@@ -285,6 +324,18 @@ class CollectedWords extends Table {
 )
 class CollectedWordSources extends Table {
   IntColumn get id => integer().autoIncrement()();
+
+  /// Spec §13 sync-readiness (schemaVersion 5->6 audit): [id] alone is only
+  /// unique *within this device* -- two devices each mining independently
+  /// would assign colliding autoincrement values. Generated at insert time
+  /// (`WordCollectionRepository`'s `_WordMiningStore.insertSighting`) via
+  /// `package:uuid`; nullable because rows created before this migration
+  /// have none and aren't backfilled. [id] itself is left alone rather than
+  /// replaced -- every existing `deleteSighting(int)`/`MineResult` call
+  /// site already keys off it for same-device undo/delete, which has
+  /// nothing to do with cross-device identity.
+  TextColumn get uuid => text().nullable()();
+
   TextColumn get collectedWordId =>
       text().references(CollectedWords, #id).named('collected_word_id')();
   TextColumn get workId => text().references(Documents, #id).named('work_id')();
@@ -330,6 +381,11 @@ class CollectedGrammars extends Table {
 )
 class CollectedGrammarSources extends Table {
   IntColumn get id => integer().autoIncrement()();
+
+  /// See `CollectedWordSources.uuid`'s doc comment -- identical reasoning,
+  /// grammar-side mirror.
+  TextColumn get uuid => text().nullable()();
+
   TextColumn get collectedGrammarId =>
       text().references(CollectedGrammars, #id).named('collected_grammar_id')();
   TextColumn get workId => text().references(Documents, #id).named('work_id')();
@@ -392,6 +448,14 @@ class Settings extends Table {
   BoolColumn get pitchAccentAudioEnabled => boolean()
       .withDefault(const Constant(false))
       .named('pitch_accent_audio_enabled')();
+
+  /// Spec §13 sync-readiness (added by the schemaVersion 5->6 audit, see
+  /// this file's own top-of-file note): this single row is genuinely
+  /// mutable user state with no `updatedAt` until now. Nullable because a
+  /// pre-migration row has no real value yet -- `SettingsRepository.update`
+  /// sets a real one on every write from here on, same as `uuid` on the
+  /// sighting tables below.
+  DateTimeColumn get updatedAt => dateTime().nullable().named('updated_at')();
 
   @override
   Set<Column> get primaryKey => {id};

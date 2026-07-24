@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
+import 'package:uuid/uuid.dart';
 
 import 'mining_engine.dart';
 import 'review_engine.dart';
@@ -244,6 +245,8 @@ class _WordMiningStore implements MiningStore {
         .into(_db.collectedWordSources)
         .insert(
           CollectedWordSourcesCompanion.insert(
+            // Spec §13 sync-readiness -- see tables.dart's own audit note.
+            uuid: Value(const Uuid().v4()),
             collectedWordId: id,
             workId: source.workId,
             sentenceId: source.sentenceId,

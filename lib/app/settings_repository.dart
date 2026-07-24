@@ -85,6 +85,8 @@ class SettingsRepository {
             pitchAccentAudioEnabled: Value(
               pitchAccentAudioEnabled ?? current.pitchAccentAudioEnabled,
             ),
+            // Spec §13 sync-readiness -- see tables.dart's own audit note.
+            updatedAt: Value(DateTime.now().toUtc()),
           ),
         );
   }

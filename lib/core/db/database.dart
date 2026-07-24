@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -79,6 +79,16 @@ class AppDatabase extends _$AppDatabase {
       // schemaVersion 5 (spec §15): reading stats.
       if (from < 5) {
         await m.createTable(readingActivity);
+      }
+      // schemaVersion 6 (spec §13 sync-readiness audit -- see tables.dart's
+      // own top-of-file note for the full audit).
+      if (from < 6) {
+        await m.addColumn(settings, settings.updatedAt);
+        await m.addColumn(collectedWordSources, collectedWordSources.uuid);
+        await m.addColumn(
+          collectedGrammarSources,
+          collectedGrammarSources.uuid,
+        );
       }
     },
   );

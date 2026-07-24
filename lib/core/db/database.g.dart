@@ -4540,6 +4540,15 @@ class $CollectedWordSourcesTable extends CollectedWordSources
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _collectedWordIdMeta = const VerificationMeta(
     'collectedWordId',
   );
@@ -4605,6 +4614,7 @@ class $CollectedWordSourcesTable extends CollectedWordSources
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uuid,
     collectedWordId,
     workId,
     sentenceId,
@@ -4625,6 +4635,12 @@ class $CollectedWordSourcesTable extends CollectedWordSources
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
     }
     if (data.containsKey('collected_word_id')) {
       context.handle(
@@ -4682,6 +4698,10 @@ class $CollectedWordSourcesTable extends CollectedWordSources
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      ),
       collectedWordId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}collected_word_id'],
@@ -4714,6 +4734,17 @@ class $CollectedWordSourcesTable extends CollectedWordSources
 class CollectedWordSource extends DataClass
     implements Insertable<CollectedWordSource> {
   final int id;
+
+  /// Spec §13 sync-readiness (schemaVersion 5->6 audit): [id] alone is only
+  /// unique *within this device* -- two devices each mining independently
+  /// would assign colliding autoincrement values. Generated at insert time
+  /// (`WordCollectionRepository`'s `_WordMiningStore.insertSighting`) via
+  /// `package:uuid`; nullable because rows created before this migration
+  /// have none and aren't backfilled. [id] itself is left alone rather than
+  /// replaced -- every existing `deleteSighting(int)`/`MineResult` call
+  /// site already keys off it for same-device undo/delete, which has
+  /// nothing to do with cross-device identity.
+  final String? uuid;
   final String collectedWordId;
   final String workId;
   final String sentenceId;
@@ -4724,6 +4755,7 @@ class CollectedWordSource extends DataClass
   final DateTime minedAt;
   const CollectedWordSource({
     required this.id,
+    this.uuid,
     required this.collectedWordId,
     required this.workId,
     required this.sentenceId,
@@ -4734,6 +4766,9 @@ class CollectedWordSource extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uuid != null) {
+      map['uuid'] = Variable<String>(uuid);
+    }
     map['collected_word_id'] = Variable<String>(collectedWordId);
     map['work_id'] = Variable<String>(workId);
     map['sentence_id'] = Variable<String>(sentenceId);
@@ -4745,6 +4780,7 @@ class CollectedWordSource extends DataClass
   CollectedWordSourcesCompanion toCompanion(bool nullToAbsent) {
     return CollectedWordSourcesCompanion(
       id: Value(id),
+      uuid: uuid == null && nullToAbsent ? const Value.absent() : Value(uuid),
       collectedWordId: Value(collectedWordId),
       workId: Value(workId),
       sentenceId: Value(sentenceId),
@@ -4760,6 +4796,7 @@ class CollectedWordSource extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CollectedWordSource(
       id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String?>(json['uuid']),
       collectedWordId: serializer.fromJson<String>(json['collectedWordId']),
       workId: serializer.fromJson<String>(json['workId']),
       sentenceId: serializer.fromJson<String>(json['sentenceId']),
@@ -4772,6 +4809,7 @@ class CollectedWordSource extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String?>(uuid),
       'collectedWordId': serializer.toJson<String>(collectedWordId),
       'workId': serializer.toJson<String>(workId),
       'sentenceId': serializer.toJson<String>(sentenceId),
@@ -4782,6 +4820,7 @@ class CollectedWordSource extends DataClass
 
   CollectedWordSource copyWith({
     int? id,
+    Value<String?> uuid = const Value.absent(),
     String? collectedWordId,
     String? workId,
     String? sentenceId,
@@ -4789,6 +4828,7 @@ class CollectedWordSource extends DataClass
     DateTime? minedAt,
   }) => CollectedWordSource(
     id: id ?? this.id,
+    uuid: uuid.present ? uuid.value : this.uuid,
     collectedWordId: collectedWordId ?? this.collectedWordId,
     workId: workId ?? this.workId,
     sentenceId: sentenceId ?? this.sentenceId,
@@ -4798,6 +4838,7 @@ class CollectedWordSource extends DataClass
   CollectedWordSource copyWithCompanion(CollectedWordSourcesCompanion data) {
     return CollectedWordSource(
       id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
       collectedWordId: data.collectedWordId.present
           ? data.collectedWordId.value
           : this.collectedWordId,
@@ -4814,6 +4855,7 @@ class CollectedWordSource extends DataClass
   String toString() {
     return (StringBuffer('CollectedWordSource(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('collectedWordId: $collectedWordId, ')
           ..write('workId: $workId, ')
           ..write('sentenceId: $sentenceId, ')
@@ -4824,13 +4866,21 @@ class CollectedWordSource extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, collectedWordId, workId, sentenceId, mediaType, minedAt);
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    collectedWordId,
+    workId,
+    sentenceId,
+    mediaType,
+    minedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CollectedWordSource &&
           other.id == this.id &&
+          other.uuid == this.uuid &&
           other.collectedWordId == this.collectedWordId &&
           other.workId == this.workId &&
           other.sentenceId == this.sentenceId &&
@@ -4841,6 +4891,7 @@ class CollectedWordSource extends DataClass
 class CollectedWordSourcesCompanion
     extends UpdateCompanion<CollectedWordSource> {
   final Value<int> id;
+  final Value<String?> uuid;
   final Value<String> collectedWordId;
   final Value<String> workId;
   final Value<String> sentenceId;
@@ -4848,6 +4899,7 @@ class CollectedWordSourcesCompanion
   final Value<DateTime> minedAt;
   const CollectedWordSourcesCompanion({
     this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
     this.collectedWordId = const Value.absent(),
     this.workId = const Value.absent(),
     this.sentenceId = const Value.absent(),
@@ -4856,6 +4908,7 @@ class CollectedWordSourcesCompanion
   });
   CollectedWordSourcesCompanion.insert({
     this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
     required String collectedWordId,
     required String workId,
     required String sentenceId,
@@ -4868,6 +4921,7 @@ class CollectedWordSourcesCompanion
        minedAt = Value(minedAt);
   static Insertable<CollectedWordSource> custom({
     Expression<int>? id,
+    Expression<String>? uuid,
     Expression<String>? collectedWordId,
     Expression<String>? workId,
     Expression<String>? sentenceId,
@@ -4876,6 +4930,7 @@ class CollectedWordSourcesCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
       if (collectedWordId != null) 'collected_word_id': collectedWordId,
       if (workId != null) 'work_id': workId,
       if (sentenceId != null) 'sentence_id': sentenceId,
@@ -4886,6 +4941,7 @@ class CollectedWordSourcesCompanion
 
   CollectedWordSourcesCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uuid,
     Value<String>? collectedWordId,
     Value<String>? workId,
     Value<String>? sentenceId,
@@ -4894,6 +4950,7 @@ class CollectedWordSourcesCompanion
   }) {
     return CollectedWordSourcesCompanion(
       id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
       collectedWordId: collectedWordId ?? this.collectedWordId,
       workId: workId ?? this.workId,
       sentenceId: sentenceId ?? this.sentenceId,
@@ -4907,6 +4964,9 @@ class CollectedWordSourcesCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
     }
     if (collectedWordId.present) {
       map['collected_word_id'] = Variable<String>(collectedWordId.value);
@@ -4930,6 +4990,7 @@ class CollectedWordSourcesCompanion
   String toString() {
     return (StringBuffer('CollectedWordSourcesCompanion(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('collectedWordId: $collectedWordId, ')
           ..write('workId: $workId, ')
           ..write('sentenceId: $sentenceId, ')
@@ -5599,6 +5660,15 @@ class $CollectedGrammarSourcesTable extends CollectedGrammarSources
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _collectedGrammarIdMeta =
       const VerificationMeta('collectedGrammarId');
   @override
@@ -5664,6 +5734,7 @@ class $CollectedGrammarSourcesTable extends CollectedGrammarSources
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uuid,
     collectedGrammarId,
     workId,
     sentenceId,
@@ -5684,6 +5755,12 @@ class $CollectedGrammarSourcesTable extends CollectedGrammarSources
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
     }
     if (data.containsKey('collected_grammar_id')) {
       context.handle(
@@ -5741,6 +5818,10 @@ class $CollectedGrammarSourcesTable extends CollectedGrammarSources
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      ),
       collectedGrammarId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}collected_grammar_id'],
@@ -5773,6 +5854,10 @@ class $CollectedGrammarSourcesTable extends CollectedGrammarSources
 class CollectedGrammarSource extends DataClass
     implements Insertable<CollectedGrammarSource> {
   final int id;
+
+  /// See `CollectedWordSources.uuid`'s doc comment -- identical reasoning,
+  /// grammar-side mirror.
+  final String? uuid;
   final String collectedGrammarId;
   final String workId;
   final String sentenceId;
@@ -5780,6 +5865,7 @@ class CollectedGrammarSource extends DataClass
   final DateTime minedAt;
   const CollectedGrammarSource({
     required this.id,
+    this.uuid,
     required this.collectedGrammarId,
     required this.workId,
     required this.sentenceId,
@@ -5790,6 +5876,9 @@ class CollectedGrammarSource extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uuid != null) {
+      map['uuid'] = Variable<String>(uuid);
+    }
     map['collected_grammar_id'] = Variable<String>(collectedGrammarId);
     map['work_id'] = Variable<String>(workId);
     map['sentence_id'] = Variable<String>(sentenceId);
@@ -5801,6 +5890,7 @@ class CollectedGrammarSource extends DataClass
   CollectedGrammarSourcesCompanion toCompanion(bool nullToAbsent) {
     return CollectedGrammarSourcesCompanion(
       id: Value(id),
+      uuid: uuid == null && nullToAbsent ? const Value.absent() : Value(uuid),
       collectedGrammarId: Value(collectedGrammarId),
       workId: Value(workId),
       sentenceId: Value(sentenceId),
@@ -5816,6 +5906,7 @@ class CollectedGrammarSource extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CollectedGrammarSource(
       id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String?>(json['uuid']),
       collectedGrammarId: serializer.fromJson<String>(
         json['collectedGrammarId'],
       ),
@@ -5830,6 +5921,7 @@ class CollectedGrammarSource extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String?>(uuid),
       'collectedGrammarId': serializer.toJson<String>(collectedGrammarId),
       'workId': serializer.toJson<String>(workId),
       'sentenceId': serializer.toJson<String>(sentenceId),
@@ -5840,6 +5932,7 @@ class CollectedGrammarSource extends DataClass
 
   CollectedGrammarSource copyWith({
     int? id,
+    Value<String?> uuid = const Value.absent(),
     String? collectedGrammarId,
     String? workId,
     String? sentenceId,
@@ -5847,6 +5940,7 @@ class CollectedGrammarSource extends DataClass
     DateTime? minedAt,
   }) => CollectedGrammarSource(
     id: id ?? this.id,
+    uuid: uuid.present ? uuid.value : this.uuid,
     collectedGrammarId: collectedGrammarId ?? this.collectedGrammarId,
     workId: workId ?? this.workId,
     sentenceId: sentenceId ?? this.sentenceId,
@@ -5858,6 +5952,7 @@ class CollectedGrammarSource extends DataClass
   ) {
     return CollectedGrammarSource(
       id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
       collectedGrammarId: data.collectedGrammarId.present
           ? data.collectedGrammarId.value
           : this.collectedGrammarId,
@@ -5874,6 +5969,7 @@ class CollectedGrammarSource extends DataClass
   String toString() {
     return (StringBuffer('CollectedGrammarSource(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('collectedGrammarId: $collectedGrammarId, ')
           ..write('workId: $workId, ')
           ..write('sentenceId: $sentenceId, ')
@@ -5886,6 +5982,7 @@ class CollectedGrammarSource extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uuid,
     collectedGrammarId,
     workId,
     sentenceId,
@@ -5897,6 +5994,7 @@ class CollectedGrammarSource extends DataClass
       identical(this, other) ||
       (other is CollectedGrammarSource &&
           other.id == this.id &&
+          other.uuid == this.uuid &&
           other.collectedGrammarId == this.collectedGrammarId &&
           other.workId == this.workId &&
           other.sentenceId == this.sentenceId &&
@@ -5907,6 +6005,7 @@ class CollectedGrammarSource extends DataClass
 class CollectedGrammarSourcesCompanion
     extends UpdateCompanion<CollectedGrammarSource> {
   final Value<int> id;
+  final Value<String?> uuid;
   final Value<String> collectedGrammarId;
   final Value<String> workId;
   final Value<String> sentenceId;
@@ -5914,6 +6013,7 @@ class CollectedGrammarSourcesCompanion
   final Value<DateTime> minedAt;
   const CollectedGrammarSourcesCompanion({
     this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
     this.collectedGrammarId = const Value.absent(),
     this.workId = const Value.absent(),
     this.sentenceId = const Value.absent(),
@@ -5922,6 +6022,7 @@ class CollectedGrammarSourcesCompanion
   });
   CollectedGrammarSourcesCompanion.insert({
     this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
     required String collectedGrammarId,
     required String workId,
     required String sentenceId,
@@ -5934,6 +6035,7 @@ class CollectedGrammarSourcesCompanion
        minedAt = Value(minedAt);
   static Insertable<CollectedGrammarSource> custom({
     Expression<int>? id,
+    Expression<String>? uuid,
     Expression<String>? collectedGrammarId,
     Expression<String>? workId,
     Expression<String>? sentenceId,
@@ -5942,6 +6044,7 @@ class CollectedGrammarSourcesCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
       if (collectedGrammarId != null)
         'collected_grammar_id': collectedGrammarId,
       if (workId != null) 'work_id': workId,
@@ -5953,6 +6056,7 @@ class CollectedGrammarSourcesCompanion
 
   CollectedGrammarSourcesCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uuid,
     Value<String>? collectedGrammarId,
     Value<String>? workId,
     Value<String>? sentenceId,
@@ -5961,6 +6065,7 @@ class CollectedGrammarSourcesCompanion
   }) {
     return CollectedGrammarSourcesCompanion(
       id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
       collectedGrammarId: collectedGrammarId ?? this.collectedGrammarId,
       workId: workId ?? this.workId,
       sentenceId: sentenceId ?? this.sentenceId,
@@ -5974,6 +6079,9 @@ class CollectedGrammarSourcesCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
     }
     if (collectedGrammarId.present) {
       map['collected_grammar_id'] = Variable<String>(collectedGrammarId.value);
@@ -5997,6 +6105,7 @@ class CollectedGrammarSourcesCompanion
   String toString() {
     return (StringBuffer('CollectedGrammarSourcesCompanion(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('collectedGrammarId: $collectedGrammarId, ')
           ..write('workId: $workId, ')
           ..write('sentenceId: $sentenceId, ')
@@ -6078,6 +6187,17 @@ class $SettingsTable extends Settings
         ),
         defaultValue: const Constant(false),
       );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6085,6 +6205,7 @@ class $SettingsTable extends Settings
     llmExplanationsEnabled,
     ttsEnabled,
     pitchAccentAudioEnabled,
+    updatedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6131,6 +6252,12 @@ class $SettingsTable extends Settings
         ),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -6160,6 +6287,10 @@ class $SettingsTable extends Settings
         DriftSqlType.bool,
         data['${effectivePrefix}pitch_accent_audio_enabled'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
     );
   }
 
@@ -6198,12 +6329,21 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// into [ttsEnabled] since a user might want synthesized speech but not
   /// the network-fetched pitch-accent clips, or vice versa.
   final bool pitchAccentAudioEnabled;
+
+  /// Spec §13 sync-readiness (added by the schemaVersion 5->6 audit, see
+  /// this file's own top-of-file note): this single row is genuinely
+  /// mutable user state with no `updatedAt` until now. Nullable because a
+  /// pre-migration row has no real value yet -- `SettingsRepository.update`
+  /// sets a real one on every write from here on, same as `uuid` on the
+  /// sighting tables below.
+  final DateTime? updatedAt;
   const SettingsRow({
     required this.id,
     this.llmApiKey,
     required this.llmExplanationsEnabled,
     required this.ttsEnabled,
     required this.pitchAccentAudioEnabled,
+    this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6215,6 +6355,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     map['llm_explanations_enabled'] = Variable<bool>(llmExplanationsEnabled);
     map['tts_enabled'] = Variable<bool>(ttsEnabled);
     map['pitch_accent_audio_enabled'] = Variable<bool>(pitchAccentAudioEnabled);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
     return map;
   }
 
@@ -6227,6 +6370,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       llmExplanationsEnabled: Value(llmExplanationsEnabled),
       ttsEnabled: Value(ttsEnabled),
       pitchAccentAudioEnabled: Value(pitchAccentAudioEnabled),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -6245,6 +6391,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       pitchAccentAudioEnabled: serializer.fromJson<bool>(
         json['pitchAccentAudioEnabled'],
       ),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
   }
   @override
@@ -6258,6 +6405,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'pitchAccentAudioEnabled': serializer.toJson<bool>(
         pitchAccentAudioEnabled,
       ),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
   }
 
@@ -6267,6 +6415,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     bool? llmExplanationsEnabled,
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
+    Value<DateTime?> updatedAt = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     llmApiKey: llmApiKey.present ? llmApiKey.value : this.llmApiKey,
@@ -6275,6 +6424,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     ttsEnabled: ttsEnabled ?? this.ttsEnabled,
     pitchAccentAudioEnabled:
         pitchAccentAudioEnabled ?? this.pitchAccentAudioEnabled,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
   SettingsRow copyWithCompanion(SettingsCompanion data) {
     return SettingsRow(
@@ -6289,6 +6439,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       pitchAccentAudioEnabled: data.pitchAccentAudioEnabled.present
           ? data.pitchAccentAudioEnabled.value
           : this.pitchAccentAudioEnabled,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -6299,7 +6450,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('llmApiKey: $llmApiKey, ')
           ..write('llmExplanationsEnabled: $llmExplanationsEnabled, ')
           ..write('ttsEnabled: $ttsEnabled, ')
-          ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled')
+          ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -6311,6 +6463,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     llmExplanationsEnabled,
     ttsEnabled,
     pitchAccentAudioEnabled,
+    updatedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -6320,7 +6473,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.llmApiKey == this.llmApiKey &&
           other.llmExplanationsEnabled == this.llmExplanationsEnabled &&
           other.ttsEnabled == this.ttsEnabled &&
-          other.pitchAccentAudioEnabled == this.pitchAccentAudioEnabled);
+          other.pitchAccentAudioEnabled == this.pitchAccentAudioEnabled &&
+          other.updatedAt == this.updatedAt);
 }
 
 class SettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -6329,12 +6483,14 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<bool> llmExplanationsEnabled;
   final Value<bool> ttsEnabled;
   final Value<bool> pitchAccentAudioEnabled;
+  final Value<DateTime?> updatedAt;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.llmApiKey = const Value.absent(),
     this.llmExplanationsEnabled = const Value.absent(),
     this.ttsEnabled = const Value.absent(),
     this.pitchAccentAudioEnabled = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -6342,6 +6498,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.llmExplanationsEnabled = const Value.absent(),
     this.ttsEnabled = const Value.absent(),
     this.pitchAccentAudioEnabled = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
@@ -6349,6 +6506,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<bool>? llmExplanationsEnabled,
     Expression<bool>? ttsEnabled,
     Expression<bool>? pitchAccentAudioEnabled,
+    Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6358,6 +6516,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (ttsEnabled != null) 'tts_enabled': ttsEnabled,
       if (pitchAccentAudioEnabled != null)
         'pitch_accent_audio_enabled': pitchAccentAudioEnabled,
+      if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
@@ -6367,6 +6526,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<bool>? llmExplanationsEnabled,
     Value<bool>? ttsEnabled,
     Value<bool>? pitchAccentAudioEnabled,
+    Value<DateTime?>? updatedAt,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -6376,6 +6536,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       ttsEnabled: ttsEnabled ?? this.ttsEnabled,
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? this.pitchAccentAudioEnabled,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -6401,6 +6562,9 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
         pitchAccentAudioEnabled.value,
       );
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
     return map;
   }
 
@@ -6411,7 +6575,8 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('llmApiKey: $llmApiKey, ')
           ..write('llmExplanationsEnabled: $llmExplanationsEnabled, ')
           ..write('ttsEnabled: $ttsEnabled, ')
-          ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled')
+          ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -11082,6 +11247,7 @@ typedef $$CollectedWordsTableProcessedTableManager =
 typedef $$CollectedWordSourcesTableCreateCompanionBuilder =
     CollectedWordSourcesCompanion Function({
       Value<int> id,
+      Value<String?> uuid,
       required String collectedWordId,
       required String workId,
       required String sentenceId,
@@ -11091,6 +11257,7 @@ typedef $$CollectedWordSourcesTableCreateCompanionBuilder =
 typedef $$CollectedWordSourcesTableUpdateCompanionBuilder =
     CollectedWordSourcesCompanion Function({
       Value<int> id,
+      Value<String?> uuid,
       Value<String> collectedWordId,
       Value<String> workId,
       Value<String> sentenceId,
@@ -11176,6 +11343,11 @@ class $$CollectedWordSourcesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11273,6 +11445,11 @@ class $$CollectedWordSourcesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get mediaType => $composableBuilder(
     column: $table.mediaType,
     builder: (column) => ColumnOrderings(column),
@@ -11364,6 +11541,9 @@ class $$CollectedWordSourcesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
 
   GeneratedColumn<String> get mediaType =>
       $composableBuilder(column: $table.mediaType, builder: (column) => column);
@@ -11482,6 +11662,7 @@ class $$CollectedWordSourcesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uuid = const Value.absent(),
                 Value<String> collectedWordId = const Value.absent(),
                 Value<String> workId = const Value.absent(),
                 Value<String> sentenceId = const Value.absent(),
@@ -11489,6 +11670,7 @@ class $$CollectedWordSourcesTableTableManager
                 Value<DateTime> minedAt = const Value.absent(),
               }) => CollectedWordSourcesCompanion(
                 id: id,
+                uuid: uuid,
                 collectedWordId: collectedWordId,
                 workId: workId,
                 sentenceId: sentenceId,
@@ -11498,6 +11680,7 @@ class $$CollectedWordSourcesTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uuid = const Value.absent(),
                 required String collectedWordId,
                 required String workId,
                 required String sentenceId,
@@ -11505,6 +11688,7 @@ class $$CollectedWordSourcesTableTableManager
                 required DateTime minedAt,
               }) => CollectedWordSourcesCompanion.insert(
                 id: id,
+                uuid: uuid,
                 collectedWordId: collectedWordId,
                 workId: workId,
                 sentenceId: sentenceId,
@@ -12055,6 +12239,7 @@ typedef $$CollectedGrammarsTableProcessedTableManager =
 typedef $$CollectedGrammarSourcesTableCreateCompanionBuilder =
     CollectedGrammarSourcesCompanion Function({
       Value<int> id,
+      Value<String?> uuid,
       required String collectedGrammarId,
       required String workId,
       required String sentenceId,
@@ -12064,6 +12249,7 @@ typedef $$CollectedGrammarSourcesTableCreateCompanionBuilder =
 typedef $$CollectedGrammarSourcesTableUpdateCompanionBuilder =
     CollectedGrammarSourcesCompanion Function({
       Value<int> id,
+      Value<String?> uuid,
       Value<String> collectedGrammarId,
       Value<String> workId,
       Value<String> sentenceId,
@@ -12150,6 +12336,11 @@ class $$CollectedGrammarSourcesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12247,6 +12438,11 @@ class $$CollectedGrammarSourcesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get mediaType => $composableBuilder(
     column: $table.mediaType,
     builder: (column) => ColumnOrderings(column),
@@ -12338,6 +12534,9 @@ class $$CollectedGrammarSourcesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
 
   GeneratedColumn<String> get mediaType =>
       $composableBuilder(column: $table.mediaType, builder: (column) => column);
@@ -12460,6 +12659,7 @@ class $$CollectedGrammarSourcesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uuid = const Value.absent(),
                 Value<String> collectedGrammarId = const Value.absent(),
                 Value<String> workId = const Value.absent(),
                 Value<String> sentenceId = const Value.absent(),
@@ -12467,6 +12667,7 @@ class $$CollectedGrammarSourcesTableTableManager
                 Value<DateTime> minedAt = const Value.absent(),
               }) => CollectedGrammarSourcesCompanion(
                 id: id,
+                uuid: uuid,
                 collectedGrammarId: collectedGrammarId,
                 workId: workId,
                 sentenceId: sentenceId,
@@ -12476,6 +12677,7 @@ class $$CollectedGrammarSourcesTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uuid = const Value.absent(),
                 required String collectedGrammarId,
                 required String workId,
                 required String sentenceId,
@@ -12483,6 +12685,7 @@ class $$CollectedGrammarSourcesTableTableManager
                 required DateTime minedAt,
               }) => CollectedGrammarSourcesCompanion.insert(
                 id: id,
+                uuid: uuid,
                 collectedGrammarId: collectedGrammarId,
                 workId: workId,
                 sentenceId: sentenceId,
@@ -12604,6 +12807,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<bool> llmExplanationsEnabled,
       Value<bool> ttsEnabled,
       Value<bool> pitchAccentAudioEnabled,
+      Value<DateTime?> updatedAt,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -12612,6 +12816,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<bool> llmExplanationsEnabled,
       Value<bool> ttsEnabled,
       Value<bool> pitchAccentAudioEnabled,
+      Value<DateTime?> updatedAt,
     });
 
 class $$SettingsTableFilterComposer
@@ -12645,6 +12850,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get pitchAccentAudioEnabled => $composableBuilder(
     column: $table.pitchAccentAudioEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -12682,6 +12892,11 @@ class $$SettingsTableOrderingComposer
     column: $table.pitchAccentAudioEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -12713,6 +12928,9 @@ class $$SettingsTableAnnotationComposer
     column: $table.pitchAccentAudioEnabled,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
 class $$SettingsTableTableManager
@@ -12751,12 +12969,14 @@ class $$SettingsTableTableManager
                 Value<bool> llmExplanationsEnabled = const Value.absent(),
                 Value<bool> ttsEnabled = const Value.absent(),
                 Value<bool> pitchAccentAudioEnabled = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 llmApiKey: llmApiKey,
                 llmExplanationsEnabled: llmExplanationsEnabled,
                 ttsEnabled: ttsEnabled,
                 pitchAccentAudioEnabled: pitchAccentAudioEnabled,
+                updatedAt: updatedAt,
               ),
           createCompanionCallback:
               ({
@@ -12765,12 +12985,14 @@ class $$SettingsTableTableManager
                 Value<bool> llmExplanationsEnabled = const Value.absent(),
                 Value<bool> ttsEnabled = const Value.absent(),
                 Value<bool> pitchAccentAudioEnabled = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 llmApiKey: llmApiKey,
                 llmExplanationsEnabled: llmExplanationsEnabled,
                 ttsEnabled: ttsEnabled,
                 pitchAccentAudioEnabled: pitchAccentAudioEnabled,
+                updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
