@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -49,6 +49,23 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(settings);
         await m.createTable(sentenceExplanations);
+      }
+      // schemaVersion 3 (spec §12): the placeholder SM-2-shaped
+      // srsInterval/srsEase columns are replaced by real FSRS memory state
+      // (fsrsDifficulty/fsrsStability/lastReviewedAt) now that
+      // `lib/l5_srs/fsrs/fsrs_scheduler.dart` exists to populate them.
+      if (from < 3) {
+        await m.addColumn(collectedWords, collectedWords.fsrsDifficulty);
+        await m.addColumn(collectedWords, collectedWords.fsrsStability);
+        await m.addColumn(collectedWords, collectedWords.lastReviewedAt);
+        await m.dropColumn(collectedWords, 'srs_interval');
+        await m.dropColumn(collectedWords, 'srs_ease');
+
+        await m.addColumn(collectedGrammars, collectedGrammars.fsrsDifficulty);
+        await m.addColumn(collectedGrammars, collectedGrammars.fsrsStability);
+        await m.addColumn(collectedGrammars, collectedGrammars.lastReviewedAt);
+        await m.dropColumn(collectedGrammars, 'srs_interval');
+        await m.dropColumn(collectedGrammars, 'srs_ease');
       }
     },
   );

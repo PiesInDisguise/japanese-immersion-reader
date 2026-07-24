@@ -3846,27 +3846,27 @@ class $CollectedWordsTable extends CollectedWords
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _srsIntervalMeta = const VerificationMeta(
-    'srsInterval',
+  static const VerificationMeta _fsrsDifficultyMeta = const VerificationMeta(
+    'fsrsDifficulty',
   );
   @override
-  late final GeneratedColumn<int> srsInterval = GeneratedColumn<int>(
-    'srs_interval',
+  late final GeneratedColumn<double> fsrsDifficulty = GeneratedColumn<double>(
+    'fsrs_difficulty',
     aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _srsEaseMeta = const VerificationMeta(
-    'srsEase',
-  );
-  @override
-  late final GeneratedColumn<double> srsEase = GeneratedColumn<double>(
-    'srs_ease',
-    aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fsrsStabilityMeta = const VerificationMeta(
+    'fsrsStability',
+  );
+  @override
+  late final GeneratedColumn<double> fsrsStability = GeneratedColumn<double>(
+    'fsrs_stability',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _srsDueMeta = const VerificationMeta('srsDue');
   @override
@@ -3899,6 +3899,18 @@ class $CollectedWordsTable extends CollectedWords
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _lastReviewedAtMeta = const VerificationMeta(
+    'lastReviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastReviewedAt =
+      GeneratedColumn<DateTime>(
+        'last_reviewed_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3907,11 +3919,12 @@ class $CollectedWordsTable extends CollectedWords
     senseIdsJson,
     addedAt,
     updatedAt,
-    srsInterval,
-    srsEase,
+    fsrsDifficulty,
+    fsrsStability,
     srsDue,
     srsLapses,
     srsStatus,
+    lastReviewedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3973,24 +3986,23 @@ class $CollectedWordsTable extends CollectedWords
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
-    if (data.containsKey('srs_interval')) {
+    if (data.containsKey('fsrs_difficulty')) {
       context.handle(
-        _srsIntervalMeta,
-        srsInterval.isAcceptableOrUnknown(
-          data['srs_interval']!,
-          _srsIntervalMeta,
+        _fsrsDifficultyMeta,
+        fsrsDifficulty.isAcceptableOrUnknown(
+          data['fsrs_difficulty']!,
+          _fsrsDifficultyMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_srsIntervalMeta);
     }
-    if (data.containsKey('srs_ease')) {
+    if (data.containsKey('fsrs_stability')) {
       context.handle(
-        _srsEaseMeta,
-        srsEase.isAcceptableOrUnknown(data['srs_ease']!, _srsEaseMeta),
+        _fsrsStabilityMeta,
+        fsrsStability.isAcceptableOrUnknown(
+          data['fsrs_stability']!,
+          _fsrsStabilityMeta,
+        ),
       );
-    } else if (isInserting) {
-      context.missing(_srsEaseMeta);
     }
     if (data.containsKey('srs_due')) {
       context.handle(
@@ -4015,6 +4027,15 @@ class $CollectedWordsTable extends CollectedWords
       );
     } else if (isInserting) {
       context.missing(_srsStatusMeta);
+    }
+    if (data.containsKey('last_reviewed_at')) {
+      context.handle(
+        _lastReviewedAtMeta,
+        lastReviewedAt.isAcceptableOrUnknown(
+          data['last_reviewed_at']!,
+          _lastReviewedAtMeta,
+        ),
+      );
     }
     return context;
   }
@@ -4049,14 +4070,14 @@ class $CollectedWordsTable extends CollectedWords
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
-      srsInterval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}srs_interval'],
-      )!,
-      srsEase: attachedDatabase.typeMapping.read(
+      fsrsDifficulty: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
-        data['${effectivePrefix}srs_ease'],
-      )!,
+        data['${effectivePrefix}fsrs_difficulty'],
+      ),
+      fsrsStability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fsrs_stability'],
+      ),
       srsDue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}srs_due'],
@@ -4069,6 +4090,10 @@ class $CollectedWordsTable extends CollectedWords
         DriftSqlType.string,
         data['${effectivePrefix}srs_status'],
       )!,
+      lastReviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_reviewed_at'],
+      ),
     );
   }
 
@@ -4091,11 +4116,19 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
   final String senseIdsJson;
   final DateTime addedAt;
   final DateTime updatedAt;
-  final int srsInterval;
-  final double srsEase;
+
+  /// Real FSRS memory state (spec §12, `lib/l5_srs/fsrs/fsrs_scheduler.dart`)
+  /// -- null together with [stability]/[lastReviewedAt] exactly when
+  /// [srsStatus] is `newCard` (never reviewed yet). Replaced the earlier
+  /// SM-2-shaped `srsInterval`/`srsEase` placeholder columns in a
+  /// schemaVersion 2->3 migration once the real FSRS scheduler existed to
+  /// populate them -- see `database.dart`'s `migration` override.
+  final double? fsrsDifficulty;
+  final double? fsrsStability;
   final DateTime srsDue;
   final int srsLapses;
   final String srsStatus;
+  final DateTime? lastReviewedAt;
   const CollectedWord({
     required this.id,
     required this.dictForm,
@@ -4103,11 +4136,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     required this.senseIdsJson,
     required this.addedAt,
     required this.updatedAt,
-    required this.srsInterval,
-    required this.srsEase,
+    this.fsrsDifficulty,
+    this.fsrsStability,
     required this.srsDue,
     required this.srsLapses,
     required this.srsStatus,
+    this.lastReviewedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4118,11 +4152,18 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     map['sense_ids_json'] = Variable<String>(senseIdsJson);
     map['added_at'] = Variable<DateTime>(addedAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
-    map['srs_interval'] = Variable<int>(srsInterval);
-    map['srs_ease'] = Variable<double>(srsEase);
+    if (!nullToAbsent || fsrsDifficulty != null) {
+      map['fsrs_difficulty'] = Variable<double>(fsrsDifficulty);
+    }
+    if (!nullToAbsent || fsrsStability != null) {
+      map['fsrs_stability'] = Variable<double>(fsrsStability);
+    }
     map['srs_due'] = Variable<DateTime>(srsDue);
     map['srs_lapses'] = Variable<int>(srsLapses);
     map['srs_status'] = Variable<String>(srsStatus);
+    if (!nullToAbsent || lastReviewedAt != null) {
+      map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt);
+    }
     return map;
   }
 
@@ -4134,11 +4175,18 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       senseIdsJson: Value(senseIdsJson),
       addedAt: Value(addedAt),
       updatedAt: Value(updatedAt),
-      srsInterval: Value(srsInterval),
-      srsEase: Value(srsEase),
+      fsrsDifficulty: fsrsDifficulty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fsrsDifficulty),
+      fsrsStability: fsrsStability == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fsrsStability),
       srsDue: Value(srsDue),
       srsLapses: Value(srsLapses),
       srsStatus: Value(srsStatus),
+      lastReviewedAt: lastReviewedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastReviewedAt),
     );
   }
 
@@ -4154,11 +4202,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       senseIdsJson: serializer.fromJson<String>(json['senseIdsJson']),
       addedAt: serializer.fromJson<DateTime>(json['addedAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-      srsInterval: serializer.fromJson<int>(json['srsInterval']),
-      srsEase: serializer.fromJson<double>(json['srsEase']),
+      fsrsDifficulty: serializer.fromJson<double?>(json['fsrsDifficulty']),
+      fsrsStability: serializer.fromJson<double?>(json['fsrsStability']),
       srsDue: serializer.fromJson<DateTime>(json['srsDue']),
       srsLapses: serializer.fromJson<int>(json['srsLapses']),
       srsStatus: serializer.fromJson<String>(json['srsStatus']),
+      lastReviewedAt: serializer.fromJson<DateTime?>(json['lastReviewedAt']),
     );
   }
   @override
@@ -4171,11 +4220,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       'senseIdsJson': serializer.toJson<String>(senseIdsJson),
       'addedAt': serializer.toJson<DateTime>(addedAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
-      'srsInterval': serializer.toJson<int>(srsInterval),
-      'srsEase': serializer.toJson<double>(srsEase),
+      'fsrsDifficulty': serializer.toJson<double?>(fsrsDifficulty),
+      'fsrsStability': serializer.toJson<double?>(fsrsStability),
       'srsDue': serializer.toJson<DateTime>(srsDue),
       'srsLapses': serializer.toJson<int>(srsLapses),
       'srsStatus': serializer.toJson<String>(srsStatus),
+      'lastReviewedAt': serializer.toJson<DateTime?>(lastReviewedAt),
     };
   }
 
@@ -4186,11 +4236,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     String? senseIdsJson,
     DateTime? addedAt,
     DateTime? updatedAt,
-    int? srsInterval,
-    double? srsEase,
+    Value<double?> fsrsDifficulty = const Value.absent(),
+    Value<double?> fsrsStability = const Value.absent(),
     DateTime? srsDue,
     int? srsLapses,
     String? srsStatus,
+    Value<DateTime?> lastReviewedAt = const Value.absent(),
   }) => CollectedWord(
     id: id ?? this.id,
     dictForm: dictForm ?? this.dictForm,
@@ -4198,11 +4249,18 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     senseIdsJson: senseIdsJson ?? this.senseIdsJson,
     addedAt: addedAt ?? this.addedAt,
     updatedAt: updatedAt ?? this.updatedAt,
-    srsInterval: srsInterval ?? this.srsInterval,
-    srsEase: srsEase ?? this.srsEase,
+    fsrsDifficulty: fsrsDifficulty.present
+        ? fsrsDifficulty.value
+        : this.fsrsDifficulty,
+    fsrsStability: fsrsStability.present
+        ? fsrsStability.value
+        : this.fsrsStability,
     srsDue: srsDue ?? this.srsDue,
     srsLapses: srsLapses ?? this.srsLapses,
     srsStatus: srsStatus ?? this.srsStatus,
+    lastReviewedAt: lastReviewedAt.present
+        ? lastReviewedAt.value
+        : this.lastReviewedAt,
   );
   CollectedWord copyWithCompanion(CollectedWordsCompanion data) {
     return CollectedWord(
@@ -4214,13 +4272,18 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
           : this.senseIdsJson,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      srsInterval: data.srsInterval.present
-          ? data.srsInterval.value
-          : this.srsInterval,
-      srsEase: data.srsEase.present ? data.srsEase.value : this.srsEase,
+      fsrsDifficulty: data.fsrsDifficulty.present
+          ? data.fsrsDifficulty.value
+          : this.fsrsDifficulty,
+      fsrsStability: data.fsrsStability.present
+          ? data.fsrsStability.value
+          : this.fsrsStability,
       srsDue: data.srsDue.present ? data.srsDue.value : this.srsDue,
       srsLapses: data.srsLapses.present ? data.srsLapses.value : this.srsLapses,
       srsStatus: data.srsStatus.present ? data.srsStatus.value : this.srsStatus,
+      lastReviewedAt: data.lastReviewedAt.present
+          ? data.lastReviewedAt.value
+          : this.lastReviewedAt,
     );
   }
 
@@ -4233,11 +4296,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
           ..write('senseIdsJson: $senseIdsJson, ')
           ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('srsInterval: $srsInterval, ')
-          ..write('srsEase: $srsEase, ')
+          ..write('fsrsDifficulty: $fsrsDifficulty, ')
+          ..write('fsrsStability: $fsrsStability, ')
           ..write('srsDue: $srsDue, ')
           ..write('srsLapses: $srsLapses, ')
-          ..write('srsStatus: $srsStatus')
+          ..write('srsStatus: $srsStatus, ')
+          ..write('lastReviewedAt: $lastReviewedAt')
           ..write(')'))
         .toString();
   }
@@ -4250,11 +4314,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     senseIdsJson,
     addedAt,
     updatedAt,
-    srsInterval,
-    srsEase,
+    fsrsDifficulty,
+    fsrsStability,
     srsDue,
     srsLapses,
     srsStatus,
+    lastReviewedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -4266,11 +4331,12 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
           other.senseIdsJson == this.senseIdsJson &&
           other.addedAt == this.addedAt &&
           other.updatedAt == this.updatedAt &&
-          other.srsInterval == this.srsInterval &&
-          other.srsEase == this.srsEase &&
+          other.fsrsDifficulty == this.fsrsDifficulty &&
+          other.fsrsStability == this.fsrsStability &&
           other.srsDue == this.srsDue &&
           other.srsLapses == this.srsLapses &&
-          other.srsStatus == this.srsStatus);
+          other.srsStatus == this.srsStatus &&
+          other.lastReviewedAt == this.lastReviewedAt);
 }
 
 class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
@@ -4280,11 +4346,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
   final Value<String> senseIdsJson;
   final Value<DateTime> addedAt;
   final Value<DateTime> updatedAt;
-  final Value<int> srsInterval;
-  final Value<double> srsEase;
+  final Value<double?> fsrsDifficulty;
+  final Value<double?> fsrsStability;
   final Value<DateTime> srsDue;
   final Value<int> srsLapses;
   final Value<String> srsStatus;
+  final Value<DateTime?> lastReviewedAt;
   final Value<int> rowid;
   const CollectedWordsCompanion({
     this.id = const Value.absent(),
@@ -4293,11 +4360,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     this.senseIdsJson = const Value.absent(),
     this.addedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.srsInterval = const Value.absent(),
-    this.srsEase = const Value.absent(),
+    this.fsrsDifficulty = const Value.absent(),
+    this.fsrsStability = const Value.absent(),
     this.srsDue = const Value.absent(),
     this.srsLapses = const Value.absent(),
     this.srsStatus = const Value.absent(),
+    this.lastReviewedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CollectedWordsCompanion.insert({
@@ -4307,11 +4375,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     required String senseIdsJson,
     required DateTime addedAt,
     required DateTime updatedAt,
-    required int srsInterval,
-    required double srsEase,
+    this.fsrsDifficulty = const Value.absent(),
+    this.fsrsStability = const Value.absent(),
     required DateTime srsDue,
     required int srsLapses,
     required String srsStatus,
+    this.lastReviewedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        dictForm = Value(dictForm),
@@ -4319,8 +4388,6 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
        senseIdsJson = Value(senseIdsJson),
        addedAt = Value(addedAt),
        updatedAt = Value(updatedAt),
-       srsInterval = Value(srsInterval),
-       srsEase = Value(srsEase),
        srsDue = Value(srsDue),
        srsLapses = Value(srsLapses),
        srsStatus = Value(srsStatus);
@@ -4331,11 +4398,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     Expression<String>? senseIdsJson,
     Expression<DateTime>? addedAt,
     Expression<DateTime>? updatedAt,
-    Expression<int>? srsInterval,
-    Expression<double>? srsEase,
+    Expression<double>? fsrsDifficulty,
+    Expression<double>? fsrsStability,
     Expression<DateTime>? srsDue,
     Expression<int>? srsLapses,
     Expression<String>? srsStatus,
+    Expression<DateTime>? lastReviewedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4345,11 +4413,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
       if (senseIdsJson != null) 'sense_ids_json': senseIdsJson,
       if (addedAt != null) 'added_at': addedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (srsInterval != null) 'srs_interval': srsInterval,
-      if (srsEase != null) 'srs_ease': srsEase,
+      if (fsrsDifficulty != null) 'fsrs_difficulty': fsrsDifficulty,
+      if (fsrsStability != null) 'fsrs_stability': fsrsStability,
       if (srsDue != null) 'srs_due': srsDue,
       if (srsLapses != null) 'srs_lapses': srsLapses,
       if (srsStatus != null) 'srs_status': srsStatus,
+      if (lastReviewedAt != null) 'last_reviewed_at': lastReviewedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4361,11 +4430,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     Value<String>? senseIdsJson,
     Value<DateTime>? addedAt,
     Value<DateTime>? updatedAt,
-    Value<int>? srsInterval,
-    Value<double>? srsEase,
+    Value<double?>? fsrsDifficulty,
+    Value<double?>? fsrsStability,
     Value<DateTime>? srsDue,
     Value<int>? srsLapses,
     Value<String>? srsStatus,
+    Value<DateTime?>? lastReviewedAt,
     Value<int>? rowid,
   }) {
     return CollectedWordsCompanion(
@@ -4375,11 +4445,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
       senseIdsJson: senseIdsJson ?? this.senseIdsJson,
       addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      srsInterval: srsInterval ?? this.srsInterval,
-      srsEase: srsEase ?? this.srsEase,
+      fsrsDifficulty: fsrsDifficulty ?? this.fsrsDifficulty,
+      fsrsStability: fsrsStability ?? this.fsrsStability,
       srsDue: srsDue ?? this.srsDue,
       srsLapses: srsLapses ?? this.srsLapses,
       srsStatus: srsStatus ?? this.srsStatus,
+      lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4405,11 +4476,11 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
-    if (srsInterval.present) {
-      map['srs_interval'] = Variable<int>(srsInterval.value);
+    if (fsrsDifficulty.present) {
+      map['fsrs_difficulty'] = Variable<double>(fsrsDifficulty.value);
     }
-    if (srsEase.present) {
-      map['srs_ease'] = Variable<double>(srsEase.value);
+    if (fsrsStability.present) {
+      map['fsrs_stability'] = Variable<double>(fsrsStability.value);
     }
     if (srsDue.present) {
       map['srs_due'] = Variable<DateTime>(srsDue.value);
@@ -4419,6 +4490,9 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     }
     if (srsStatus.present) {
       map['srs_status'] = Variable<String>(srsStatus.value);
+    }
+    if (lastReviewedAt.present) {
+      map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -4435,11 +4509,12 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
           ..write('senseIdsJson: $senseIdsJson, ')
           ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('srsInterval: $srsInterval, ')
-          ..write('srsEase: $srsEase, ')
+          ..write('fsrsDifficulty: $fsrsDifficulty, ')
+          ..write('fsrsStability: $fsrsStability, ')
           ..write('srsDue: $srsDue, ')
           ..write('srsLapses: $srsLapses, ')
           ..write('srsStatus: $srsStatus, ')
+          ..write('lastReviewedAt: $lastReviewedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4913,27 +4988,27 @@ class $CollectedGrammarsTable extends CollectedGrammars
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _srsIntervalMeta = const VerificationMeta(
-    'srsInterval',
+  static const VerificationMeta _fsrsDifficultyMeta = const VerificationMeta(
+    'fsrsDifficulty',
   );
   @override
-  late final GeneratedColumn<int> srsInterval = GeneratedColumn<int>(
-    'srs_interval',
+  late final GeneratedColumn<double> fsrsDifficulty = GeneratedColumn<double>(
+    'fsrs_difficulty',
     aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _srsEaseMeta = const VerificationMeta(
-    'srsEase',
-  );
-  @override
-  late final GeneratedColumn<double> srsEase = GeneratedColumn<double>(
-    'srs_ease',
-    aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fsrsStabilityMeta = const VerificationMeta(
+    'fsrsStability',
+  );
+  @override
+  late final GeneratedColumn<double> fsrsStability = GeneratedColumn<double>(
+    'fsrs_stability',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _srsDueMeta = const VerificationMeta('srsDue');
   @override
@@ -4955,6 +5030,18 @@ class $CollectedGrammarsTable extends CollectedGrammars
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _lastReviewedAtMeta = const VerificationMeta(
+    'lastReviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastReviewedAt =
+      GeneratedColumn<DateTime>(
+        'last_reviewed_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _srsStatusMeta = const VerificationMeta(
     'srsStatus',
   );
@@ -4972,10 +5059,11 @@ class $CollectedGrammarsTable extends CollectedGrammars
     grammarPointId,
     addedAt,
     updatedAt,
-    srsInterval,
-    srsEase,
+    fsrsDifficulty,
+    fsrsStability,
     srsDue,
     srsLapses,
+    lastReviewedAt,
     srsStatus,
   ];
   @override
@@ -5022,24 +5110,23 @@ class $CollectedGrammarsTable extends CollectedGrammars
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
-    if (data.containsKey('srs_interval')) {
+    if (data.containsKey('fsrs_difficulty')) {
       context.handle(
-        _srsIntervalMeta,
-        srsInterval.isAcceptableOrUnknown(
-          data['srs_interval']!,
-          _srsIntervalMeta,
+        _fsrsDifficultyMeta,
+        fsrsDifficulty.isAcceptableOrUnknown(
+          data['fsrs_difficulty']!,
+          _fsrsDifficultyMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_srsIntervalMeta);
     }
-    if (data.containsKey('srs_ease')) {
+    if (data.containsKey('fsrs_stability')) {
       context.handle(
-        _srsEaseMeta,
-        srsEase.isAcceptableOrUnknown(data['srs_ease']!, _srsEaseMeta),
+        _fsrsStabilityMeta,
+        fsrsStability.isAcceptableOrUnknown(
+          data['fsrs_stability']!,
+          _fsrsStabilityMeta,
+        ),
       );
-    } else if (isInserting) {
-      context.missing(_srsEaseMeta);
     }
     if (data.containsKey('srs_due')) {
       context.handle(
@@ -5056,6 +5143,15 @@ class $CollectedGrammarsTable extends CollectedGrammars
       );
     } else if (isInserting) {
       context.missing(_srsLapsesMeta);
+    }
+    if (data.containsKey('last_reviewed_at')) {
+      context.handle(
+        _lastReviewedAtMeta,
+        lastReviewedAt.isAcceptableOrUnknown(
+          data['last_reviewed_at']!,
+          _lastReviewedAtMeta,
+        ),
+      );
     }
     if (data.containsKey('srs_status')) {
       context.handle(
@@ -5090,14 +5186,14 @@ class $CollectedGrammarsTable extends CollectedGrammars
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
-      srsInterval: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}srs_interval'],
-      )!,
-      srsEase: attachedDatabase.typeMapping.read(
+      fsrsDifficulty: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
-        data['${effectivePrefix}srs_ease'],
-      )!,
+        data['${effectivePrefix}fsrs_difficulty'],
+      ),
+      fsrsStability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fsrs_stability'],
+      ),
       srsDue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}srs_due'],
@@ -5106,6 +5202,10 @@ class $CollectedGrammarsTable extends CollectedGrammars
         DriftSqlType.int,
         data['${effectivePrefix}srs_lapses'],
       )!,
+      lastReviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_reviewed_at'],
+      ),
       srsStatus: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}srs_status'],
@@ -5125,20 +5225,25 @@ class CollectedGrammar extends DataClass
   final String grammarPointId;
   final DateTime addedAt;
   final DateTime updatedAt;
-  final int srsInterval;
-  final double srsEase;
+
+  /// See `CollectedWords.fsrsDifficulty`'s doc comment -- identical
+  /// reasoning, grammar-side mirror.
+  final double? fsrsDifficulty;
+  final double? fsrsStability;
   final DateTime srsDue;
   final int srsLapses;
+  final DateTime? lastReviewedAt;
   final String srsStatus;
   const CollectedGrammar({
     required this.id,
     required this.grammarPointId,
     required this.addedAt,
     required this.updatedAt,
-    required this.srsInterval,
-    required this.srsEase,
+    this.fsrsDifficulty,
+    this.fsrsStability,
     required this.srsDue,
     required this.srsLapses,
+    this.lastReviewedAt,
     required this.srsStatus,
   });
   @override
@@ -5148,10 +5253,17 @@ class CollectedGrammar extends DataClass
     map['grammar_point_id'] = Variable<String>(grammarPointId);
     map['added_at'] = Variable<DateTime>(addedAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
-    map['srs_interval'] = Variable<int>(srsInterval);
-    map['srs_ease'] = Variable<double>(srsEase);
+    if (!nullToAbsent || fsrsDifficulty != null) {
+      map['fsrs_difficulty'] = Variable<double>(fsrsDifficulty);
+    }
+    if (!nullToAbsent || fsrsStability != null) {
+      map['fsrs_stability'] = Variable<double>(fsrsStability);
+    }
     map['srs_due'] = Variable<DateTime>(srsDue);
     map['srs_lapses'] = Variable<int>(srsLapses);
+    if (!nullToAbsent || lastReviewedAt != null) {
+      map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt);
+    }
     map['srs_status'] = Variable<String>(srsStatus);
     return map;
   }
@@ -5162,10 +5274,17 @@ class CollectedGrammar extends DataClass
       grammarPointId: Value(grammarPointId),
       addedAt: Value(addedAt),
       updatedAt: Value(updatedAt),
-      srsInterval: Value(srsInterval),
-      srsEase: Value(srsEase),
+      fsrsDifficulty: fsrsDifficulty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fsrsDifficulty),
+      fsrsStability: fsrsStability == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fsrsStability),
       srsDue: Value(srsDue),
       srsLapses: Value(srsLapses),
+      lastReviewedAt: lastReviewedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastReviewedAt),
       srsStatus: Value(srsStatus),
     );
   }
@@ -5180,10 +5299,11 @@ class CollectedGrammar extends DataClass
       grammarPointId: serializer.fromJson<String>(json['grammarPointId']),
       addedAt: serializer.fromJson<DateTime>(json['addedAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
-      srsInterval: serializer.fromJson<int>(json['srsInterval']),
-      srsEase: serializer.fromJson<double>(json['srsEase']),
+      fsrsDifficulty: serializer.fromJson<double?>(json['fsrsDifficulty']),
+      fsrsStability: serializer.fromJson<double?>(json['fsrsStability']),
       srsDue: serializer.fromJson<DateTime>(json['srsDue']),
       srsLapses: serializer.fromJson<int>(json['srsLapses']),
+      lastReviewedAt: serializer.fromJson<DateTime?>(json['lastReviewedAt']),
       srsStatus: serializer.fromJson<String>(json['srsStatus']),
     );
   }
@@ -5195,10 +5315,11 @@ class CollectedGrammar extends DataClass
       'grammarPointId': serializer.toJson<String>(grammarPointId),
       'addedAt': serializer.toJson<DateTime>(addedAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
-      'srsInterval': serializer.toJson<int>(srsInterval),
-      'srsEase': serializer.toJson<double>(srsEase),
+      'fsrsDifficulty': serializer.toJson<double?>(fsrsDifficulty),
+      'fsrsStability': serializer.toJson<double?>(fsrsStability),
       'srsDue': serializer.toJson<DateTime>(srsDue),
       'srsLapses': serializer.toJson<int>(srsLapses),
+      'lastReviewedAt': serializer.toJson<DateTime?>(lastReviewedAt),
       'srsStatus': serializer.toJson<String>(srsStatus),
     };
   }
@@ -5208,20 +5329,28 @@ class CollectedGrammar extends DataClass
     String? grammarPointId,
     DateTime? addedAt,
     DateTime? updatedAt,
-    int? srsInterval,
-    double? srsEase,
+    Value<double?> fsrsDifficulty = const Value.absent(),
+    Value<double?> fsrsStability = const Value.absent(),
     DateTime? srsDue,
     int? srsLapses,
+    Value<DateTime?> lastReviewedAt = const Value.absent(),
     String? srsStatus,
   }) => CollectedGrammar(
     id: id ?? this.id,
     grammarPointId: grammarPointId ?? this.grammarPointId,
     addedAt: addedAt ?? this.addedAt,
     updatedAt: updatedAt ?? this.updatedAt,
-    srsInterval: srsInterval ?? this.srsInterval,
-    srsEase: srsEase ?? this.srsEase,
+    fsrsDifficulty: fsrsDifficulty.present
+        ? fsrsDifficulty.value
+        : this.fsrsDifficulty,
+    fsrsStability: fsrsStability.present
+        ? fsrsStability.value
+        : this.fsrsStability,
     srsDue: srsDue ?? this.srsDue,
     srsLapses: srsLapses ?? this.srsLapses,
+    lastReviewedAt: lastReviewedAt.present
+        ? lastReviewedAt.value
+        : this.lastReviewedAt,
     srsStatus: srsStatus ?? this.srsStatus,
   );
   CollectedGrammar copyWithCompanion(CollectedGrammarsCompanion data) {
@@ -5232,12 +5361,17 @@ class CollectedGrammar extends DataClass
           : this.grammarPointId,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      srsInterval: data.srsInterval.present
-          ? data.srsInterval.value
-          : this.srsInterval,
-      srsEase: data.srsEase.present ? data.srsEase.value : this.srsEase,
+      fsrsDifficulty: data.fsrsDifficulty.present
+          ? data.fsrsDifficulty.value
+          : this.fsrsDifficulty,
+      fsrsStability: data.fsrsStability.present
+          ? data.fsrsStability.value
+          : this.fsrsStability,
       srsDue: data.srsDue.present ? data.srsDue.value : this.srsDue,
       srsLapses: data.srsLapses.present ? data.srsLapses.value : this.srsLapses,
+      lastReviewedAt: data.lastReviewedAt.present
+          ? data.lastReviewedAt.value
+          : this.lastReviewedAt,
       srsStatus: data.srsStatus.present ? data.srsStatus.value : this.srsStatus,
     );
   }
@@ -5249,10 +5383,11 @@ class CollectedGrammar extends DataClass
           ..write('grammarPointId: $grammarPointId, ')
           ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('srsInterval: $srsInterval, ')
-          ..write('srsEase: $srsEase, ')
+          ..write('fsrsDifficulty: $fsrsDifficulty, ')
+          ..write('fsrsStability: $fsrsStability, ')
           ..write('srsDue: $srsDue, ')
           ..write('srsLapses: $srsLapses, ')
+          ..write('lastReviewedAt: $lastReviewedAt, ')
           ..write('srsStatus: $srsStatus')
           ..write(')'))
         .toString();
@@ -5264,10 +5399,11 @@ class CollectedGrammar extends DataClass
     grammarPointId,
     addedAt,
     updatedAt,
-    srsInterval,
-    srsEase,
+    fsrsDifficulty,
+    fsrsStability,
     srsDue,
     srsLapses,
+    lastReviewedAt,
     srsStatus,
   );
   @override
@@ -5278,10 +5414,11 @@ class CollectedGrammar extends DataClass
           other.grammarPointId == this.grammarPointId &&
           other.addedAt == this.addedAt &&
           other.updatedAt == this.updatedAt &&
-          other.srsInterval == this.srsInterval &&
-          other.srsEase == this.srsEase &&
+          other.fsrsDifficulty == this.fsrsDifficulty &&
+          other.fsrsStability == this.fsrsStability &&
           other.srsDue == this.srsDue &&
           other.srsLapses == this.srsLapses &&
+          other.lastReviewedAt == this.lastReviewedAt &&
           other.srsStatus == this.srsStatus);
 }
 
@@ -5290,10 +5427,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
   final Value<String> grammarPointId;
   final Value<DateTime> addedAt;
   final Value<DateTime> updatedAt;
-  final Value<int> srsInterval;
-  final Value<double> srsEase;
+  final Value<double?> fsrsDifficulty;
+  final Value<double?> fsrsStability;
   final Value<DateTime> srsDue;
   final Value<int> srsLapses;
+  final Value<DateTime?> lastReviewedAt;
   final Value<String> srsStatus;
   final Value<int> rowid;
   const CollectedGrammarsCompanion({
@@ -5301,10 +5439,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     this.grammarPointId = const Value.absent(),
     this.addedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    this.srsInterval = const Value.absent(),
-    this.srsEase = const Value.absent(),
+    this.fsrsDifficulty = const Value.absent(),
+    this.fsrsStability = const Value.absent(),
     this.srsDue = const Value.absent(),
     this.srsLapses = const Value.absent(),
+    this.lastReviewedAt = const Value.absent(),
     this.srsStatus = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -5313,18 +5452,17 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     required String grammarPointId,
     required DateTime addedAt,
     required DateTime updatedAt,
-    required int srsInterval,
-    required double srsEase,
+    this.fsrsDifficulty = const Value.absent(),
+    this.fsrsStability = const Value.absent(),
     required DateTime srsDue,
     required int srsLapses,
+    this.lastReviewedAt = const Value.absent(),
     required String srsStatus,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        grammarPointId = Value(grammarPointId),
        addedAt = Value(addedAt),
        updatedAt = Value(updatedAt),
-       srsInterval = Value(srsInterval),
-       srsEase = Value(srsEase),
        srsDue = Value(srsDue),
        srsLapses = Value(srsLapses),
        srsStatus = Value(srsStatus);
@@ -5333,10 +5471,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     Expression<String>? grammarPointId,
     Expression<DateTime>? addedAt,
     Expression<DateTime>? updatedAt,
-    Expression<int>? srsInterval,
-    Expression<double>? srsEase,
+    Expression<double>? fsrsDifficulty,
+    Expression<double>? fsrsStability,
     Expression<DateTime>? srsDue,
     Expression<int>? srsLapses,
+    Expression<DateTime>? lastReviewedAt,
     Expression<String>? srsStatus,
     Expression<int>? rowid,
   }) {
@@ -5345,10 +5484,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
       if (grammarPointId != null) 'grammar_point_id': grammarPointId,
       if (addedAt != null) 'added_at': addedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
-      if (srsInterval != null) 'srs_interval': srsInterval,
-      if (srsEase != null) 'srs_ease': srsEase,
+      if (fsrsDifficulty != null) 'fsrs_difficulty': fsrsDifficulty,
+      if (fsrsStability != null) 'fsrs_stability': fsrsStability,
       if (srsDue != null) 'srs_due': srsDue,
       if (srsLapses != null) 'srs_lapses': srsLapses,
+      if (lastReviewedAt != null) 'last_reviewed_at': lastReviewedAt,
       if (srsStatus != null) 'srs_status': srsStatus,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5359,10 +5499,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     Value<String>? grammarPointId,
     Value<DateTime>? addedAt,
     Value<DateTime>? updatedAt,
-    Value<int>? srsInterval,
-    Value<double>? srsEase,
+    Value<double?>? fsrsDifficulty,
+    Value<double?>? fsrsStability,
     Value<DateTime>? srsDue,
     Value<int>? srsLapses,
+    Value<DateTime?>? lastReviewedAt,
     Value<String>? srsStatus,
     Value<int>? rowid,
   }) {
@@ -5371,10 +5512,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
       grammarPointId: grammarPointId ?? this.grammarPointId,
       addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      srsInterval: srsInterval ?? this.srsInterval,
-      srsEase: srsEase ?? this.srsEase,
+      fsrsDifficulty: fsrsDifficulty ?? this.fsrsDifficulty,
+      fsrsStability: fsrsStability ?? this.fsrsStability,
       srsDue: srsDue ?? this.srsDue,
       srsLapses: srsLapses ?? this.srsLapses,
+      lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
       srsStatus: srsStatus ?? this.srsStatus,
       rowid: rowid ?? this.rowid,
     );
@@ -5395,17 +5537,20 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
-    if (srsInterval.present) {
-      map['srs_interval'] = Variable<int>(srsInterval.value);
+    if (fsrsDifficulty.present) {
+      map['fsrs_difficulty'] = Variable<double>(fsrsDifficulty.value);
     }
-    if (srsEase.present) {
-      map['srs_ease'] = Variable<double>(srsEase.value);
+    if (fsrsStability.present) {
+      map['fsrs_stability'] = Variable<double>(fsrsStability.value);
     }
     if (srsDue.present) {
       map['srs_due'] = Variable<DateTime>(srsDue.value);
     }
     if (srsLapses.present) {
       map['srs_lapses'] = Variable<int>(srsLapses.value);
+    }
+    if (lastReviewedAt.present) {
+      map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt.value);
     }
     if (srsStatus.present) {
       map['srs_status'] = Variable<String>(srsStatus.value);
@@ -5423,10 +5568,11 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
           ..write('grammarPointId: $grammarPointId, ')
           ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('srsInterval: $srsInterval, ')
-          ..write('srsEase: $srsEase, ')
+          ..write('fsrsDifficulty: $fsrsDifficulty, ')
+          ..write('fsrsStability: $fsrsStability, ')
           ..write('srsDue: $srsDue, ')
           ..write('srsLapses: $srsLapses, ')
+          ..write('lastReviewedAt: $lastReviewedAt, ')
           ..write('srsStatus: $srsStatus, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -10121,11 +10267,12 @@ typedef $$CollectedWordsTableCreateCompanionBuilder =
       required String senseIdsJson,
       required DateTime addedAt,
       required DateTime updatedAt,
-      required int srsInterval,
-      required double srsEase,
+      Value<double?> fsrsDifficulty,
+      Value<double?> fsrsStability,
       required DateTime srsDue,
       required int srsLapses,
       required String srsStatus,
+      Value<DateTime?> lastReviewedAt,
       Value<int> rowid,
     });
 typedef $$CollectedWordsTableUpdateCompanionBuilder =
@@ -10136,11 +10283,12 @@ typedef $$CollectedWordsTableUpdateCompanionBuilder =
       Value<String> senseIdsJson,
       Value<DateTime> addedAt,
       Value<DateTime> updatedAt,
-      Value<int> srsInterval,
-      Value<double> srsEase,
+      Value<double?> fsrsDifficulty,
+      Value<double?> fsrsStability,
       Value<DateTime> srsDue,
       Value<int> srsLapses,
       Value<String> srsStatus,
+      Value<DateTime?> lastReviewedAt,
       Value<int> rowid,
     });
 
@@ -10221,13 +10369,13 @@ class $$CollectedWordsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get srsInterval => $composableBuilder(
-    column: $table.srsInterval,
+  ColumnFilters<double> get fsrsDifficulty => $composableBuilder(
+    column: $table.fsrsDifficulty,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get srsEase => $composableBuilder(
-    column: $table.srsEase,
+  ColumnFilters<double> get fsrsStability => $composableBuilder(
+    column: $table.fsrsStability,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10243,6 +10391,11 @@ class $$CollectedWordsTableFilterComposer
 
   ColumnFilters<String> get srsStatus => $composableBuilder(
     column: $table.srsStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastReviewedAt => $composableBuilder(
+    column: $table.lastReviewedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10311,13 +10464,13 @@ class $$CollectedWordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get srsInterval => $composableBuilder(
-    column: $table.srsInterval,
+  ColumnOrderings<double> get fsrsDifficulty => $composableBuilder(
+    column: $table.fsrsDifficulty,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get srsEase => $composableBuilder(
-    column: $table.srsEase,
+  ColumnOrderings<double> get fsrsStability => $composableBuilder(
+    column: $table.fsrsStability,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -10333,6 +10486,11 @@ class $$CollectedWordsTableOrderingComposer
 
   ColumnOrderings<String> get srsStatus => $composableBuilder(
     column: $table.srsStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastReviewedAt => $composableBuilder(
+    column: $table.lastReviewedAt,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -10366,13 +10524,15 @@ class $$CollectedWordsTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<int> get srsInterval => $composableBuilder(
-    column: $table.srsInterval,
+  GeneratedColumn<double> get fsrsDifficulty => $composableBuilder(
+    column: $table.fsrsDifficulty,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get srsEase =>
-      $composableBuilder(column: $table.srsEase, builder: (column) => column);
+  GeneratedColumn<double> get fsrsStability => $composableBuilder(
+    column: $table.fsrsStability,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get srsDue =>
       $composableBuilder(column: $table.srsDue, builder: (column) => column);
@@ -10382,6 +10542,11 @@ class $$CollectedWordsTableAnnotationComposer
 
   GeneratedColumn<String> get srsStatus =>
       $composableBuilder(column: $table.srsStatus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastReviewedAt => $composableBuilder(
+    column: $table.lastReviewedAt,
+    builder: (column) => column,
+  );
 
   Expression<T> collectedWordSourcesRefs<T extends Object>(
     Expression<T> Function($$CollectedWordSourcesTableAnnotationComposer a) f,
@@ -10446,11 +10611,12 @@ class $$CollectedWordsTableTableManager
                 Value<String> senseIdsJson = const Value.absent(),
                 Value<DateTime> addedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> srsInterval = const Value.absent(),
-                Value<double> srsEase = const Value.absent(),
+                Value<double?> fsrsDifficulty = const Value.absent(),
+                Value<double?> fsrsStability = const Value.absent(),
                 Value<DateTime> srsDue = const Value.absent(),
                 Value<int> srsLapses = const Value.absent(),
                 Value<String> srsStatus = const Value.absent(),
+                Value<DateTime?> lastReviewedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedWordsCompanion(
                 id: id,
@@ -10459,11 +10625,12 @@ class $$CollectedWordsTableTableManager
                 senseIdsJson: senseIdsJson,
                 addedAt: addedAt,
                 updatedAt: updatedAt,
-                srsInterval: srsInterval,
-                srsEase: srsEase,
+                fsrsDifficulty: fsrsDifficulty,
+                fsrsStability: fsrsStability,
                 srsDue: srsDue,
                 srsLapses: srsLapses,
                 srsStatus: srsStatus,
+                lastReviewedAt: lastReviewedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -10474,11 +10641,12 @@ class $$CollectedWordsTableTableManager
                 required String senseIdsJson,
                 required DateTime addedAt,
                 required DateTime updatedAt,
-                required int srsInterval,
-                required double srsEase,
+                Value<double?> fsrsDifficulty = const Value.absent(),
+                Value<double?> fsrsStability = const Value.absent(),
                 required DateTime srsDue,
                 required int srsLapses,
                 required String srsStatus,
+                Value<DateTime?> lastReviewedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedWordsCompanion.insert(
                 id: id,
@@ -10487,11 +10655,12 @@ class $$CollectedWordsTableTableManager
                 senseIdsJson: senseIdsJson,
                 addedAt: addedAt,
                 updatedAt: updatedAt,
-                srsInterval: srsInterval,
-                srsEase: srsEase,
+                fsrsDifficulty: fsrsDifficulty,
+                fsrsStability: fsrsStability,
                 srsDue: srsDue,
                 srsLapses: srsLapses,
                 srsStatus: srsStatus,
+                lastReviewedAt: lastReviewedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -11096,10 +11265,11 @@ typedef $$CollectedGrammarsTableCreateCompanionBuilder =
       required String grammarPointId,
       required DateTime addedAt,
       required DateTime updatedAt,
-      required int srsInterval,
-      required double srsEase,
+      Value<double?> fsrsDifficulty,
+      Value<double?> fsrsStability,
       required DateTime srsDue,
       required int srsLapses,
+      Value<DateTime?> lastReviewedAt,
       required String srsStatus,
       Value<int> rowid,
     });
@@ -11109,10 +11279,11 @@ typedef $$CollectedGrammarsTableUpdateCompanionBuilder =
       Value<String> grammarPointId,
       Value<DateTime> addedAt,
       Value<DateTime> updatedAt,
-      Value<int> srsInterval,
-      Value<double> srsEase,
+      Value<double?> fsrsDifficulty,
+      Value<double?> fsrsStability,
       Value<DateTime> srsDue,
       Value<int> srsLapses,
+      Value<DateTime?> lastReviewedAt,
       Value<String> srsStatus,
       Value<int> rowid,
     });
@@ -11190,13 +11361,13 @@ class $$CollectedGrammarsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get srsInterval => $composableBuilder(
-    column: $table.srsInterval,
+  ColumnFilters<double> get fsrsDifficulty => $composableBuilder(
+    column: $table.fsrsDifficulty,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get srsEase => $composableBuilder(
-    column: $table.srsEase,
+  ColumnFilters<double> get fsrsStability => $composableBuilder(
+    column: $table.fsrsStability,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11207,6 +11378,11 @@ class $$CollectedGrammarsTableFilterComposer
 
   ColumnFilters<int> get srsLapses => $composableBuilder(
     column: $table.srsLapses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastReviewedAt => $composableBuilder(
+    column: $table.lastReviewedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11271,13 +11447,13 @@ class $$CollectedGrammarsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get srsInterval => $composableBuilder(
-    column: $table.srsInterval,
+  ColumnOrderings<double> get fsrsDifficulty => $composableBuilder(
+    column: $table.fsrsDifficulty,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get srsEase => $composableBuilder(
-    column: $table.srsEase,
+  ColumnOrderings<double> get fsrsStability => $composableBuilder(
+    column: $table.fsrsStability,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -11288,6 +11464,11 @@ class $$CollectedGrammarsTableOrderingComposer
 
   ColumnOrderings<int> get srsLapses => $composableBuilder(
     column: $table.srsLapses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastReviewedAt => $composableBuilder(
+    column: $table.lastReviewedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -11320,19 +11501,26 @@ class $$CollectedGrammarsTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<int> get srsInterval => $composableBuilder(
-    column: $table.srsInterval,
+  GeneratedColumn<double> get fsrsDifficulty => $composableBuilder(
+    column: $table.fsrsDifficulty,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get srsEase =>
-      $composableBuilder(column: $table.srsEase, builder: (column) => column);
+  GeneratedColumn<double> get fsrsStability => $composableBuilder(
+    column: $table.fsrsStability,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get srsDue =>
       $composableBuilder(column: $table.srsDue, builder: (column) => column);
 
   GeneratedColumn<int> get srsLapses =>
       $composableBuilder(column: $table.srsLapses, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastReviewedAt => $composableBuilder(
+    column: $table.lastReviewedAt,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get srsStatus =>
       $composableBuilder(column: $table.srsStatus, builder: (column) => column);
@@ -11402,10 +11590,11 @@ class $$CollectedGrammarsTableTableManager
                 Value<String> grammarPointId = const Value.absent(),
                 Value<DateTime> addedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
-                Value<int> srsInterval = const Value.absent(),
-                Value<double> srsEase = const Value.absent(),
+                Value<double?> fsrsDifficulty = const Value.absent(),
+                Value<double?> fsrsStability = const Value.absent(),
                 Value<DateTime> srsDue = const Value.absent(),
                 Value<int> srsLapses = const Value.absent(),
+                Value<DateTime?> lastReviewedAt = const Value.absent(),
                 Value<String> srsStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedGrammarsCompanion(
@@ -11413,10 +11602,11 @@ class $$CollectedGrammarsTableTableManager
                 grammarPointId: grammarPointId,
                 addedAt: addedAt,
                 updatedAt: updatedAt,
-                srsInterval: srsInterval,
-                srsEase: srsEase,
+                fsrsDifficulty: fsrsDifficulty,
+                fsrsStability: fsrsStability,
                 srsDue: srsDue,
                 srsLapses: srsLapses,
+                lastReviewedAt: lastReviewedAt,
                 srsStatus: srsStatus,
                 rowid: rowid,
               ),
@@ -11426,10 +11616,11 @@ class $$CollectedGrammarsTableTableManager
                 required String grammarPointId,
                 required DateTime addedAt,
                 required DateTime updatedAt,
-                required int srsInterval,
-                required double srsEase,
+                Value<double?> fsrsDifficulty = const Value.absent(),
+                Value<double?> fsrsStability = const Value.absent(),
                 required DateTime srsDue,
                 required int srsLapses,
+                Value<DateTime?> lastReviewedAt = const Value.absent(),
                 required String srsStatus,
                 Value<int> rowid = const Value.absent(),
               }) => CollectedGrammarsCompanion.insert(
@@ -11437,10 +11628,11 @@ class $$CollectedGrammarsTableTableManager
                 grammarPointId: grammarPointId,
                 addedAt: addedAt,
                 updatedAt: updatedAt,
-                srsInterval: srsInterval,
-                srsEase: srsEase,
+                fsrsDifficulty: fsrsDifficulty,
+                fsrsStability: fsrsStability,
                 srsDue: srsDue,
                 srsLapses: srsLapses,
+                lastReviewedAt: lastReviewedAt,
                 srsStatus: srsStatus,
                 rowid: rowid,
               ),

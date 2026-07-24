@@ -255,11 +255,19 @@ class CollectedWords extends Table {
   DateTimeColumn get addedAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
-  IntColumn get srsInterval => integer().named('srs_interval')();
-  RealColumn get srsEase => real().named('srs_ease')();
+  /// Real FSRS memory state (spec §12, `lib/l5_srs/fsrs/fsrs_scheduler.dart`)
+  /// -- null together with [stability]/[lastReviewedAt] exactly when
+  /// [srsStatus] is `newCard` (never reviewed yet). Replaced the earlier
+  /// SM-2-shaped `srsInterval`/`srsEase` placeholder columns in a
+  /// schemaVersion 2->3 migration once the real FSRS scheduler existed to
+  /// populate them -- see `database.dart`'s `migration` override.
+  RealColumn get fsrsDifficulty => real().nullable().named('fsrs_difficulty')();
+  RealColumn get fsrsStability => real().nullable().named('fsrs_stability')();
   DateTimeColumn get srsDue => dateTime().named('srs_due')();
   IntColumn get srsLapses => integer().named('srs_lapses')();
   TextColumn get srsStatus => text().named('srs_status')();
+  DateTimeColumn get lastReviewedAt =>
+      dateTime().nullable().named('last_reviewed_at')();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -301,10 +309,14 @@ class CollectedGrammars extends Table {
   DateTimeColumn get addedAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
-  IntColumn get srsInterval => integer().named('srs_interval')();
-  RealColumn get srsEase => real().named('srs_ease')();
+  /// See `CollectedWords.fsrsDifficulty`'s doc comment -- identical
+  /// reasoning, grammar-side mirror.
+  RealColumn get fsrsDifficulty => real().nullable().named('fsrs_difficulty')();
+  RealColumn get fsrsStability => real().nullable().named('fsrs_stability')();
   DateTimeColumn get srsDue => dateTime().named('srs_due')();
   IntColumn get srsLapses => integer().named('srs_lapses')();
+  DateTimeColumn get lastReviewedAt =>
+      dateTime().nullable().named('last_reviewed_at')();
   TextColumn get srsStatus => text().named('srs_status')();
 
   @override

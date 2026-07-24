@@ -113,11 +113,12 @@ class _WordMiningStore implements MiningStore {
             senseIdsJson: jsonEncode(senseIds),
             addedAt: timestamp,
             updatedAt: timestamp,
-            srsInterval: state.interval,
-            srsEase: state.ease,
+            fsrsDifficulty: Value(state.difficulty),
+            fsrsStability: Value(state.stability),
             srsDue: state.due,
             srsLapses: state.lapses,
             srsStatus: state.status.name,
+            lastReviewedAt: Value(state.lastReviewedAt),
           ),
         );
   }
@@ -129,11 +130,12 @@ class _WordMiningStore implements MiningStore {
     )..where((w) => w.id.equals(id))).write(
       CollectedWordsCompanion(
         updatedAt: Value(timestamp),
-        srsInterval: Value(state.interval),
-        srsEase: Value(state.ease),
+        fsrsDifficulty: Value(state.difficulty),
+        fsrsStability: Value(state.stability),
         srsDue: Value(state.due),
         srsLapses: Value(state.lapses),
         srsStatus: Value(state.status.name),
+        lastReviewedAt: Value(state.lastReviewedAt),
       ),
     );
   }
@@ -172,10 +174,11 @@ class _WordMiningStore implements MiningStore {
   }
 
   SrsState _srsStateOf(CollectedWord row) => SrsState(
-    interval: row.srsInterval,
-    ease: row.srsEase,
+    difficulty: row.fsrsDifficulty,
+    stability: row.fsrsStability,
     due: row.srsDue,
     lapses: row.srsLapses,
     status: SrsStatus.values.byName(row.srsStatus),
+    lastReviewedAt: row.lastReviewedAt,
   );
 }

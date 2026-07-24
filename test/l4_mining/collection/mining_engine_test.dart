@@ -81,7 +81,8 @@ void main() {
       expect(result.entryId, 'id-1');
       expect(result.previousSrsState, isNull);
       expect(store.state!.status, SrsStatus.newCard);
-      expect(store.state!.interval, 0);
+      expect(store.state!.stability, isNull);
+      expect(store.state!.difficulty, isNull);
       expect(store.state!.lapses, 0);
       expect(store.sightings, hasLength(1));
       expect(result.sightingId, store.sightings.single.id);
@@ -93,11 +94,12 @@ void main() {
     final store = _FakeStore('id-1');
     final originalDue = DateTime.utc(2020, 1, 1);
     store.state = SrsState(
-      interval: 20,
-      ease: 3.0,
+      difficulty: 6.0,
+      stability: 20.0,
       due: originalDue,
       lapses: 4,
       status: SrsStatus.review,
+      lastReviewedAt: DateTime.utc(2019, 12, 20),
     );
     final firstSightingId = await store.insertSighting(
       source,
@@ -108,10 +110,10 @@ void main() {
 
     expect(result.wasFreshAdd, isFalse);
     expect(result.previousSrsState, isNotNull);
-    expect(result.previousSrsState!.interval, 20);
+    expect(result.previousSrsState!.stability, 20.0);
     expect(result.previousSrsState!.status, SrsStatus.review);
     expect(store.state!.status, SrsStatus.newCard);
-    expect(store.state!.interval, 0);
+    expect(store.state!.stability, isNull);
     expect(store.sightings, hasLength(2));
     expect(store.sightings.map((s) => s.id), contains(firstSightingId));
   });
@@ -132,11 +134,12 @@ void main() {
     final store = _FakeStore('id-1');
     final originalDue = DateTime.utc(2020, 1, 1);
     store.state = SrsState(
-      interval: 20,
-      ease: 3.0,
+      difficulty: 6.0,
+      stability: 20.0,
       due: originalDue,
       lapses: 4,
       status: SrsStatus.review,
+      lastReviewedAt: DateTime.utc(2019, 12, 20),
     );
     final firstSightingId = await store.insertSighting(
       source,
@@ -147,8 +150,8 @@ void main() {
     await engine.undo(store, result);
 
     expect(store.deleted, isFalse);
-    expect(store.state!.interval, 20);
-    expect(store.state!.ease, 3.0);
+    expect(store.state!.stability, 20.0);
+    expect(store.state!.difficulty, 6.0);
     expect(store.state!.due, originalDue);
     expect(store.state!.lapses, 4);
     expect(store.state!.status, SrsStatus.review);

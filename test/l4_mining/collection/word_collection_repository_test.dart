@@ -28,19 +28,20 @@ const _otherSource = SourceRef(
 Future<void> _forceSrsState(
   AppDatabase db,
   String id, {
-  required int interval,
-  required double ease,
+  required double difficulty,
+  required double stability,
   required DateTime due,
   required int lapses,
   required SrsStatus status,
 }) {
   return (db.update(db.collectedWords)..where((w) => w.id.equals(id))).write(
     CollectedWordsCompanion(
-      srsInterval: Value(interval),
-      srsEase: Value(ease),
+      fsrsDifficulty: Value(difficulty),
+      fsrsStability: Value(stability),
       srsDue: Value(due),
       srsLapses: Value(lapses),
       srsStatus: Value(status.name),
+      lastReviewedAt: Value(due.subtract(const Duration(days: 1))),
     ),
   );
 }
@@ -77,9 +78,9 @@ void main() {
       expect(row.reading, 'たべる');
       expect(jsonDecode(row.senseIdsJson), [1, 2]);
       expect(row.srsStatus, SrsStatus.newCard.name);
-      expect(row.srsInterval, 0);
+      expect(row.fsrsDifficulty, isNull);
+      expect(row.fsrsStability, isNull);
       expect(row.srsLapses, 0);
-      expect(row.srsEase, 2.5);
 
       final sightings = await db.select(db.collectedWordSources).get();
       expect(sightings, hasLength(1));
@@ -138,8 +139,8 @@ void main() {
       await _forceSrsState(
         db,
         first.entryId,
-        interval: 10,
-        ease: 2.8,
+        difficulty: 6.0,
+        stability: 10.0,
         due: DateTime.utc(2030, 1, 1),
         lapses: 3,
         status: SrsStatus.review,
@@ -155,8 +156,8 @@ void main() {
       expect(second.wasFreshAdd, isFalse);
       expect(second.entryId, first.entryId);
       expect(second.previousSrsState, isNotNull);
-      expect(second.previousSrsState!.interval, 10);
-      expect(second.previousSrsState!.ease, 2.8);
+      expect(second.previousSrsState!.stability, 10.0);
+      expect(second.previousSrsState!.difficulty, 6.0);
       expect(second.previousSrsState!.lapses, 3);
       expect(second.previousSrsState!.status, SrsStatus.review);
 
@@ -165,9 +166,9 @@ void main() {
       expect(rows, hasLength(1));
       final row = rows.single;
       expect(row.srsStatus, SrsStatus.newCard.name);
-      expect(row.srsInterval, 0);
+      expect(row.fsrsDifficulty, isNull);
+      expect(row.fsrsStability, isNull);
       expect(row.srsLapses, 0);
-      expect(row.srsEase, 2.5);
 
       // senseIds is a fresh-add-only field; a reset must not touch it.
       expect(jsonDecode(row.senseIdsJson), [1]);
@@ -232,8 +233,8 @@ void main() {
         await _forceSrsState(
           db,
           first.entryId,
-          interval: 10,
-          ease: 2.8,
+          difficulty: 6.0,
+          stability: 10.0,
           due: DateTime.utc(2030, 1, 1),
           lapses: 3,
           status: SrsStatus.review,
@@ -251,8 +252,8 @@ void main() {
         final rows = await db.select(db.collectedWords).get();
         expect(rows, hasLength(1));
         final row = rows.single;
-        expect(row.srsInterval, 10);
-        expect(row.srsEase, 2.8);
+        expect(row.fsrsStability, 10.0);
+        expect(row.fsrsDifficulty, 6.0);
         // isAtSameMomentAs, not `==`: Drift reads DateTimeColumn values back
         // as local time, and DateTime's `==` (unlike isAtSameMomentAs) treats
         // a UTC instant and the same instant in local time as unequal.
