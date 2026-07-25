@@ -4,9 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
+import 'package:japanese_immersion_reader/l1_ingestion/cover_art_extractor.dart';
 import 'package:japanese_immersion_reader/l1_ingestion/unified_importer.dart';
-import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
+import 'package:japanese_immersion_reader/l3_reader_ui/reading_position.dart';
 import 'package:japanese_immersion_reader/l5_srs/review_ui/review_screen.dart';
 
 import 'library_screen.dart';
@@ -19,11 +20,11 @@ import 'stats/stats_screen.dart';
 /// The app's entry screen: load a book (from the Library, the bundled
 /// sample fixture, or a real import) and jump into Card Mode.
 ///
-/// **Still a placeholder in spirit** (spec §5's cover art / progress % per
-/// book aren't shown -- `LibraryScreen` is a plain title list, not a
-/// visual shelf), but every import now persists via `DocumentRepository`
-/// and can be reopened without re-picking the source file, closing the
-/// main gap this comment used to describe.
+/// **Still a placeholder in spirit** (spec §5's progress % per book isn't
+/// shown), but every import now persists via `DocumentRepository`, can be
+/// reopened without re-picking the source file, shows a real cover
+/// thumbnail where one could be extracted (`LibraryScreen`), and resumes
+/// at the exact sentence the reader last left off at.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -35,7 +36,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _loading = false;
   String? _error;
 
-  Future<void> _openDocument(Future<Document> Function() load) async {
+  Future<void> _openDocument(
+    Future<Document> Function() load, {
+    Future<void> Function(Document document)? afterSave,
+  }) async {
     setState(() {
       _loading = true;
       _error = null;
@@ -50,6 +54,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // source sentence built in as context"), long after this in-memory
       // Document is gone. See DocumentRepository's own doc comment.
       await ref.read(documentRepositoryProvider).save(document);
+      if (afterSave != null) await afterSave(document);
+
+      // Spec §5: resume where a prior session left off. Read AFTER save()
+      // so this document's row is guaranteed to exist -- both this read and
+      // any later write for this session go through
+      // currentSentencePositionProvider (see reading_position.dart), which
+      // Card/Document Mode's controllers already read as their starting
+      // position on first build.
+      final lastSentenceId = await ref
+          .read(documentRepositoryProvider)
+          .lastSentenceId(document.id);
+      ref.read(currentSentencePositionProvider.notifier).set(lastSentenceId);
+
       if (mounted) {
         await Navigator.of(
           context,
@@ -104,27 +121,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// the bare spinner below for feedback (no per-step progress UI exists yet,
   /// matching every other import button on this placeholder screen -- see
   /// class doc comment). Subsequent imports reuse the cached models.
-  Future<void> _importBook() => _openDocument(() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['epub', 'pdf'],
+  Future<void> _importBook() {
+    File? importedFile;
+    return _openDocument(
+      () async {
+        final result = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['epub', 'pdf'],
+        );
+        final path = result?.files.single.path;
+        if (path == null) throw StateError('No file selected.');
+        importedFile = File(path);
+        return importAnyFile(importedFile!, onProgress: (_) {});
+      },
+      afterSave: (document) => _extractAndStoreCover(document, importedFile),
     );
-    final path = result?.files.single.path;
-    if (path == null) throw StateError('No file selected.');
-    return importAnyFile(File(path), onProgress: (_) {});
-  });
+  }
 
   /// Spec §5's remote book sources: [RemoteBrowseScreen] handles connecting
   /// to/listing/downloading from a WebDAV or OPDS source and pops with the
   /// downloaded local file -- this hands it to the same [importAnyFile]
   /// routing the sideload button uses, including scanned-PDF detection.
-  Future<void> _importFromRemote() => _openDocument(() async {
-    final file = await Navigator.of(
-      context,
-    ).push<File>(MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()));
-    if (file == null) throw StateError('No book selected.');
-    return importAnyFile(file, onProgress: (_) {});
-  });
+  Future<void> _importFromRemote() {
+    File? remoteFile;
+    return _openDocument(
+      () async {
+        final file = await Navigator.of(context).push<File>(
+          MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()),
+        );
+        if (file == null) throw StateError('No book selected.');
+        remoteFile = file;
+        return importAnyFile(file, onProgress: (_) {});
+      },
+      afterSave: (document) => _extractAndStoreCover(document, remoteFile),
+    );
+  }
+
+  /// Best-effort Library cover-art extraction (see `extractCoverArt`'s own
+  /// doc comment) -- only possible right here, where a real source [File]
+  /// still exists; a Library reopen loads from the database with no file to
+  /// re-extract from, and the bundled samples are in-memory `Document`s
+  /// with no file at all. Only sets the cover if [document] doesn't already
+  /// have a user-picked one (`setAutoExtractedCoverIfAbsent`), and swallows
+  /// every failure -- a missing/broken cover must never surface as an
+  /// import error.
+  Future<void> _extractAndStoreCover(Document document, File? file) async {
+    if (file == null) return;
+    final bytes = await extractCoverArt(file);
+    if (bytes == null) return;
+    final path = await ref.read(coverArtStoreProvider).write(document.id, bytes);
+    await ref
+        .read(documentRepositoryProvider)
+        .setAutoExtractedCoverIfAbsent(document.id, path);
+  }
 
   @override
   Widget build(BuildContext context) {
