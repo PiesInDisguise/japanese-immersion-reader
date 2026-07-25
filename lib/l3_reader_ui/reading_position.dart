@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
+
+import '../app/services.dart';
 
 /// The `Document` currently open, or `null` before any book is opened.
 /// Deliberately a plain [Notifier] holding one value rather than a family
@@ -27,16 +31,33 @@ final currentDocumentProvider = NotifierProvider<CurrentDocument, Document?>(
 /// restarting from the top, per spec's own explanation of why `Sentence`
 /// carries a stable ID at all (`docs/spec.md` §3).
 ///
-/// Session-only for now, not yet persisted across app restarts (spec §5's
-/// "persisted per work" implies durable storage keyed by work -- that needs
-/// a real per-Document reading-position table, which doesn't exist yet; a
-/// reasonable, separately-scoped follow-up once a Library view exists to
-/// actually list multiple works with saved positions).
+/// Persisted per spec §5: every [set] call also fire-and-forget writes
+/// through to `Documents.lastSentenceId` (`DocumentRepository
+/// .updateLastSentenceId`), keyed by whichever document
+/// `currentDocumentProvider` currently holds. `home_screen.dart`'s
+/// `_openDocument` reads that persisted value back and seeds this provider
+/// before pushing the reader screen, so reopening a book (from the Library,
+/// or a fresh app launch) resumes at the same sentence a prior session left
+/// off at.
 class CurrentSentencePosition extends Notifier<String?> {
   @override
   String? build() => null;
 
-  void set(String? sentenceId) => state = sentenceId;
+  void set(String? sentenceId) {
+    state = sentenceId;
+    if (sentenceId == null) return;
+    final document = ref.read(currentDocumentProvider);
+    if (document == null) return;
+    // Fire-and-forget: a card swipe/scroll tick must not block on a DB
+    // write completing. Mirrors `ReadingTimeTracker`'s identical
+    // `unawaited(...)` use of `documentRepositoryProvider`'s sibling
+    // repository for spec §15 (`reading_time_tracker.dart`).
+    unawaited(
+      ref
+          .read(documentRepositoryProvider)
+          .updateLastSentenceId(document.id, sentenceId),
+    );
+  }
 }
 
 final currentSentencePositionProvider =

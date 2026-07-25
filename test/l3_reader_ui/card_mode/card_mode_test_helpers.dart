@@ -18,6 +18,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:japanese_immersion_reader/app/document_repository.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
 import 'package:japanese_immersion_reader/app/settings_repository.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
@@ -190,6 +191,30 @@ class FakeSettingsRepository extends SettingsRepository {
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
     );
+  }
+}
+
+/// A [DocumentRepository] that never touches a database -- required once
+/// `CurrentSentencePosition.set()` (`reading_position.dart`) started
+/// fire-and-forget persisting via `documentRepositoryProvider` on every
+/// card swipe/scroll sentence-boundary change: without this override, these
+/// widget tests would reach a real `AppDatabase()` (there's no
+/// `path_provider` platform-channel mock anywhere in this project's test
+/// suite) the first time either mode's controller reports a position.
+/// `updateLastSentenceId` just records its calls for tests that want to
+/// assert on them.
+class FakeDocumentRepository extends DocumentRepository {
+  FakeDocumentRepository() : super(_inertDatabase());
+
+  final List<({String documentId, String sentenceId})> updateLastSentenceIdCalls =
+      [];
+
+  @override
+  Future<void> updateLastSentenceId(String documentId, String sentenceId) async {
+    updateLastSentenceIdCalls.add((
+      documentId: documentId,
+      sentenceId: sentenceId,
+    ));
   }
 }
 
@@ -376,6 +401,7 @@ Future<void> pumpCardModeScreen(
   required FakeDictionaryRepository dictionaryRepository,
   required FakeWordCollectionRepository wordCollectionRepository,
   FakeSettingsRepository? settingsRepository,
+  FakeDocumentRepository? documentRepository,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -390,6 +416,9 @@ Future<void> pumpCardModeScreen(
         ),
         settingsRepositoryProvider.overrideWithValue(
           settingsRepository ?? FakeSettingsRepository(),
+        ),
+        documentRepositoryProvider.overrideWithValue(
+          documentRepository ?? FakeDocumentRepository(),
         ),
       ],
       child: const MaterialApp(home: CardModeScreen()),
@@ -410,6 +439,7 @@ Future<void> pumpDocumentModeScreen(
   required FakeDictionaryRepository dictionaryRepository,
   required FakeWordCollectionRepository wordCollectionRepository,
   FakeSettingsRepository? settingsRepository,
+  FakeDocumentRepository? documentRepository,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -424,6 +454,9 @@ Future<void> pumpDocumentModeScreen(
         ),
         settingsRepositoryProvider.overrideWithValue(
           settingsRepository ?? FakeSettingsRepository(),
+        ),
+        documentRepositoryProvider.overrideWithValue(
+          documentRepository ?? FakeDocumentRepository(),
         ),
       ],
       child: const MaterialApp(home: DocumentModeScreen()),
