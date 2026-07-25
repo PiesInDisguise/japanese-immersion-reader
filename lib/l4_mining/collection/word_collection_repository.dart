@@ -234,6 +234,7 @@ class _WordMiningStore implements MiningStore {
             srsLapses: state.lapses,
             srsStatus: state.status.name,
             lastReviewedAt: Value(state.lastReviewedAt),
+            srsStep: Value(state.step),
           ),
         );
   }
@@ -251,6 +252,7 @@ class _WordMiningStore implements MiningStore {
         srsLapses: Value(state.lapses),
         srsStatus: Value(state.status.name),
         lastReviewedAt: Value(state.lastReviewedAt),
+        srsStep: Value(state.step),
       ),
     );
   }
@@ -297,5 +299,6 @@ class _WordMiningStore implements MiningStore {
     lapses: row.srsLapses,
     status: SrsStatus.values.byName(row.srsStatus),
     lastReviewedAt: row.lastReviewedAt,
+    step: row.srsStep,
   );
 }

@@ -2,16 +2,37 @@ import 'dart:math' as math;
 
 import 'rating.dart';
 
-/// A card's FSRS memory state going into a review -- `null`
-/// [difficulty]/[stability]/[lastReviewedAt] together mean "never reviewed
-/// yet" (mirrors the reference implementation's fresh `Card`, which starts
-/// with `stability=None, difficulty=None, last_review=None`).
+/// A card's place in the FSRS state machine (spec §12; matches the
+/// reference `open-spaced-repetition/py-fsrs`'s `State` `IntEnum` exactly:
+/// `Learning=1, Review=2, Relearning=3`) -- [FsrsScheduler.review] branches
+/// on this to decide whether a rating advances a short learning/relearning
+/// step or goes through full day-scale FSRS scheduling.
+enum FsrsState { learning, review, relearning }
+
+/// A card's FSRS memory state going into a review -- `difficulty`/
+/// `stability`/`lastReviewedAt` are `null` together exactly for a
+/// never-reviewed card (mirrors the reference implementation's fresh
+/// `Card`, which starts with `stability=None, difficulty=None,
+/// last_review=None`). [state] defaults to [FsrsState.learning] and [step]
+/// to `0` -- a brand-new card's starting point, per the reference `Card`'s
+/// own `__init__` (`state=State.Learning`, `step=0` when unset).
 class FsrsCardState {
-  const FsrsCardState({this.difficulty, this.stability, this.lastReviewedAt});
+  const FsrsCardState({
+    this.difficulty,
+    this.stability,
+    this.lastReviewedAt,
+    this.state = FsrsState.learning,
+    this.step = 0,
+  });
 
   final double? difficulty;
   final double? stability;
   final DateTime? lastReviewedAt;
+  final FsrsState state;
+
+  /// The current learning/relearning step index, or `null` when [state] is
+  /// [FsrsState.review] (a graduated card isn't "on" any step).
+  final int? step;
 }
 
 /// The result of [FsrsScheduler.review]: the card's new memory state, plus
@@ -22,12 +43,16 @@ class FsrsReviewResult {
     required this.stability,
     required this.due,
     required this.reviewedAt,
+    required this.state,
+    required this.step,
   });
 
   final double difficulty;
   final double stability;
   final DateTime due;
   final DateTime reviewedAt;
+  final FsrsState state;
+  final int? step;
 }
 
 /// A faithful Dart port of FSRS-6 (spec §12: "Algorithm: FSRS... reference
@@ -36,28 +61,34 @@ class FsrsReviewResult {
 /// `Scheduler`/`Card` classes -- every constant and formula below
 /// (`_initialStability`, `_initialDifficulty`, `_nextInterval`,
 /// `_shortTermStability`, `_nextDifficulty`, `_nextForgetStability`,
-/// `_nextRecallStability`, `retrievability`) is a line-for-line translation
-/// of that source, not a reimplementation from a paraphrased description.
+/// `_nextRecallStability`, `retrievability`, and [review]'s
+/// Learning/Review/Relearning branching) is a line-for-line translation of
+/// that source (`fsrs/scheduler.py`'s `Scheduler.review_card`), not a
+/// reimplementation from a paraphrased description.
 ///
-/// **Deliberately configured with zero learning/relearning steps** (the
-/// reference implementation's own `learning_steps=()`/`relearning_steps=()`
-/// configuration, not an approximation of it -- see the reference
-/// `Scheduler.review_card`'s own `len(self.learning_steps) == 0`/
-/// `len(self.relearning_steps) == 0` branches, which are first-class
-/// supported paths, not error cases). That mechanic is Anki-style
-/// sub-day session pacing layered on top of FSRS, not part of the
-/// retention-optimizing algorithm itself (the stability/difficulty math
-/// below); skipping it means every rating -- including a lapse -- goes
-/// straight through the real day-scale FSRS math and produces a new
-/// day-granularity due date, which is what actually matters for a reading
-/// app's review deck rather than Anki's minute-by-minute drilling. This is
-/// why [review] only ever needs a card's current memory state (not a
-/// separate "which learning step is it on" field).
+/// **Learning/relearning steps are real here**, matching upstream's own
+/// defaults (`learning_steps=(1m, 10m)`, `relearning_steps=(10m,)`) -- the
+/// same Anki-style sub-day pacing real Anki (which also ships FSRS as its
+/// default scheduler) uses: a new card is rated a few times in quick
+/// succession before it "graduates" into the real day-scale FSRS interval
+/// math, and a lapsed (`Again`-rated) Review card similarly gets a short
+/// relearning pass before returning to Review. [learningSteps]/
+/// [relearningSteps] are constructor-injectable (an empty list on either
+/// disables that phase entirely, `review_card`'s own first-class-supported
+/// `len(...) == 0` path) so callers that specifically want the old
+/// immediate-day-scale-scheduling behavior still can.
+///
+/// Not ported: `enable_fuzzing` (upstream's small randomized jitter on
+/// Review-state intervals) -- out of scope for this pass, since it's an
+/// independent knob from learning/relearning steps and this port's
+/// intervals stay exactly reproducible without it.
 class FsrsScheduler {
   const FsrsScheduler({
     this.parameters = defaultParameters,
     this.desiredRetention = 0.9,
     this.maximumIntervalDays = 36500,
+    this.learningSteps = defaultLearningSteps,
+    this.relearningSteps = defaultRelearningSteps,
   });
 
   /// FSRS-6's own published default weights (`w[0]`..`w[20]`), verbatim from
@@ -86,6 +117,16 @@ class FsrsScheduler {
     0.1542,
   ];
 
+  /// `py-fsrs`'s own default `learning_steps=(timedelta(minutes=1),
+  /// timedelta(minutes=10))` -- matches Anki's own default new-card steps.
+  static const defaultLearningSteps = [
+    Duration(minutes: 1),
+    Duration(minutes: 10),
+  ];
+
+  /// `py-fsrs`'s own default `relearning_steps=(timedelta(minutes=10),)`.
+  static const defaultRelearningSteps = [Duration(minutes: 10)];
+
   static const _stabilityMin = 0.001;
   static const _minDifficulty = 1.0;
   static const _maxDifficulty = 10.0;
@@ -103,6 +144,17 @@ class FsrsScheduler {
   /// centuries out.
   final int maximumIntervalDays;
 
+  /// Small time intervals that schedule cards in [FsrsState.learning].
+  /// Empty disables the learning phase entirely -- every rating on a
+  /// Learning-state card graduates it straight to [FsrsState.review].
+  final List<Duration> learningSteps;
+
+  /// Small time intervals that schedule cards in [FsrsState.relearning].
+  /// Empty disables the relearning phase -- an `Again` on a Review-state
+  /// card goes straight back through day-scale FSRS scheduling instead of
+  /// dropping into [FsrsState.relearning].
+  final List<Duration> relearningSteps;
+
   double get _decay => -parameters[20];
   double get _factor => math.pow(0.9, 1 / _decay) - 1;
 
@@ -117,7 +169,10 @@ class FsrsScheduler {
   }
 
   /// Applies [rating] to [state] as of [now] (defaults to the current UTC
-  /// time), returning the card's updated memory state and next due date.
+  /// time), returning the card's updated memory state, FSRS state/step, and
+  /// next due date. A line-for-line port of `Scheduler.review_card`'s three
+  /// `match card.state` branches (Learning/Review/Relearning) -- see the
+  /// class doc comment.
   FsrsReviewResult review(
     FsrsCardState state,
     Rating rating, {
@@ -128,36 +183,213 @@ class FsrsScheduler {
         ? null
         : reviewedAt.difference(state.lastReviewedAt!).inDays;
 
-    double difficulty;
-    double stability;
+    late final double difficulty;
+    late final double stability;
+    late final FsrsState resultState;
+    late final int? resultStep;
+    late final Duration nextInterval;
 
-    if (state.stability == null || state.difficulty == null) {
-      stability = _initialStability(rating);
-      difficulty = _initialDifficulty(rating);
-    } else if (daysSinceLastReview != null && daysSinceLastReview < 1) {
-      stability = _shortTermStability(state.stability!, rating);
-      difficulty = _nextDifficulty(state.difficulty!, rating);
-    } else {
-      final r = retrievability(state, reviewedAt);
-      stability = _nextStability(
-        difficulty: state.difficulty!,
-        stability: state.stability!,
-        retrievability: r,
-        rating: rating,
-      );
-      difficulty = _nextDifficulty(state.difficulty!, rating);
+    switch (state.state) {
+      case FsrsState.learning:
+        final step = state.step ?? 0;
+        (difficulty, stability) = _updateMemoryState(
+          state: state,
+          rating: rating,
+          reviewedAt: reviewedAt,
+          daysSinceLastReview: daysSinceLastReview,
+        );
+
+        // Handles the edge case where this card was previously scheduled
+        // with a Scheduler that had more learningSteps than this one.
+        if (learningSteps.isEmpty ||
+            (step >= learningSteps.length && rating != Rating.again)) {
+          resultState = FsrsState.review;
+          resultStep = null;
+          nextInterval = Duration(days: _nextInterval(stability));
+        } else {
+          switch (rating) {
+            case Rating.again:
+              resultState = FsrsState.learning;
+              resultStep = 0;
+              nextInterval = learningSteps[0];
+            case Rating.hard:
+              resultState = FsrsState.learning;
+              resultStep = step;
+              if (step == 0 && learningSteps.length == 1) {
+                nextInterval = learningSteps[0] * 1.5;
+              } else if (step == 0 && learningSteps.length >= 2) {
+                nextInterval = _midpoint(learningSteps[0], learningSteps[1]);
+              } else {
+                nextInterval = learningSteps[step];
+              }
+            case Rating.good:
+              if (step + 1 == learningSteps.length) {
+                resultState = FsrsState.review;
+                resultStep = null;
+                nextInterval = Duration(days: _nextInterval(stability));
+              } else {
+                resultState = FsrsState.learning;
+                resultStep = step + 1;
+                nextInterval = learningSteps[resultStep];
+              }
+            case Rating.easy:
+              resultState = FsrsState.review;
+              resultStep = null;
+              nextInterval = Duration(days: _nextInterval(stability));
+          }
+        }
+
+      case FsrsState.review:
+        difficulty = _nextDifficulty(state.difficulty!, rating);
+        stability = _updateReviewStability(
+          state: state,
+          rating: rating,
+          reviewedAt: reviewedAt,
+          daysSinceLastReview: daysSinceLastReview,
+        );
+
+        switch (rating) {
+          case Rating.again:
+            if (relearningSteps.isEmpty) {
+              resultState = FsrsState.review;
+              resultStep = null;
+              nextInterval = Duration(days: _nextInterval(stability));
+            } else {
+              resultState = FsrsState.relearning;
+              resultStep = 0;
+              nextInterval = relearningSteps[0];
+            }
+          case Rating.hard:
+          case Rating.good:
+          case Rating.easy:
+            resultState = FsrsState.review;
+            resultStep = null;
+            nextInterval = Duration(days: _nextInterval(stability));
+        }
+
+      case FsrsState.relearning:
+        final step = state.step ?? 0;
+        difficulty = _nextDifficulty(state.difficulty!, rating);
+        stability = _updateReviewStability(
+          state: state,
+          rating: rating,
+          reviewedAt: reviewedAt,
+          daysSinceLastReview: daysSinceLastReview,
+        );
+
+        // Handles the edge case where this card was previously scheduled
+        // with a Scheduler that had more relearningSteps than this one.
+        if (relearningSteps.isEmpty ||
+            (step >= relearningSteps.length && rating != Rating.again)) {
+          resultState = FsrsState.review;
+          resultStep = null;
+          nextInterval = Duration(days: _nextInterval(stability));
+        } else {
+          switch (rating) {
+            case Rating.again:
+              resultStep = 0;
+              nextInterval = relearningSteps[0];
+              resultState = FsrsState.relearning;
+            case Rating.hard:
+              resultStep = step;
+              if (step == 0 && relearningSteps.length == 1) {
+                nextInterval = relearningSteps[0] * 1.5;
+              } else if (step == 0 && relearningSteps.length >= 2) {
+                nextInterval = _midpoint(
+                  relearningSteps[0],
+                  relearningSteps[1],
+                );
+              } else {
+                nextInterval = relearningSteps[step];
+              }
+              resultState = FsrsState.relearning;
+            case Rating.good:
+              if (step + 1 == relearningSteps.length) {
+                resultState = FsrsState.review;
+                resultStep = null;
+                nextInterval = Duration(days: _nextInterval(stability));
+              } else {
+                resultStep = step + 1;
+                nextInterval = relearningSteps[resultStep];
+                resultState = FsrsState.relearning;
+              }
+            case Rating.easy:
+              resultState = FsrsState.review;
+              resultStep = null;
+              nextInterval = Duration(days: _nextInterval(stability));
+          }
+        }
     }
-
-    final intervalDays = _nextInterval(stability);
-    final due = reviewedAt.add(Duration(days: intervalDays));
 
     return FsrsReviewResult(
       difficulty: difficulty,
       stability: stability,
-      due: due,
+      due: reviewedAt.add(nextInterval),
       reviewedAt: reviewedAt,
+      state: resultState,
+      step: resultStep,
     );
   }
+
+  /// Shared difficulty/stability update for a [FsrsState.learning] card --
+  /// the same three-way branch (`stability is None` / `days_since < 1` /
+  /// otherwise) `review_card`'s Learning arm and Relearning arm each
+  /// duplicate in the reference; factored out here since it's identical.
+  (double, double) _updateMemoryState({
+    required FsrsCardState state,
+    required Rating rating,
+    required DateTime reviewedAt,
+    required int? daysSinceLastReview,
+  }) {
+    if (state.stability == null || state.difficulty == null) {
+      return (_initialDifficulty(rating), _initialStability(rating));
+    }
+    if (daysSinceLastReview != null && daysSinceLastReview < 1) {
+      return (
+        _nextDifficulty(state.difficulty!, rating),
+        _shortTermStability(state.stability!, rating),
+      );
+    }
+    final r = retrievability(state, reviewedAt);
+    return (
+      _nextDifficulty(state.difficulty!, rating),
+      _nextStability(
+        difficulty: state.difficulty!,
+        stability: state.stability!,
+        retrievability: r,
+        rating: rating,
+      ),
+    );
+  }
+
+  /// Review/Relearning-state stability update (difficulty is always just
+  /// `_nextDifficulty` in both, computed by the caller) -- the `days_since
+  /// < 1` short-term-stability-only branch vs. the full retrievability-based
+  /// `_nextStability` branch.
+  double _updateReviewStability({
+    required FsrsCardState state,
+    required Rating rating,
+    required DateTime reviewedAt,
+    required int? daysSinceLastReview,
+  }) {
+    if (daysSinceLastReview != null && daysSinceLastReview < 1) {
+      return _shortTermStability(state.stability!, rating);
+    }
+    final r = retrievability(state, reviewedAt);
+    return _nextStability(
+      difficulty: state.difficulty!,
+      stability: state.stability!,
+      retrievability: r,
+      rating: rating,
+    );
+  }
+
+  /// `(a + b) / 2.0` for [Duration]s -- Dart's [Duration] has no `/`
+  /// operator, so this works in microseconds directly. Matches upstream's
+  /// `(learning_steps[0] + learning_steps[1]) / 2.0` (the two-or-more-step
+  /// Hard-on-first-step case).
+  Duration _midpoint(Duration a, Duration b) =>
+      Duration(microseconds: ((a.inMicroseconds + b.inMicroseconds) / 2).round());
 
   double _clampDifficulty(double difficulty) =>
       difficulty.clamp(_minDifficulty, _maxDifficulty);

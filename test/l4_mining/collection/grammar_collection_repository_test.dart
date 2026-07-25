@@ -299,7 +299,13 @@ void main() {
         final row = await (db.select(
           db.collectedGrammars,
         )..where((g) => g.id.equals(result.entryId))).getSingle();
-        expect(row.srsStatus, SrsStatus.review.name);
+        // A single Good rating on a brand-new card advances it one real
+        // Anki-style learning step -- it does not graduate straight to
+        // `review` (that needs an Easy, or a Good on the last step; see
+        // `fsrs_scheduler_learning_steps_test.dart` for the
+        // scheduler-level coverage of that).
+        expect(row.srsStatus, SrsStatus.learning.name);
+        expect(row.srsStep, isNotNull);
         expect(row.fsrsDifficulty, isNotNull);
         expect(row.fsrsStability, isNotNull);
         expect(row.srsDue.isAfter(reviewedAt), isTrue);

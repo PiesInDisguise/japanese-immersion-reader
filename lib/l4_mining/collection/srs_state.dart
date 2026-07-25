@@ -1,15 +1,12 @@
 /// FSRS-shaped SRS status (spec §12): `newCard` before any review, then
-/// `review` once the real `FsrsScheduler` (`lib/l5_srs/fsrs/`) has scored at
-/// least one rating. Named `newCard` rather than `new` because the latter is
-/// a reserved word in Dart.
-///
-/// `learning`/`relearning` stay in this enum for schema/API
-/// forward-compatibility (a future pass could add real Anki-style sub-day
-/// learning steps), but `ReviewEngine`'s current review flow never produces
-/// them -- see `FsrsScheduler`'s own doc comment for why this app runs FSRS
-/// with zero learning/relearning steps, a first-class supported
-/// configuration in the reference implementation rather than an
-/// approximation of one.
+/// real `learning`/`review`/`relearning` states once the real
+/// `FsrsScheduler` (`lib/l5_srs/fsrs/`) has scored at least one rating --
+/// `learning`/`relearning` are Anki-style sub-day steps a card passes
+/// through before/after `review` (see `FsrsScheduler.learningSteps`/
+/// `relearningSteps`'s own doc comments), not placeholders: `ReviewEngine`
+/// maps directly to/from `FsrsScheduler`'s own `FsrsState` enum on every
+/// review. Named `newCard` rather than `new` because the latter is a
+/// reserved word in Dart.
 enum SrsStatus { newCard, learning, review, relearning }
 
 /// Spec §12's `srsState`, stored as flat Drift columns rather than a nested
@@ -23,7 +20,9 @@ enum SrsStatus { newCard, learning, review, relearning }
 /// when [status] is [SrsStatus.newCard] -- no rating has ever been given yet,
 /// so `FsrsScheduler` has nothing to update (mirrors the reference FSRS
 /// implementation's own fresh-card representation, `stability=None,
-/// difficulty=None, last_review=None`).
+/// difficulty=None, last_review=None`). [step] mirrors `FsrsCardState.step`
+/// -- the current learning/relearning step index, `null` once [status] is
+/// [SrsStatus.review] (a graduated card isn't "on" any step).
 class SrsState {
   const SrsState({
     required this.difficulty,
@@ -32,6 +31,7 @@ class SrsState {
     required this.lapses,
     required this.status,
     required this.lastReviewedAt,
+    required this.step,
   });
 
   /// The placeholder state for a brand-new entry, and what a "reset" tap
@@ -45,6 +45,7 @@ class SrsState {
     lapses: 0,
     status: SrsStatus.newCard,
     lastReviewedAt: null,
+    step: 0,
   );
 
   final double? difficulty;
@@ -53,4 +54,5 @@ class SrsState {
   final int lapses;
   final SrsStatus status;
   final DateTime? lastReviewedAt;
+  final int? step;
 }

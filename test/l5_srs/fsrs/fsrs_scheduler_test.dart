@@ -5,13 +5,24 @@
 // dumping `card.difficulty`/`card.stability`/`(card.due - now).days` after
 // every review. This is the actual cross-check for `FsrsScheduler` being a
 // faithful port, not just "the analyzer is happy with the arithmetic".
+//
+// The scheduler under test here is explicitly configured with empty
+// learning/relearning steps (matching exactly what generated the ground
+// truth above) so every rating on a fresh FsrsCardState() takes the same
+// immediate-graduate-to-Review path these values were captured against --
+// FsrsScheduler's own *default* construction now uses real (Anki-matching)
+// non-empty steps instead (see fsrs_scheduler_learning_steps_test.dart for
+// that behavior).
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/l5_srs/fsrs/fsrs_scheduler.dart';
 import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
 
 void main() {
-  final scheduler = const FsrsScheduler();
+  final scheduler = const FsrsScheduler(
+    learningSteps: [],
+    relearningSteps: [],
+  );
   final start = DateTime.utc(2026, 1, 1);
 
   group('FsrsScheduler against real py-fsrs reference output', () {

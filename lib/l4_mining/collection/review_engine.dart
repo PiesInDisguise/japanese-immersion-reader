@@ -41,6 +41,8 @@ class ReviewEngine {
         difficulty: current.difficulty,
         stability: current.stability,
         lastReviewedAt: current.lastReviewedAt,
+        state: _fsrsStateOf(current.status),
+        step: current.step ?? 0,
       ),
       rating,
       now: reviewedAt,
@@ -48,10 +50,12 @@ class ReviewEngine {
 
     // A "lapse" (spec §11's `lapses` counter) means forgetting a
     // previously-learned card -- an Again rating on a never-yet-reviewed
-    // (`newCard`) entry is just "didn't know it on the first try", not a
-    // lapse. `FsrsScheduler`'s own reference source doesn't track lapses
-    // itself (it's an app-level stat, not part of the FSRS memory model),
-    // so this app maintains it here.
+    // (`newCard`) or still-Learning entry is just "didn't know it yet", not
+    // a lapse. This checks `current.status` (the status *going into* this
+    // review), not `result`'s: it's the same condition FsrsScheduler itself
+    // uses to decide whether an Again on a Review card drops into
+    // Relearning, just restated here since lapse-counting is an app-level
+    // stat FsrsScheduler's own reference source doesn't track itself.
     final lapses = rating == Rating.again && current.status == SrsStatus.review
         ? current.lapses + 1
         : current.lapses;
@@ -62,10 +66,33 @@ class ReviewEngine {
         stability: result.stability,
         due: result.due,
         lapses: lapses,
-        status: SrsStatus.review,
+        status: _srsStatusOf(result.state),
         lastReviewedAt: result.reviewedAt,
+        step: result.step,
       ),
       reviewedAt,
     );
   }
+
+  /// `newCard` (never reviewed) starts exactly where a fresh
+  /// `FsrsCardState` does -- [FsrsState.learning] -- matching the reference
+  /// `Card`'s own `__init__` default. `learning`/`review`/`relearning` map
+  /// straight across; [SrsStatus] only has the one extra value
+  /// [FsrsState] doesn't need, since "never reviewed" and "reviewed at
+  /// least once, still in Learning" are the same `FsrsState` but distinct,
+  /// spec-meaningful app states (a fresh entry is immediately due; a
+  /// mid-learning-steps entry is due at whatever short interval its last
+  /// rating produced).
+  FsrsState _fsrsStateOf(SrsStatus status) => switch (status) {
+    SrsStatus.newCard => FsrsState.learning,
+    SrsStatus.learning => FsrsState.learning,
+    SrsStatus.review => FsrsState.review,
+    SrsStatus.relearning => FsrsState.relearning,
+  };
+
+  SrsStatus _srsStatusOf(FsrsState state) => switch (state) {
+    FsrsState.learning => SrsStatus.learning,
+    FsrsState.review => SrsStatus.review,
+    FsrsState.relearning => SrsStatus.relearning,
+  };
 }

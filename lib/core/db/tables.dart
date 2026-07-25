@@ -322,6 +322,13 @@ class CollectedWords extends Table {
   DateTimeColumn get lastReviewedAt =>
       dateTime().nullable().named('last_reviewed_at')();
 
+  /// The current learning/relearning step index (spec §12,
+  /// `FsrsCardState.step`), `null` once [srsStatus] is `review` (a
+  /// graduated card isn't "on" any step). Added alongside real
+  /// learning/relearning-step scheduling in a schemaVersion 9->10
+  /// migration -- see `database.dart`'s `migration` override.
+  IntColumn get srsStep => integer().nullable().named('srs_step')();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -383,6 +390,10 @@ class CollectedGrammars extends Table {
   DateTimeColumn get lastReviewedAt =>
       dateTime().nullable().named('last_reviewed_at')();
   TextColumn get srsStatus => text().named('srs_status')();
+
+  /// See `CollectedWords.srsStep`'s doc comment -- identical reasoning,
+  /// grammar-side mirror.
+  IntColumn get srsStep => integer().nullable().named('srs_step')();
 
   @override
   Set<Column> get primaryKey => {id};

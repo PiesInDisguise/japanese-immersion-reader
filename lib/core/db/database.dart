@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -103,6 +103,13 @@ class AppDatabase extends _$AppDatabase {
       // schemaVersion 9 (spec §6/§14): auto-add-to-collection toggle.
       if (from < 9) {
         await m.addColumn(settings, settings.autoAddToCollection);
+      }
+      // schemaVersion 10 (spec §12): real Anki-style learning/relearning
+      // steps -- FsrsCardState.step needs somewhere to persist between
+      // reviews.
+      if (from < 10) {
+        await m.addColumn(collectedWords, collectedWords.srsStep);
+        await m.addColumn(collectedGrammars, collectedGrammars.srsStep);
       }
     },
   );

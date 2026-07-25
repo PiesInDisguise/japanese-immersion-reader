@@ -4039,6 +4039,17 @@ class $CollectedWordsTable extends CollectedWords
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _srsStepMeta = const VerificationMeta(
+    'srsStep',
+  );
+  @override
+  late final GeneratedColumn<int> srsStep = GeneratedColumn<int>(
+    'srs_step',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4053,6 +4064,7 @@ class $CollectedWordsTable extends CollectedWords
     srsLapses,
     srsStatus,
     lastReviewedAt,
+    srsStep,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4165,6 +4177,12 @@ class $CollectedWordsTable extends CollectedWords
         ),
       );
     }
+    if (data.containsKey('srs_step')) {
+      context.handle(
+        _srsStepMeta,
+        srsStep.isAcceptableOrUnknown(data['srs_step']!, _srsStepMeta),
+      );
+    }
     return context;
   }
 
@@ -4222,6 +4240,10 @@ class $CollectedWordsTable extends CollectedWords
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_reviewed_at'],
       ),
+      srsStep: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}srs_step'],
+      ),
     );
   }
 
@@ -4257,6 +4279,13 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
   final int srsLapses;
   final String srsStatus;
   final DateTime? lastReviewedAt;
+
+  /// The current learning/relearning step index (spec §12,
+  /// `FsrsCardState.step`), `null` once [srsStatus] is `review` (a
+  /// graduated card isn't "on" any step). Added alongside real
+  /// learning/relearning-step scheduling in a schemaVersion 9->10
+  /// migration -- see `database.dart`'s `migration` override.
+  final int? srsStep;
   const CollectedWord({
     required this.id,
     required this.dictForm,
@@ -4270,6 +4299,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     required this.srsLapses,
     required this.srsStatus,
     this.lastReviewedAt,
+    this.srsStep,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4291,6 +4321,9 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     map['srs_status'] = Variable<String>(srsStatus);
     if (!nullToAbsent || lastReviewedAt != null) {
       map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt);
+    }
+    if (!nullToAbsent || srsStep != null) {
+      map['srs_step'] = Variable<int>(srsStep);
     }
     return map;
   }
@@ -4315,6 +4348,9 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       lastReviewedAt: lastReviewedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastReviewedAt),
+      srsStep: srsStep == null && nullToAbsent
+          ? const Value.absent()
+          : Value(srsStep),
     );
   }
 
@@ -4336,6 +4372,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       srsLapses: serializer.fromJson<int>(json['srsLapses']),
       srsStatus: serializer.fromJson<String>(json['srsStatus']),
       lastReviewedAt: serializer.fromJson<DateTime?>(json['lastReviewedAt']),
+      srsStep: serializer.fromJson<int?>(json['srsStep']),
     );
   }
   @override
@@ -4354,6 +4391,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       'srsLapses': serializer.toJson<int>(srsLapses),
       'srsStatus': serializer.toJson<String>(srsStatus),
       'lastReviewedAt': serializer.toJson<DateTime?>(lastReviewedAt),
+      'srsStep': serializer.toJson<int?>(srsStep),
     };
   }
 
@@ -4370,6 +4408,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     int? srsLapses,
     String? srsStatus,
     Value<DateTime?> lastReviewedAt = const Value.absent(),
+    Value<int?> srsStep = const Value.absent(),
   }) => CollectedWord(
     id: id ?? this.id,
     dictForm: dictForm ?? this.dictForm,
@@ -4389,6 +4428,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     lastReviewedAt: lastReviewedAt.present
         ? lastReviewedAt.value
         : this.lastReviewedAt,
+    srsStep: srsStep.present ? srsStep.value : this.srsStep,
   );
   CollectedWord copyWithCompanion(CollectedWordsCompanion data) {
     return CollectedWord(
@@ -4412,6 +4452,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
       lastReviewedAt: data.lastReviewedAt.present
           ? data.lastReviewedAt.value
           : this.lastReviewedAt,
+      srsStep: data.srsStep.present ? data.srsStep.value : this.srsStep,
     );
   }
 
@@ -4429,7 +4470,8 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
           ..write('srsDue: $srsDue, ')
           ..write('srsLapses: $srsLapses, ')
           ..write('srsStatus: $srsStatus, ')
-          ..write('lastReviewedAt: $lastReviewedAt')
+          ..write('lastReviewedAt: $lastReviewedAt, ')
+          ..write('srsStep: $srsStep')
           ..write(')'))
         .toString();
   }
@@ -4448,6 +4490,7 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
     srsLapses,
     srsStatus,
     lastReviewedAt,
+    srsStep,
   );
   @override
   bool operator ==(Object other) =>
@@ -4464,7 +4507,8 @@ class CollectedWord extends DataClass implements Insertable<CollectedWord> {
           other.srsDue == this.srsDue &&
           other.srsLapses == this.srsLapses &&
           other.srsStatus == this.srsStatus &&
-          other.lastReviewedAt == this.lastReviewedAt);
+          other.lastReviewedAt == this.lastReviewedAt &&
+          other.srsStep == this.srsStep);
 }
 
 class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
@@ -4480,6 +4524,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
   final Value<int> srsLapses;
   final Value<String> srsStatus;
   final Value<DateTime?> lastReviewedAt;
+  final Value<int?> srsStep;
   final Value<int> rowid;
   const CollectedWordsCompanion({
     this.id = const Value.absent(),
@@ -4494,6 +4539,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     this.srsLapses = const Value.absent(),
     this.srsStatus = const Value.absent(),
     this.lastReviewedAt = const Value.absent(),
+    this.srsStep = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CollectedWordsCompanion.insert({
@@ -4509,6 +4555,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     required int srsLapses,
     required String srsStatus,
     this.lastReviewedAt = const Value.absent(),
+    this.srsStep = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        dictForm = Value(dictForm),
@@ -4532,6 +4579,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     Expression<int>? srsLapses,
     Expression<String>? srsStatus,
     Expression<DateTime>? lastReviewedAt,
+    Expression<int>? srsStep,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4547,6 +4595,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
       if (srsLapses != null) 'srs_lapses': srsLapses,
       if (srsStatus != null) 'srs_status': srsStatus,
       if (lastReviewedAt != null) 'last_reviewed_at': lastReviewedAt,
+      if (srsStep != null) 'srs_step': srsStep,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4564,6 +4613,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     Value<int>? srsLapses,
     Value<String>? srsStatus,
     Value<DateTime?>? lastReviewedAt,
+    Value<int?>? srsStep,
     Value<int>? rowid,
   }) {
     return CollectedWordsCompanion(
@@ -4579,6 +4629,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
       srsLapses: srsLapses ?? this.srsLapses,
       srsStatus: srsStatus ?? this.srsStatus,
       lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
+      srsStep: srsStep ?? this.srsStep,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4622,6 +4673,9 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
     if (lastReviewedAt.present) {
       map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt.value);
     }
+    if (srsStep.present) {
+      map['srs_step'] = Variable<int>(srsStep.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4643,6 +4697,7 @@ class CollectedWordsCompanion extends UpdateCompanion<CollectedWord> {
           ..write('srsLapses: $srsLapses, ')
           ..write('srsStatus: $srsStatus, ')
           ..write('lastReviewedAt: $lastReviewedAt, ')
+          ..write('srsStep: $srsStep, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5242,6 +5297,17 @@ class $CollectedGrammarsTable extends CollectedGrammars
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _srsStepMeta = const VerificationMeta(
+    'srsStep',
+  );
+  @override
+  late final GeneratedColumn<int> srsStep = GeneratedColumn<int>(
+    'srs_step',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5254,6 +5320,7 @@ class $CollectedGrammarsTable extends CollectedGrammars
     srsLapses,
     lastReviewedAt,
     srsStatus,
+    srsStep,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5350,6 +5417,12 @@ class $CollectedGrammarsTable extends CollectedGrammars
     } else if (isInserting) {
       context.missing(_srsStatusMeta);
     }
+    if (data.containsKey('srs_step')) {
+      context.handle(
+        _srsStepMeta,
+        srsStep.isAcceptableOrUnknown(data['srs_step']!, _srsStepMeta),
+      );
+    }
     return context;
   }
 
@@ -5399,6 +5472,10 @@ class $CollectedGrammarsTable extends CollectedGrammars
         DriftSqlType.string,
         data['${effectivePrefix}srs_status'],
       )!,
+      srsStep: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}srs_step'],
+      ),
     );
   }
 
@@ -5423,6 +5500,10 @@ class CollectedGrammar extends DataClass
   final int srsLapses;
   final DateTime? lastReviewedAt;
   final String srsStatus;
+
+  /// See `CollectedWords.srsStep`'s doc comment -- identical reasoning,
+  /// grammar-side mirror.
+  final int? srsStep;
   const CollectedGrammar({
     required this.id,
     required this.grammarPointId,
@@ -5434,6 +5515,7 @@ class CollectedGrammar extends DataClass
     required this.srsLapses,
     this.lastReviewedAt,
     required this.srsStatus,
+    this.srsStep,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5454,6 +5536,9 @@ class CollectedGrammar extends DataClass
       map['last_reviewed_at'] = Variable<DateTime>(lastReviewedAt);
     }
     map['srs_status'] = Variable<String>(srsStatus);
+    if (!nullToAbsent || srsStep != null) {
+      map['srs_step'] = Variable<int>(srsStep);
+    }
     return map;
   }
 
@@ -5475,6 +5560,9 @@ class CollectedGrammar extends DataClass
           ? const Value.absent()
           : Value(lastReviewedAt),
       srsStatus: Value(srsStatus),
+      srsStep: srsStep == null && nullToAbsent
+          ? const Value.absent()
+          : Value(srsStep),
     );
   }
 
@@ -5494,6 +5582,7 @@ class CollectedGrammar extends DataClass
       srsLapses: serializer.fromJson<int>(json['srsLapses']),
       lastReviewedAt: serializer.fromJson<DateTime?>(json['lastReviewedAt']),
       srsStatus: serializer.fromJson<String>(json['srsStatus']),
+      srsStep: serializer.fromJson<int?>(json['srsStep']),
     );
   }
   @override
@@ -5510,6 +5599,7 @@ class CollectedGrammar extends DataClass
       'srsLapses': serializer.toJson<int>(srsLapses),
       'lastReviewedAt': serializer.toJson<DateTime?>(lastReviewedAt),
       'srsStatus': serializer.toJson<String>(srsStatus),
+      'srsStep': serializer.toJson<int?>(srsStep),
     };
   }
 
@@ -5524,6 +5614,7 @@ class CollectedGrammar extends DataClass
     int? srsLapses,
     Value<DateTime?> lastReviewedAt = const Value.absent(),
     String? srsStatus,
+    Value<int?> srsStep = const Value.absent(),
   }) => CollectedGrammar(
     id: id ?? this.id,
     grammarPointId: grammarPointId ?? this.grammarPointId,
@@ -5541,6 +5632,7 @@ class CollectedGrammar extends DataClass
         ? lastReviewedAt.value
         : this.lastReviewedAt,
     srsStatus: srsStatus ?? this.srsStatus,
+    srsStep: srsStep.present ? srsStep.value : this.srsStep,
   );
   CollectedGrammar copyWithCompanion(CollectedGrammarsCompanion data) {
     return CollectedGrammar(
@@ -5562,6 +5654,7 @@ class CollectedGrammar extends DataClass
           ? data.lastReviewedAt.value
           : this.lastReviewedAt,
       srsStatus: data.srsStatus.present ? data.srsStatus.value : this.srsStatus,
+      srsStep: data.srsStep.present ? data.srsStep.value : this.srsStep,
     );
   }
 
@@ -5577,7 +5670,8 @@ class CollectedGrammar extends DataClass
           ..write('srsDue: $srsDue, ')
           ..write('srsLapses: $srsLapses, ')
           ..write('lastReviewedAt: $lastReviewedAt, ')
-          ..write('srsStatus: $srsStatus')
+          ..write('srsStatus: $srsStatus, ')
+          ..write('srsStep: $srsStep')
           ..write(')'))
         .toString();
   }
@@ -5594,6 +5688,7 @@ class CollectedGrammar extends DataClass
     srsLapses,
     lastReviewedAt,
     srsStatus,
+    srsStep,
   );
   @override
   bool operator ==(Object other) =>
@@ -5608,7 +5703,8 @@ class CollectedGrammar extends DataClass
           other.srsDue == this.srsDue &&
           other.srsLapses == this.srsLapses &&
           other.lastReviewedAt == this.lastReviewedAt &&
-          other.srsStatus == this.srsStatus);
+          other.srsStatus == this.srsStatus &&
+          other.srsStep == this.srsStep);
 }
 
 class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
@@ -5622,6 +5718,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
   final Value<int> srsLapses;
   final Value<DateTime?> lastReviewedAt;
   final Value<String> srsStatus;
+  final Value<int?> srsStep;
   final Value<int> rowid;
   const CollectedGrammarsCompanion({
     this.id = const Value.absent(),
@@ -5634,6 +5731,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     this.srsLapses = const Value.absent(),
     this.lastReviewedAt = const Value.absent(),
     this.srsStatus = const Value.absent(),
+    this.srsStep = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CollectedGrammarsCompanion.insert({
@@ -5647,6 +5745,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     required int srsLapses,
     this.lastReviewedAt = const Value.absent(),
     required String srsStatus,
+    this.srsStep = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        grammarPointId = Value(grammarPointId),
@@ -5666,6 +5765,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     Expression<int>? srsLapses,
     Expression<DateTime>? lastReviewedAt,
     Expression<String>? srsStatus,
+    Expression<int>? srsStep,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5679,6 +5779,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
       if (srsLapses != null) 'srs_lapses': srsLapses,
       if (lastReviewedAt != null) 'last_reviewed_at': lastReviewedAt,
       if (srsStatus != null) 'srs_status': srsStatus,
+      if (srsStep != null) 'srs_step': srsStep,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5694,6 +5795,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     Value<int>? srsLapses,
     Value<DateTime?>? lastReviewedAt,
     Value<String>? srsStatus,
+    Value<int?>? srsStep,
     Value<int>? rowid,
   }) {
     return CollectedGrammarsCompanion(
@@ -5707,6 +5809,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
       srsLapses: srsLapses ?? this.srsLapses,
       lastReviewedAt: lastReviewedAt ?? this.lastReviewedAt,
       srsStatus: srsStatus ?? this.srsStatus,
+      srsStep: srsStep ?? this.srsStep,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5744,6 +5847,9 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
     if (srsStatus.present) {
       map['srs_status'] = Variable<String>(srsStatus.value);
     }
+    if (srsStep.present) {
+      map['srs_step'] = Variable<int>(srsStep.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5763,6 +5869,7 @@ class CollectedGrammarsCompanion extends UpdateCompanion<CollectedGrammar> {
           ..write('srsLapses: $srsLapses, ')
           ..write('lastReviewedAt: $lastReviewedAt, ')
           ..write('srsStatus: $srsStatus, ')
+          ..write('srsStep: $srsStep, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -11090,6 +11197,7 @@ typedef $$CollectedWordsTableCreateCompanionBuilder =
       required int srsLapses,
       required String srsStatus,
       Value<DateTime?> lastReviewedAt,
+      Value<int?> srsStep,
       Value<int> rowid,
     });
 typedef $$CollectedWordsTableUpdateCompanionBuilder =
@@ -11106,6 +11214,7 @@ typedef $$CollectedWordsTableUpdateCompanionBuilder =
       Value<int> srsLapses,
       Value<String> srsStatus,
       Value<DateTime?> lastReviewedAt,
+      Value<int?> srsStep,
       Value<int> rowid,
     });
 
@@ -11216,6 +11325,11 @@ class $$CollectedWordsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get srsStep => $composableBuilder(
+    column: $table.srsStep,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> collectedWordSourcesRefs(
     Expression<bool> Function($$CollectedWordSourcesTableFilterComposer f) f,
   ) {
@@ -11310,6 +11424,11 @@ class $$CollectedWordsTableOrderingComposer
     column: $table.lastReviewedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get srsStep => $composableBuilder(
+    column: $table.srsStep,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CollectedWordsTableAnnotationComposer
@@ -11364,6 +11483,9 @@ class $$CollectedWordsTableAnnotationComposer
     column: $table.lastReviewedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get srsStep =>
+      $composableBuilder(column: $table.srsStep, builder: (column) => column);
 
   Expression<T> collectedWordSourcesRefs<T extends Object>(
     Expression<T> Function($$CollectedWordSourcesTableAnnotationComposer a) f,
@@ -11434,6 +11556,7 @@ class $$CollectedWordsTableTableManager
                 Value<int> srsLapses = const Value.absent(),
                 Value<String> srsStatus = const Value.absent(),
                 Value<DateTime?> lastReviewedAt = const Value.absent(),
+                Value<int?> srsStep = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedWordsCompanion(
                 id: id,
@@ -11448,6 +11571,7 @@ class $$CollectedWordsTableTableManager
                 srsLapses: srsLapses,
                 srsStatus: srsStatus,
                 lastReviewedAt: lastReviewedAt,
+                srsStep: srsStep,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11464,6 +11588,7 @@ class $$CollectedWordsTableTableManager
                 required int srsLapses,
                 required String srsStatus,
                 Value<DateTime?> lastReviewedAt = const Value.absent(),
+                Value<int?> srsStep = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedWordsCompanion.insert(
                 id: id,
@@ -11478,6 +11603,7 @@ class $$CollectedWordsTableTableManager
                 srsLapses: srsLapses,
                 srsStatus: srsStatus,
                 lastReviewedAt: lastReviewedAt,
+                srsStep: srsStep,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -12107,6 +12233,7 @@ typedef $$CollectedGrammarsTableCreateCompanionBuilder =
       required int srsLapses,
       Value<DateTime?> lastReviewedAt,
       required String srsStatus,
+      Value<int?> srsStep,
       Value<int> rowid,
     });
 typedef $$CollectedGrammarsTableUpdateCompanionBuilder =
@@ -12121,6 +12248,7 @@ typedef $$CollectedGrammarsTableUpdateCompanionBuilder =
       Value<int> srsLapses,
       Value<DateTime?> lastReviewedAt,
       Value<String> srsStatus,
+      Value<int?> srsStep,
       Value<int> rowid,
     });
 
@@ -12227,6 +12355,11 @@ class $$CollectedGrammarsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get srsStep => $composableBuilder(
+    column: $table.srsStep,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> collectedGrammarSourcesRefs(
     Expression<bool> Function($$CollectedGrammarSourcesTableFilterComposer f) f,
   ) {
@@ -12312,6 +12445,11 @@ class $$CollectedGrammarsTableOrderingComposer
     column: $table.srsStatus,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get srsStep => $composableBuilder(
+    column: $table.srsStep,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CollectedGrammarsTableAnnotationComposer
@@ -12360,6 +12498,9 @@ class $$CollectedGrammarsTableAnnotationComposer
 
   GeneratedColumn<String> get srsStatus =>
       $composableBuilder(column: $table.srsStatus, builder: (column) => column);
+
+  GeneratedColumn<int> get srsStep =>
+      $composableBuilder(column: $table.srsStep, builder: (column) => column);
 
   Expression<T> collectedGrammarSourcesRefs<T extends Object>(
     Expression<T> Function($$CollectedGrammarSourcesTableAnnotationComposer a)
@@ -12432,6 +12573,7 @@ class $$CollectedGrammarsTableTableManager
                 Value<int> srsLapses = const Value.absent(),
                 Value<DateTime?> lastReviewedAt = const Value.absent(),
                 Value<String> srsStatus = const Value.absent(),
+                Value<int?> srsStep = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedGrammarsCompanion(
                 id: id,
@@ -12444,6 +12586,7 @@ class $$CollectedGrammarsTableTableManager
                 srsLapses: srsLapses,
                 lastReviewedAt: lastReviewedAt,
                 srsStatus: srsStatus,
+                srsStep: srsStep,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -12458,6 +12601,7 @@ class $$CollectedGrammarsTableTableManager
                 required int srsLapses,
                 Value<DateTime?> lastReviewedAt = const Value.absent(),
                 required String srsStatus,
+                Value<int?> srsStep = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CollectedGrammarsCompanion.insert(
                 id: id,
@@ -12470,6 +12614,7 @@ class $$CollectedGrammarsTableTableManager
                 srsLapses: srsLapses,
                 lastReviewedAt: lastReviewedAt,
                 srsStatus: srsStatus,
+                srsStep: srsStep,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

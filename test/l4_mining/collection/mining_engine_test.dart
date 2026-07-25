@@ -100,6 +100,7 @@ void main() {
       lapses: 4,
       status: SrsStatus.review,
       lastReviewedAt: DateTime.utc(2019, 12, 20),
+      step: null,
     );
     final firstSightingId = await store.insertSighting(
       source,
@@ -140,6 +141,7 @@ void main() {
       lapses: 4,
       status: SrsStatus.review,
       lastReviewedAt: DateTime.utc(2019, 12, 20),
+      step: null,
     );
     final firstSightingId = await store.insertSighting(
       source,
