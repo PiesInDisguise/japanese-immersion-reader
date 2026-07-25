@@ -457,6 +457,14 @@ class Settings extends Table {
   /// sighting tables below.
   DateTimeColumn get updatedAt => dateTime().nullable().named('updated_at')();
 
+  /// The document-wide mined-word highlight color (word-highlighting
+  /// feature), stored as an ARGB `Color.toARGB32()` int. Nullable: null
+  /// means "use `defaultHighlightColor`," same null-means-default pattern
+  /// as every other column here rather than needing a separate
+  /// has-the-user-customized-this flag.
+  IntColumn get highlightColorValue =>
+      integer().nullable().named('highlight_color_value')();
+
   @override
   Set<Column> get primaryKey => {id};
 }

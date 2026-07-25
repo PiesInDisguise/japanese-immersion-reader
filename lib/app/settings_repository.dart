@@ -1,17 +1,25 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 
+/// Default document-wide mined-word highlight color: yellow at ~40% alpha,
+/// used both as `AppSettings.defaults`' value and whenever a stored row has
+/// no customized value yet.
+const defaultHighlightColor = Color(0x66FFEE58);
+
 /// The single row of user-configurable settings this app has real UI for so
-/// far -- spec §14's LLM section (API key, grammar-explanation on/off) and
-/// spec §9's audio section (TTS/pitch-accent-audio on/off). See
-/// `core/db/tables.dart`'s `Settings` table doc comment for why this is a
-/// fixed-shape single row rather than a generic key-value store.
+/// far -- spec §14's LLM section (API key, grammar-explanation on/off), spec
+/// §9's audio section (TTS/pitch-accent-audio on/off), and the mined-word
+/// highlight color. See `core/db/tables.dart`'s `Settings` table doc comment
+/// for why this is a fixed-shape single row rather than a generic key-value
+/// store.
 class AppSettings {
   const AppSettings({
     required this.llmApiKey,
     required this.llmExplanationsEnabled,
     required this.ttsEnabled,
     required this.pitchAccentAudioEnabled,
+    this.highlightColor = defaultHighlightColor,
   });
 
   static const defaults = AppSettings(
@@ -19,12 +27,14 @@ class AppSettings {
     llmExplanationsEnabled: true,
     ttsEnabled: false,
     pitchAccentAudioEnabled: false,
+    highlightColor: defaultHighlightColor,
   );
 
   final String? llmApiKey;
   final bool llmExplanationsEnabled;
   final bool ttsEnabled;
   final bool pitchAccentAudioEnabled;
+  final Color highlightColor;
 
   /// Whether spec §8 layer 3 should actually attempt a real network call --
   /// both the toggle *and* a configured API key are required, not just the
@@ -70,6 +80,7 @@ class SettingsRepository {
     bool? llmExplanationsEnabled,
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
+    Color? highlightColor,
   }) async {
     final current = await read();
     await _db
@@ -85,6 +96,9 @@ class SettingsRepository {
             pitchAccentAudioEnabled: Value(
               pitchAccentAudioEnabled ?? current.pitchAccentAudioEnabled,
             ),
+            highlightColorValue: Value(
+              (highlightColor ?? current.highlightColor).toARGB32(),
+            ),
             // Spec §13 sync-readiness -- see tables.dart's own audit note.
             updatedAt: Value(DateTime.now().toUtc()),
           ),
@@ -96,5 +110,8 @@ class SettingsRepository {
     llmExplanationsEnabled: row.llmExplanationsEnabled,
     ttsEnabled: row.ttsEnabled,
     pitchAccentAudioEnabled: row.pitchAccentAudioEnabled,
+    highlightColor: row.highlightColorValue == null
+        ? defaultHighlightColor
+        : Color(row.highlightColorValue!),
   );
 }

@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/app/settings_repository.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
@@ -22,6 +23,25 @@ void main() {
       expect(settings.llmExplanationsActive, isFalse);
       expect(settings.ttsEnabled, isFalse);
       expect(settings.pitchAccentAudioEnabled, isFalse);
+      expect(settings.highlightColor, defaultHighlightColor);
+    });
+
+    test('update() round-trips highlightColor, leaving other fields alone', () async {
+      await repository.update(ttsEnabled: true);
+
+      const customColor = Color(0xFF3388CC);
+      await repository.update(highlightColor: customColor);
+      var settings = await repository.read();
+      expect(settings.highlightColor, customColor);
+      expect(settings.ttsEnabled, isTrue, reason: 'earlier field preserved');
+
+      await repository.update(llmApiKey: 'sk-abc');
+      settings = await repository.read();
+      expect(
+        settings.highlightColor,
+        customColor,
+        reason: 'untouched by an unrelated update',
+      );
     });
 
     test('update() writes the audio toggles independently of the LLM ones', () async {

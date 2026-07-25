@@ -4,6 +4,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
@@ -34,6 +35,7 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? llmExplanationsEnabled,
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
+    Color? highlightColor,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
@@ -42,6 +44,7 @@ class FakeSettingsRepository extends SettingsRepository {
       ttsEnabled: ttsEnabled ?? _settings.ttsEnabled,
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
+      highlightColor: highlightColor ?? _settings.highlightColor,
     );
   }
 }

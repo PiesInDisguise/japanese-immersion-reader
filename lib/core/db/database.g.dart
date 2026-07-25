@@ -6198,6 +6198,16 @@ class $SettingsTable extends Settings
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _highlightColorValueMeta =
+      const VerificationMeta('highlightColorValue');
+  @override
+  late final GeneratedColumn<int> highlightColorValue = GeneratedColumn<int>(
+    'highlight_color_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6206,6 +6216,7 @@ class $SettingsTable extends Settings
     ttsEnabled,
     pitchAccentAudioEnabled,
     updatedAt,
+    highlightColorValue,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6258,6 +6269,15 @@ class $SettingsTable extends Settings
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('highlight_color_value')) {
+      context.handle(
+        _highlightColorValueMeta,
+        highlightColorValue.isAcceptableOrUnknown(
+          data['highlight_color_value']!,
+          _highlightColorValueMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6290,6 +6310,10 @@ class $SettingsTable extends Settings
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
+      ),
+      highlightColorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}highlight_color_value'],
       ),
     );
   }
@@ -6337,6 +6361,13 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// sets a real one on every write from here on, same as `uuid` on the
   /// sighting tables below.
   final DateTime? updatedAt;
+
+  /// The document-wide mined-word highlight color (word-highlighting
+  /// feature), stored as an ARGB `Color.toARGB32()` int. Nullable: null
+  /// means "use `defaultHighlightColor`," same null-means-default pattern
+  /// as every other column here rather than needing a separate
+  /// has-the-user-customized-this flag.
+  final int? highlightColorValue;
   const SettingsRow({
     required this.id,
     this.llmApiKey,
@@ -6344,6 +6375,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     required this.ttsEnabled,
     required this.pitchAccentAudioEnabled,
     this.updatedAt,
+    this.highlightColorValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6357,6 +6389,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     map['pitch_accent_audio_enabled'] = Variable<bool>(pitchAccentAudioEnabled);
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || highlightColorValue != null) {
+      map['highlight_color_value'] = Variable<int>(highlightColorValue);
     }
     return map;
   }
@@ -6373,6 +6408,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      highlightColorValue: highlightColorValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(highlightColorValue),
     );
   }
 
@@ -6392,6 +6430,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         json['pitchAccentAudioEnabled'],
       ),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      highlightColorValue: serializer.fromJson<int?>(
+        json['highlightColorValue'],
+      ),
     );
   }
   @override
@@ -6406,6 +6447,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         pitchAccentAudioEnabled,
       ),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'highlightColorValue': serializer.toJson<int?>(highlightColorValue),
     };
   }
 
@@ -6416,6 +6458,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
     Value<DateTime?> updatedAt = const Value.absent(),
+    Value<int?> highlightColorValue = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     llmApiKey: llmApiKey.present ? llmApiKey.value : this.llmApiKey,
@@ -6425,6 +6468,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     pitchAccentAudioEnabled:
         pitchAccentAudioEnabled ?? this.pitchAccentAudioEnabled,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    highlightColorValue: highlightColorValue.present
+        ? highlightColorValue.value
+        : this.highlightColorValue,
   );
   SettingsRow copyWithCompanion(SettingsCompanion data) {
     return SettingsRow(
@@ -6440,6 +6486,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ? data.pitchAccentAudioEnabled.value
           : this.pitchAccentAudioEnabled,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      highlightColorValue: data.highlightColorValue.present
+          ? data.highlightColorValue.value
+          : this.highlightColorValue,
     );
   }
 
@@ -6451,7 +6500,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('llmExplanationsEnabled: $llmExplanationsEnabled, ')
           ..write('ttsEnabled: $ttsEnabled, ')
           ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('highlightColorValue: $highlightColorValue')
           ..write(')'))
         .toString();
   }
@@ -6464,6 +6514,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     ttsEnabled,
     pitchAccentAudioEnabled,
     updatedAt,
+    highlightColorValue,
   );
   @override
   bool operator ==(Object other) =>
@@ -6474,7 +6525,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.llmExplanationsEnabled == this.llmExplanationsEnabled &&
           other.ttsEnabled == this.ttsEnabled &&
           other.pitchAccentAudioEnabled == this.pitchAccentAudioEnabled &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.highlightColorValue == this.highlightColorValue);
 }
 
 class SettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -6484,6 +6536,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<bool> ttsEnabled;
   final Value<bool> pitchAccentAudioEnabled;
   final Value<DateTime?> updatedAt;
+  final Value<int?> highlightColorValue;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.llmApiKey = const Value.absent(),
@@ -6491,6 +6544,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.ttsEnabled = const Value.absent(),
     this.pitchAccentAudioEnabled = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.highlightColorValue = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -6499,6 +6553,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.ttsEnabled = const Value.absent(),
     this.pitchAccentAudioEnabled = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.highlightColorValue = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
@@ -6507,6 +6562,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<bool>? ttsEnabled,
     Expression<bool>? pitchAccentAudioEnabled,
     Expression<DateTime>? updatedAt,
+    Expression<int>? highlightColorValue,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6517,6 +6573,8 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (pitchAccentAudioEnabled != null)
         'pitch_accent_audio_enabled': pitchAccentAudioEnabled,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (highlightColorValue != null)
+        'highlight_color_value': highlightColorValue,
     });
   }
 
@@ -6527,6 +6585,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<bool>? ttsEnabled,
     Value<bool>? pitchAccentAudioEnabled,
     Value<DateTime?>? updatedAt,
+    Value<int?>? highlightColorValue,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -6537,6 +6596,7 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? this.pitchAccentAudioEnabled,
       updatedAt: updatedAt ?? this.updatedAt,
+      highlightColorValue: highlightColorValue ?? this.highlightColorValue,
     );
   }
 
@@ -6565,6 +6625,9 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (highlightColorValue.present) {
+      map['highlight_color_value'] = Variable<int>(highlightColorValue.value);
+    }
     return map;
   }
 
@@ -6576,7 +6639,8 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('llmExplanationsEnabled: $llmExplanationsEnabled, ')
           ..write('ttsEnabled: $ttsEnabled, ')
           ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('highlightColorValue: $highlightColorValue')
           ..write(')'))
         .toString();
   }
@@ -12808,6 +12872,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<bool> ttsEnabled,
       Value<bool> pitchAccentAudioEnabled,
       Value<DateTime?> updatedAt,
+      Value<int?> highlightColorValue,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -12817,6 +12882,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<bool> ttsEnabled,
       Value<bool> pitchAccentAudioEnabled,
       Value<DateTime?> updatedAt,
+      Value<int?> highlightColorValue,
     });
 
 class $$SettingsTableFilterComposer
@@ -12855,6 +12921,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get highlightColorValue => $composableBuilder(
+    column: $table.highlightColorValue,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -12897,6 +12968,11 @@ class $$SettingsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get highlightColorValue => $composableBuilder(
+    column: $table.highlightColorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -12931,6 +13007,11 @@ class $$SettingsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get highlightColorValue => $composableBuilder(
+    column: $table.highlightColorValue,
+    builder: (column) => column,
+  );
 }
 
 class $$SettingsTableTableManager
@@ -12970,6 +13051,7 @@ class $$SettingsTableTableManager
                 Value<bool> ttsEnabled = const Value.absent(),
                 Value<bool> pitchAccentAudioEnabled = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int?> highlightColorValue = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 llmApiKey: llmApiKey,
@@ -12977,6 +13059,7 @@ class $$SettingsTableTableManager
                 ttsEnabled: ttsEnabled,
                 pitchAccentAudioEnabled: pitchAccentAudioEnabled,
                 updatedAt: updatedAt,
+                highlightColorValue: highlightColorValue,
               ),
           createCompanionCallback:
               ({
@@ -12986,6 +13069,7 @@ class $$SettingsTableTableManager
                 Value<bool> ttsEnabled = const Value.absent(),
                 Value<bool> pitchAccentAudioEnabled = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<int?> highlightColorValue = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 llmApiKey: llmApiKey,
@@ -12993,6 +13077,7 @@ class $$SettingsTableTableManager
                 ttsEnabled: ttsEnabled,
                 pitchAccentAudioEnabled: pitchAccentAudioEnabled,
                 updatedAt: updatedAt,
+                highlightColorValue: highlightColorValue,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

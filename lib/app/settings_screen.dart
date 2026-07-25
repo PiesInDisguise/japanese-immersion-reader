@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_importer.dart';
@@ -194,6 +195,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const Divider(height: 32),
               const Text(
+                'Highlighting',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Mined words are highlighted everywhere they appear, in '
+                'every book.',
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: settings.highlightColor,
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                  ),
+                ),
+                title: const Text('Highlight color'),
+                trailing: OutlinedButton(
+                  onPressed: () => _pickHighlightColor(settings.highlightColor),
+                  child: const Text('Change...'),
+                ),
+              ),
+              const Divider(height: 32),
+              const Text(
                 'Dictionaries (spec §10)',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -254,5 +282,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('API key saved.')));
     }
+  }
+
+  /// The word-highlighting feature's color picker: a local `pickerColor`
+  /// tracks live `onColorChanged` edits inside the dialog (an HSV picker has
+  /// no natural "confirm" gesture of its own -- dragging the wheel fires
+  /// continuously), and only the dialog's own "Save" button commits that
+  /// value via `SettingsRepository.update`. Cancelling leaves the stored
+  /// color untouched.
+  Future<void> _pickHighlightColor(Color current) async {
+    var pickerColor = current;
+    final picked = await showDialog<Color>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Highlight color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) => pickerColor = color,
+            enableAlpha: true,
+            labelTypes: const [],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(pickerColor),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (picked == null) return;
+    await ref.read(settingsRepositoryProvider).update(highlightColor: picked);
   }
 }
