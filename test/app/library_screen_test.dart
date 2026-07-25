@@ -123,6 +123,8 @@ void main() {
 
     await tester.tap(find.text('Open Library'));
     await tester.pumpAndSettle();
+    // Tapping the title still opens the book -- the whole card (cover +
+    // title) is one InkWell, not just the cover.
     await tester.tap(find.text('First Book'));
     await tester.pumpAndSettle();
 
@@ -169,31 +171,27 @@ void main() {
     // branching logic.
 
     testWidgets(
-      'the cover thumbnail is wrapped in its own tap target, separate from '
-      "the row's open-book tap handler",
+      'the cover has its own long-press handler, separate from the '
+      "card's open-book tap handler",
       (tester) async {
-        // Structural check only -- deliberately does NOT tap the thumbnail:
-        // doing so would invoke the real FilePicker.pickFiles, which on
-        // Windows opens a real native dialog with no platform-channel mock
-        // available in this suite, hanging the test indefinitely. See
-        // library_screen.dart's own doc comment on _pickCustomCover.
+        // Structural check only -- deliberately does NOT long-press the
+        // cover: doing so would invoke the real FilePicker.pickFiles,
+        // which on Windows opens a real native dialog with no
+        // platform-channel mock available in this suite, hanging the test
+        // indefinitely. See library_screen.dart's own doc comment on
+        // _pickCustomCover.
         await _pumpLibraryScreen(tester, [
           _row(id: 'doc-1', title: 'First Book'),
         ]);
         await tester.pumpAndSettle();
 
-        final listTile = find.byType(ListTile);
-        expect(listTile, findsOneWidget);
-        // ListTile itself already renders one implicit InkWell for its own
-        // onTap -- the leading cover thumbnail's own explicit InkWell (see
-        // library_screen.dart) makes this at least two, proving it owns a
-        // separate tap target rather than relying on the row's.
+        expect(find.byType(InkWell), findsOneWidget);
         expect(
-          find.descendant(of: listTile, matching: find.byType(InkWell)),
-          findsAtLeastNWidgets(2),
+          find.byType(GestureDetector),
+          findsWidgets,
           reason:
-              'the leading cover thumbnail must own a separate tap target '
-              "from the ListTile's own onTap (open book)",
+              'the cover must own a separate long-press handler from the '
+              "card's own InkWell onTap (open book)",
         );
       },
     );

@@ -8,17 +8,21 @@ import 'package:japanese_immersion_reader/core/models/models.dart';
 
 import 'services.dart';
 
-/// Every previously-imported book, so the reader doesn't have to re-pick/
-/// re-import the same file just to keep reading it. Pops itself with the
-/// tapped document's id (via [Navigator.pop]) rather than navigating
-/// onward itself -- mirrors `RemoteBrowseScreen`'s own "pop with a picked
-/// value" pattern -- so `HomeScreen` stays the single place that knows how
-/// to turn a `Document` into an open reading session.
+/// Every previously-imported book, as a shelf of cover cards, so the reader
+/// doesn't have to re-pick/re-import the same file just to keep reading it.
+/// Pops itself with the tapped document's id (via [Navigator.pop]) rather
+/// than navigating onward itself -- mirrors `RemoteBrowseScreen`'s own "pop
+/// with a picked value" pattern -- so `HomeScreen` stays the single place
+/// that knows how to turn a `Document` into an open reading session.
 ///
-/// Each row shows a real cover thumbnail where one was auto-extracted at
-/// import time (or previously user-picked), falling back to a
-/// per-source-type placeholder icon otherwise -- tapping that thumbnail
-/// lets the user pick their own custom image (see [_pickCustomCover]).
+/// Each card shows a real cover thumbnail where one was auto-extracted at
+/// import time (or previously user-picked), falling back to a bordered
+/// per-source-type placeholder icon otherwise, with the title below. Tap a
+/// card to open that book; long-press it to pick a custom cover image (see
+/// [_pickCustomCover]) -- tap is the card's primary, most-discoverable
+/// action once the cover fills the whole card (unlike the previous
+/// row-based layout, where the cover was a small leading icon and tapping
+/// it specifically to customize didn't compete with opening the book).
 ///
 /// Fetches once, on push, via a plain `Future` rather than a live stream:
 /// unlike collection state (which the reader UI needs to reflect live
@@ -67,19 +71,46 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             );
           }
 
-          return ListView.separated(
+          return GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 160,
+              childAspectRatio: 0.62,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
             itemCount: documents.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final document = documents[index];
-              return ListTile(
-                leading: InkWell(
-                  onTap: () => _pickCustomCover(document),
-                  child: _buildCoverThumbnail(document),
-                ),
-                title: Text(document.title),
-                subtitle: Text(_formatDate(document.updatedAt)),
+              // Tapping anywhere on the card (cover or title) opens the
+              // book -- the primary, most-discoverable action once a card
+              // is dominated by its cover art. Long-pressing specifically
+              // on the cover picks a custom image instead; a plain
+              // GestureDetector there (rather than a second InkWell) is
+              // enough since the outer InkWell's own splash already covers
+              // the whole card visually.
+              return InkWell(
+                borderRadius: BorderRadius.circular(12),
                 onTap: () => Navigator.of(context).pop(document.id),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onLongPress: () => _pickCustomCover(document),
+                        child: _buildCoverThumbnail(document),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      document.title,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -89,32 +120,42 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   }
 
   /// A real cover image if [document] has one (auto-extracted at import
-  /// time, or previously picked by the user), else the per-source-type
-  /// placeholder icon. `errorBuilder` -- not a synchronous `existsSync()`
-  /// pre-check -- is the built-in mechanism `Image.file` already provides
-  /// for "the cover file is missing," e.g. if it was deleted from disk
-  /// outside the app.
+  /// time, or previously picked by the user), filling the whole card, else
+  /// a bordered placeholder box with the per-source-type icon centered in
+  /// it. `errorBuilder` -- not a synchronous `existsSync()` pre-check -- is
+  /// the built-in mechanism `Image.file` already provides for "the cover
+  /// file is missing," e.g. if it was deleted from disk outside the app.
   Widget _buildCoverThumbnail(DocumentRow document) {
-    final placeholder = Icon(_iconFor(document.sourceType));
+    final borderRadius = BorderRadius.circular(12);
+    final border = Border.all(
+      color: Theme.of(context).colorScheme.outline,
+      width: 2,
+    );
+    final placeholder = DecoratedBox(
+      decoration: BoxDecoration(border: border, borderRadius: borderRadius),
+      child: Center(
+        child: Icon(_iconFor(document.sourceType), size: 40),
+      ),
+    );
+
     final path = document.coverImagePath;
     if (path == null) return placeholder;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: Image.file(
-        File(path),
-        width: 40,
-        height: 56,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
+      borderRadius: borderRadius,
+      child: DecoratedBox(
+        decoration: BoxDecoration(border: border),
+        child: Image.file(
+          File(path),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        ),
       ),
     );
   }
 
-  /// Tapping a book's cover thumbnail/placeholder (the user's confirmed
-  /// choice of where this affordance should live, over a long-press menu or
-  /// a separate edit icon) lets them pick their own image, which then
-  /// overrides any auto-extracted cover -- `updateCoverImagePath` always
-  /// wins unconditionally, unlike import-time auto-extraction's
+  /// Long-pressing a card's cover lets the user pick their own image, which
+  /// then overrides any auto-extracted cover -- `updateCoverImagePath`
+  /// always wins unconditionally, unlike import-time auto-extraction's
   /// `setAutoExtractedCoverIfAbsent`. Refreshes [_documentsFuture] so the
   /// new cover shows immediately without leaving and reopening this screen.
   Future<void> _pickCustomCover(DocumentRow document) async {
@@ -141,11 +182,5 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       DocumentSourceType.pdfText => Icons.picture_as_pdf_outlined,
       DocumentSourceType.pdfScanned => Icons.document_scanner_outlined,
     };
-  }
-
-  String _formatDate(DateTime dateTime) {
-    final local = dateTime.toLocal();
-    String pad(int n) => n.toString().padLeft(2, '0');
-    return '${local.year}-${pad(local.month)}-${pad(local.day)}';
   }
 }
