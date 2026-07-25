@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
+import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/definition_rendering.dart';
 import 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart';
 
 export 'package:japanese_immersion_reader/l5_srs/fsrs/rating.dart' show Rating;
@@ -141,10 +140,14 @@ class ReviewController extends AsyncNotifier<ReviewQueueState> {
     return ReviewQueueState(cards: cards, index: 0, isRevealed: false);
   }
 
+  /// Reuses `definition_rendering.dart`'s structured-content-aware parser --
+  /// Yomitan's `definitionsJson` array can mix plain strings with
+  /// `{type: "structured-content", ...}` objects (common even for JMdict's
+  /// own conversion, not just monolingual dictionaries), so a naive
+  /// `.cast<String>()` throws the moment it hits one of those, crashing the
+  /// whole review deck rather than just that one card's definition text.
   String _definitionText(DictionaryLookupHit hit) {
-    final definitions = (jsonDecode(hit.term.definitionsJson) as List)
-        .cast<String>();
-    return definitions.join('; ');
+    return parseDefinitionEntries(hit.term.definitionsJson).join('; ');
   }
 
   /// Tap-to-reveal: shows the current card's [ReviewCard.back]/

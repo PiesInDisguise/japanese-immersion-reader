@@ -122,6 +122,36 @@ DictionaryLookupHit _catHit() {
   );
 }
 
+/// A hit whose `definitionsJson` mixes a plain string with a Yomitan
+/// `structured-content` object -- the shape that used to crash the whole
+/// review deck (a naive cast throwing a type error on the Map entry) rather
+/// than degrading gracefully.
+DictionaryLookupHit _structuredContentHit() {
+  const entry = DictionaryTermEntry(
+    id: 2,
+    dictionaryId: 'dict-1',
+    headword: '難しい',
+    reading: 'むずかしい',
+    readingNormalized: 'むずかしい',
+    definitionTags: null,
+    rules: '',
+    score: 0,
+    definitionsJson:
+        '["difficult",'
+        '{"type":"structured-content","content":"hard, tough"}]',
+    sequence: 2,
+    termTags: '',
+    importOrder: 0,
+  );
+  return const DictionaryLookupHit(
+    term: entry,
+    dictionaryId: 'dict-1',
+    dictionaryTitle: 'Test Dictionary',
+    dictionaryPriority: 0,
+    matchedVia: MatchTier.dictionaryForm,
+  );
+}
+
 void main() {
   late FakeWordCollectionRepository wordRepository;
   late FakeGrammarCollectionRepository grammarRepository;
@@ -180,6 +210,45 @@ void main() {
     expect(card.back, 'cat; feline');
     expect(card.contextSentence, '猫が好きです。');
   });
+
+  test(
+    'builds a word card whose definitions mix plain strings and '
+    'structured-content entries, without crashing',
+    () async {
+      dictionaryRepository = FakeDictionaryRepository({
+        '難しい': [_structuredContentHit()],
+      });
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          wordCollectionRepositoryProvider.overrideWithValue(wordRepository),
+          grammarCollectionRepositoryProvider.overrideWithValue(
+            grammarRepository,
+          ),
+          dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
+          documentRepositoryProvider.overrideWithValue(documentRepository),
+          grammarDatabaseProvider.overrideWith(
+            (ref) async => GrammarMatcher([_grammarPoint]),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      wordRepository.dueWords = [
+        DueWord(
+          id: 'word-2',
+          dictForm: '難しい',
+          reading: 'むずかしい',
+          senseIds: const [2],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+
+      final state = await container.read(reviewControllerProvider.future);
+
+      expect(state.cards, hasLength(1));
+      expect(state.cards.single.back, 'difficult; hard, tough');
+    },
+  );
 
   test('builds grammar cards from the grammar-point database', () async {
     grammarRepository.dueGrammars = [
