@@ -32,6 +32,13 @@ class DocumentRepository {
   Future<void> save(Document document) {
     return _db.transaction(() async {
       final now = DateTime.now().toUtc();
+      // Preserve the real first-added timestamp across re-saves (e.g.
+      // reopening a book from the Library re-runs this same save call) --
+      // `insertOnConflictUpdate` would otherwise overwrite every column,
+      // including `addedAt`, to `now` on every reopen.
+      final existing = await (_db.select(
+        _db.documents,
+      )..where((d) => d.id.equals(document.id))).getSingleOrNull();
       await _db
           .into(_db.documents)
           .insertOnConflictUpdate(
@@ -39,7 +46,7 @@ class DocumentRepository {
               id: document.id,
               title: document.title,
               sourceType: document.sourceType.name,
-              addedAt: now,
+              addedAt: existing?.addedAt ?? now,
               updatedAt: now,
             ),
           );
@@ -103,5 +110,57 @@ class DocumentRepository {
       _db.documents,
     )..where((d) => d.id.equals(documentId))).getSingleOrNull();
     return row?.title;
+  }
+
+  /// Every [save]d document, most-recently-opened first -- the Library
+  /// screen's own data source. Ordered by `updatedAt` (not `addedAt`):
+  /// [save] runs on every reopen, not just first import, so `updatedAt`
+  /// already behaves as "last opened," which is the ordering a library
+  /// actually wants (continue reading the most recent book first).
+  Future<List<DocumentRow>> listDocuments() {
+    return (_db.select(
+      _db.documents,
+    )..orderBy([(d) => OrderingTerm.desc(d.updatedAt)])).get();
+  }
+
+  /// Reconstructs a full, in-memory [Document] -- every chapter/block/
+  /// sentence/token -- from what [save] persisted, so the Library screen
+  /// can reopen a book without re-picking/re-importing its source file.
+  /// `null` if [documentId] was never saved. Rebuilds purely from
+  /// `Chapters.blocksJson` (each chapter's full `List<Block>`, already
+  /// JSON round-trip-capable via `Block.toJson`/`Block.fromJson`) --
+  /// `Sentences` (a flat, plain-text index for [sentenceContent]/mining
+  /// lookups) isn't needed for this, since the real sentence/token data
+  /// already lives in `blocksJson`.
+  Future<Document?> loadDocument(String documentId) async {
+    final documentRow = await (_db.select(
+      _db.documents,
+    )..where((d) => d.id.equals(documentId))).getSingleOrNull();
+    if (documentRow == null) return null;
+
+    final chapterRows =
+        await (_db.select(_db.chapters)
+              ..where((c) => c.documentId.equals(documentId))
+              ..orderBy([(c) => OrderingTerm.asc(c.chapterIndex)]))
+            .get();
+
+    final chapters = [
+      for (final row in chapterRows)
+        Chapter(
+          id: row.id,
+          index: row.chapterIndex,
+          title: row.title,
+          blocks: (jsonDecode(row.blocksJson) as List)
+              .map((json) => Block.fromJson(json as Map<String, dynamic>))
+              .toList(),
+        ),
+    ];
+
+    return Document(
+      id: documentRow.id,
+      title: documentRow.title,
+      sourceType: DocumentSourceType.values.byName(documentRow.sourceType),
+      chapters: chapters,
+    );
   }
 }

@@ -13,23 +13,21 @@ import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_scree
 import 'package:japanese_immersion_reader/l5_srs/review_ui/review_screen.dart';
 import 'package:path/path.dart' as p;
 
+import 'library_screen.dart';
 import 'remote_browse_screen.dart';
 import 'sample_content.dart';
 import 'services.dart';
 import 'settings_screen.dart';
 import 'stats/stats_screen.dart';
 
-/// The app's entry screen: load a book (the bundled sample fixture, or a
-/// real EPUB via the system file picker) and jump into Card Mode.
+/// The app's entry screen: load a book (from the Library, the bundled
+/// sample fixture, or a real import) and jump into Card Mode.
 ///
-/// **Placeholder, like the rest of `lib/app/`**: there's no Library view
-/// (spec §5 -- imported works, cover art, progress%) yet, so this is a
-/// straight-to-reading flow rather than a real library. Every import here
-/// is in-memory only for this session; nothing is persisted to
-/// `AppDatabase`'s `documents`/`chapters`/`sentences` tables yet (that
-/// repository layer doesn't exist -- see the Phase 1 plan note about it
-/// being deferred until something actually needs to call it. Something
-/// now does, but building it is separate work from Card Mode itself).
+/// **Still a placeholder in spirit** (spec §5's cover art / progress % per
+/// book aren't shown -- `LibraryScreen` is a plain title list, not a
+/// visual shelf), but every import now persists via `DocumentRepository`
+/// and can be reopened without re-picking the source file, closing the
+/// main gap this comment used to describe.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -66,6 +64,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  /// The Library's own "tap to reopen" flow: pushes [LibraryScreen], which
+  /// pops with the tapped document's id (or `null` if the user backed out
+  /// without picking one), then reuses [_openDocument] unchanged --
+  /// reopening a previously-imported book funnels through exactly the same
+  /// pipeline (seed dictionary, set `currentDocumentProvider`, re-`save`,
+  /// push `CardModeScreen`) a fresh import does, just with
+  /// `DocumentRepository.loadDocument` standing in for an `Importer`.
+  Future<void> _openLibrary() async {
+    final documentId = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const LibraryScreen()));
+    if (documentId == null) return;
+    await _openDocument(() async {
+      final document = await ref
+          .read(documentRepositoryProvider)
+          .loadDocument(documentId);
+      if (document == null) {
+        throw StateError('That book is no longer available.');
+      }
+      return document;
+    });
   }
 
   Future<void> _loadSample() => _openDocument(loadSampleBook);
@@ -154,7 +175,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             if (_loading) const CircularProgressIndicator(),
             if (!_loading) ...[
-              ElevatedButton(
+              ElevatedButton.icon(
+                icon: const Icon(Icons.collections_bookmark_outlined),
+                label: const Text('Library'),
+                onPressed: _openLibrary,
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
                 onPressed: _loadSample,
                 child: const Text('Load Sample Book'),
               ),
