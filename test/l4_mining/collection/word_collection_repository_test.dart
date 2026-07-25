@@ -387,4 +387,46 @@ void main() {
       expect(await repo.latestSightingSentenceId('no-such-id'), isNull);
     });
   });
+
+  group('watchCollectedWordIds', () {
+    test('emits an empty set with nothing collected', () async {
+      expect(await repo.watchCollectedWordIds().first, isEmpty);
+    });
+
+    test('emits an updated set after mine()', () async {
+      final emissions = <Set<String>>[];
+      final sub = repo.watchCollectedWordIds().listen(emissions.add);
+      addTearDown(sub.cancel);
+      await pumpEventQueue();
+
+      final result = await repo.mine(
+        dictForm: 'X',
+        reading: 'Y',
+        senseIds: const [],
+        source: _source,
+      );
+      await pumpEventQueue();
+
+      expect(emissions.last, {result.entryId});
+    });
+
+    test('emits an updated set after remove()', () async {
+      await repo.mine(
+        dictForm: 'X',
+        reading: 'Y',
+        senseIds: const [],
+        source: _source,
+      );
+
+      final emissions = <Set<String>>[];
+      final sub = repo.watchCollectedWordIds().listen(emissions.add);
+      addTearDown(sub.cancel);
+      await pumpEventQueue();
+
+      await repo.remove(dictForm: 'X', reading: 'Y');
+      await pumpEventQueue();
+
+      expect(emissions.last, isEmpty);
+    });
+  });
 }

@@ -162,6 +162,22 @@ class WordCollectionRepository {
     final row = await query.getSingle();
     return row.read(countColumn) ?? 0;
   }
+
+  /// Every collected word's [contentDerivedWordId], live-updating -- the
+  /// reader UI's word-highlighting feature watches this (via
+  /// `collectedWordIdsProvider` in `app/services.dart`) to know which
+  /// on-screen tokens to highlight, without an async `isCollected` round
+  /// trip per token per render. `selectOnly` + a single projected column
+  /// (not a full-row `select`) since only the id is ever needed here, and a
+  /// reading session can have hundreds of collected words. Mirrors
+  /// `SettingsRepository.watch()`'s reactive-`.watch()` precedent.
+  Stream<Set<String>> watchCollectedWordIds() {
+    final query = _db.selectOnly(_db.collectedWords)
+      ..addColumns([_db.collectedWords.id]);
+    return query.watch().map(
+      (rows) => rows.map((r) => r.read(_db.collectedWords.id)!).toSet(),
+    );
+  }
 }
 
 /// Drift-backed [MiningStore] for `CollectedWords`/`CollectedWordSources`.

@@ -100,6 +100,15 @@ final appSettingsProvider = StreamProvider<AppSettings>((ref) {
   return ref.watch(settingsRepositoryProvider).watch();
 });
 
+/// Every mined word's content-derived id, live-updating -- the reader UI's
+/// word-highlighting feature watches this so a token's highlight appears
+/// immediately on mine/un-mine, and shows consistently for the same word
+/// across every document (this is app-wide collection state, not scoped to
+/// whichever document is currently open).
+final collectedWordIdsProvider = StreamProvider<Set<String>>((ref) {
+  return ref.watch(wordCollectionRepositoryProvider).watchCollectedWordIds();
+});
+
 /// Builds a real [GrammarExplanationClient] from a live API key. Kept as a
 /// factory seam (not a single shared instance) rather than
 /// `ReaderMiningSession` constructing `AnthropicGrammarExplanationClient`

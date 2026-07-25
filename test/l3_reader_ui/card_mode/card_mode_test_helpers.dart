@@ -13,6 +13,8 @@
 // elsewhere (e.g. `test/l2_linguistics/tokenizer/
 // sudachi_reconcile_integration_test.dart`).
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -127,6 +129,29 @@ class FakeWordCollectionRepository extends WordCollectionRepository {
   @override
   Future<void> undo(MineResult result) async {
     undoCalls.add(result);
+  }
+
+  final _collectedWordIdsController = StreamController<Set<String>>.broadcast();
+
+  /// The current fake "collected word ids" set -- what a fresh
+  /// [watchCollectedWordIds] subscription sees immediately, mirroring how
+  /// the real Drift `.watch()` stream emits the current state to a new
+  /// listener before any further changes happen.
+  Set<String> collectedWordIds = {};
+
+  /// Test hook: push a new set of collected word ids, as if mining/removal
+  /// had just changed the live database -- mirrors what
+  /// [WordCollectionRepository.watchCollectedWordIds]'s real stream would
+  /// emit on a change, without this fake needing a real database.
+  void emitCollectedWordIds(Set<String> ids) {
+    collectedWordIds = ids;
+    _collectedWordIdsController.add(ids);
+  }
+
+  @override
+  Stream<Set<String>> watchCollectedWordIds() async* {
+    yield collectedWordIds;
+    yield* _collectedWordIdsController.stream;
   }
 }
 
