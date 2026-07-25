@@ -207,19 +207,16 @@ class _CardAreaState extends ConsumerState<_CardArea> {
     // `mine` itself as soon as its lookup resolves when this is true.
     final autoAdd =
         ref.read(appSettingsProvider).value?.autoAddToCollection ?? false;
-    final mined = await showModalBottomSheet<bool>(
+    final mined = await showWordLookupPopup(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => WordLookupSheet(
-        token: token,
-        lookup: () => controller.lookupWord(token),
-        mine: (senses) => controller.mineWord(token, senses),
-        checkTtsActive: controller.ttsActive,
-        speak: controller.speak,
-        checkPitchAccentActive: controller.pitchAccentAudioActive,
-        playPitchAccentAudio: controller.playPitchAccentAudio,
-        autoMine: autoAdd,
-      ),
+      token: token,
+      lookup: () => controller.lookupWord(token),
+      mine: (senses) => controller.mineWord(token, senses),
+      checkTtsActive: controller.ttsActive,
+      speak: controller.speak,
+      checkPitchAccentActive: controller.pitchAccentAudioActive,
+      playPitchAccentAudio: controller.playPitchAccentAudio,
+      autoMine: autoAdd,
     );
     if (mined == true && mounted) {
       messenger.showSnackBar(

@@ -28,7 +28,7 @@ class AnthropicGrammarExplanationClient implements GrammarExplanationClient {
   AnthropicGrammarExplanationClient({
     required this.apiKey,
     this.model = defaultModel,
-    this.maxTokens = 400,
+    this.maxTokens = 1500,
     http.Client? httpClient,
   }) : _httpClient = httpClient ?? http.Client();
 
@@ -102,12 +102,21 @@ class AnthropicGrammarExplanationClient implements GrammarExplanationClient {
               'this part):\n$contextText\n\n';
     return '$contextSection'
         'Sentence to explain:\n$sentenceText\n\n'
-        'You are helping a Japanese-language learner reading a light novel. '
-        'In 2-4 sentences, explain what is grammatically interesting or '
-        'potentially confusing about this specific sentence -- word order, '
-        'omitted subjects/objects, ambiguous particles, idiomatic '
-        'expressions, or nuance the surrounding context resolves. Do not '
-        'give a full translation or a word-by-word breakdown (the reader '
-        'already has that); focus on the grammar itself.';
+        'Break down this Japanese sentence into numbered chunks. For each '
+        'chunk:\n\n'
+        'Write the chunk as a header (numbered).\n'
+        'List each component on its own line as a bullet, in the format '
+        'word（reading） = meaning, with hiragana readings for kanji. For '
+        'する-verb nouns, you may gloss them in verb form (e.g. 複製する = '
+        'to copy).\n'
+        'After the components, give a short literal gloss of that chunk in '
+        'quotes.\n'
+        'Where the grammar is genuinely non-obvious, explain it in a bit '
+        'more depth — walk through patterns like ～たり, nominalizing こと, '
+        'or set constructions with examples if helpful. Keep routine '
+        'chunks (simple particles, obvious vocab) short and don\'t '
+        'over-explain them.\n\n'
+        'Don\'t include a structure outline or diagram. Finish with a '
+        'natural English translation of the whole sentence.';
   }
 }

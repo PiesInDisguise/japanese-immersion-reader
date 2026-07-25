@@ -5,6 +5,51 @@ import 'package:japanese_immersion_reader/l2_linguistics/kana.dart';
 
 import 'definition_rendering.dart';
 
+/// Shows [WordLookupSheet] as a small popup anchored toward the upper part
+/// of the screen, rather than a full-height modal bottom sheet -- so it
+/// doesn't cover most of the reading surface behind it. Both Card Mode's and
+/// Document Mode's `_handleWordTap` call this instead of constructing
+/// [WordLookupSheet]/`showModalBottomSheet` directly, so the popup's size
+/// and position stay in one place. Returns whatever [WordLookupSheet] itself
+/// pops with (`true` if the word was mined during this popup's lifetime).
+Future<bool?> showWordLookupPopup({
+  required BuildContext context,
+  required Token token,
+  required Future<List<DictionaryLookupHit>> Function() lookup,
+  required Future<void> Function(List<DictionaryLookupHit> senses) mine,
+  Future<bool> Function()? checkTtsActive,
+  Future<void> Function(String text)? speak,
+  Future<bool> Function()? checkPitchAccentActive,
+  Future<bool> Function({required String expression, required String reading})?
+  playPitchAccentAudio,
+  bool autoMine = false,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => Align(
+      alignment: const Alignment(0, -0.3),
+      child: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360, maxHeight: 420),
+          child: WordLookupSheet(
+            token: token,
+            lookup: lookup,
+            mine: mine,
+            checkTtsActive: checkTtsActive,
+            speak: speak,
+            checkPitchAccentActive: checkPitchAccentActive,
+            playPitchAccentAudio: playPitchAccentAudio,
+            autoMine: autoMine,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /// Card Mode's and Document Mode's shared tap-a-word popup (spec §6/§7/§10):
 /// shows [lookup]'s results -- word, reading, meaning, spec §10's
 /// default-on popup fields -- for [token], with a button to mine it via
@@ -83,7 +128,10 @@ class WordLookupSheet extends StatefulWidget {
   final Future<bool> Function()? checkPitchAccentActive;
 
   /// `ReaderMiningSession.playPitchAccentAudio`.
-  final Future<bool> Function({required String expression, required String reading})?
+  final Future<bool> Function({
+    required String expression,
+    required String reading,
+  })?
   playPitchAccentAudio;
 
   @override
@@ -159,116 +207,96 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.token.surface,
+              style: theme.textTheme.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            if (widget.token.reading != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  katakanaToHiragana(widget.token.reading!),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.outline,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              Text(
-                widget.token.surface,
-                style: theme.textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              if (widget.token.reading != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    katakanaToHiragana(widget.token.reading!),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.outline,
+            if (_ttsActive || _pitchAccentActive)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_ttsActive)
+                    IconButton(
+                      icon: const Icon(Icons.volume_up_outlined),
+                      tooltip: 'Speak',
+                      onPressed: _speakWord,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              if (_ttsActive || _pitchAccentActive)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (_ttsActive)
-                      IconButton(
-                        icon: const Icon(Icons.volume_up_outlined),
-                        tooltip: 'Speak',
-                        onPressed: _speakWord,
-                      ),
-                    if (_pitchAccentActive)
-                      IconButton(
-                        icon: _playingPitchAccent
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.graphic_eq),
-                        tooltip: 'Play pitch-accent recording',
-                        onPressed: _playingPitchAccent
-                            ? null
-                            : _playPitchAccent,
-                      ),
-                  ],
-                ),
-              const SizedBox(height: 16),
-              FutureBuilder<List<DictionaryLookupHit>>(
-                future: _lookupFuture,
-                builder: (context, snapshot) {
-                  final ready =
-                      snapshot.connectionState == ConnectionState.done;
-                  if (!ready) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        'Dictionary lookup failed: ${snapshot.error}',
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                    );
-                  }
-
-                  final hits = snapshot.data ?? const [];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _LookupResults(hits: hits, surface: widget.token.surface),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        icon: _mining
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.bookmark_add_outlined),
-                        label: const Text('Add to Collection'),
-                        onPressed: _mining ? null : () => _mine(hits),
-                      ),
-                    ],
-                  );
-                },
+                  if (_pitchAccentActive)
+                    IconButton(
+                      icon: _playingPitchAccent
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.graphic_eq),
+                      tooltip: 'Play pitch-accent recording',
+                      onPressed: _playingPitchAccent ? null : _playPitchAccent,
+                    ),
+                ],
               ),
-            ],
-          ),
+            const SizedBox(height: 16),
+            FutureBuilder<List<DictionaryLookupHit>>(
+              future: _lookupFuture,
+              builder: (context, snapshot) {
+                final ready = snapshot.connectionState == ConnectionState.done;
+                if (!ready) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      'Dictionary lookup failed: ${snapshot.error}',
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                  );
+                }
+
+                final hits = snapshot.data ?? const [];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _LookupResults(hits: hits, surface: widget.token.surface),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      icon: _mining
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.bookmark_add_outlined),
+                      label: const Text('Add to Collection'),
+                      onPressed: _mining ? null : () => _mine(hits),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
