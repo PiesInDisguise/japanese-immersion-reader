@@ -49,6 +49,8 @@ class RenderVerticalText extends RenderBox {
     required this._lineHeightFactor,
     required this._columnSpacingFactor,
     this._onCharacterTapped,
+    this._highlightedCharIndices,
+    this._highlightColor,
   }) {
     _tap = TapGestureRecognizer(debugOwner: this)..onTapUp = _handleTapUp;
   }
@@ -99,6 +101,27 @@ class RenderVerticalText extends RenderBox {
   /// one; see [_handleTapUp].
   ValueChanged<int>? _onCharacterTapped;
   set onCharacterTapped(ValueChanged<int>? value) => _onCharacterTapped = value;
+
+  /// Char indices (word-highlighting feature) to paint a background behind,
+  /// in [paint], before that character's glyph -- the set a collected
+  /// word's token(s) resolve to via `TokenSpanIndex.charRangeForToken`
+  /// (`VerticalSentenceView` builds it). Repaint-only, like [textStyle]:
+  /// which characters are highlighted never changes the layout grid itself.
+  Set<int>? _highlightedCharIndices;
+  Set<int>? get highlightedCharIndices => _highlightedCharIndices;
+  set highlightedCharIndices(Set<int>? value) {
+    if (_highlightedCharIndices == value) return;
+    _highlightedCharIndices = value;
+    markNeedsPaint();
+  }
+
+  Color? _highlightColor;
+  Color? get highlightColor => _highlightColor;
+  set highlightColor(Color? value) {
+    if (_highlightColor == value) return;
+    _highlightColor = value;
+    markNeedsPaint();
+  }
 
   late final TapGestureRecognizer _tap;
 
@@ -175,9 +198,15 @@ class RenderVerticalText extends RenderBox {
     final layout = _layout;
     final painters = _textPainters;
     if (layout == null || painters == null) return;
+    final highlightedCharIndices = _highlightedCharIndices;
+    final highlightColor = _highlightColor;
     for (var i = 0; i < painters.length; i++) {
       final painter = painters[i];
       final rect = layout.rectForChar(i).shift(offset);
+      if (highlightColor != null &&
+          (highlightedCharIndices?.contains(i) ?? false)) {
+        context.canvas.drawRect(rect, Paint()..color = highlightColor);
+      }
       // Center each glyph within its cell.
       final dx = rect.left + (rect.width - painter.width) / 2;
       final dy = rect.top + (rect.height - painter.height) / 2;
@@ -218,6 +247,8 @@ class RawVerticalText extends LeafRenderObjectWidget {
     required this.lineHeightFactor,
     required this.columnSpacingFactor,
     this.onCharacterTapped,
+    this.highlightedCharIndices,
+    this.highlightColor,
   });
 
   final String text;
@@ -226,6 +257,8 @@ class RawVerticalText extends LeafRenderObjectWidget {
   final double lineHeightFactor;
   final double columnSpacingFactor;
   final ValueChanged<int>? onCharacterTapped;
+  final Set<int>? highlightedCharIndices;
+  final Color? highlightColor;
 
   @override
   RenderVerticalText createRenderObject(BuildContext context) {
@@ -236,6 +269,8 @@ class RawVerticalText extends LeafRenderObjectWidget {
       lineHeightFactor: lineHeightFactor,
       columnSpacingFactor: columnSpacingFactor,
       onCharacterTapped: onCharacterTapped,
+      highlightedCharIndices: highlightedCharIndices,
+      highlightColor: highlightColor,
     );
   }
 
@@ -250,6 +285,8 @@ class RawVerticalText extends LeafRenderObjectWidget {
       ..fontSize = fontSize
       ..lineHeightFactor = lineHeightFactor
       ..columnSpacingFactor = columnSpacingFactor
-      ..onCharacterTapped = onCharacterTapped;
+      ..onCharacterTapped = onCharacterTapped
+      ..highlightedCharIndices = highlightedCharIndices
+      ..highlightColor = highlightColor;
   }
 }

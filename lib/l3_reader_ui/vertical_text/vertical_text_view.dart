@@ -65,6 +65,8 @@ class VerticalTextView extends StatelessWidget {
     this.columnSpacingFactor = 1.6,
     this.textStyle,
     this.onCharacterTapped,
+    this.highlightedCharIndices,
+    this.highlightColor,
   });
 
   /// The source string to lay out, already in correct 縦書き reading order
@@ -94,6 +96,15 @@ class VerticalTextView extends StatelessWidget {
   /// Not called if a tap doesn't land on any character (see
   /// [VerticalTextLayout.hitTest]).
   final ValueChanged<int>? onCharacterTapped;
+
+  /// Char indices (word-highlighting feature) to paint [highlightColor]
+  /// behind. See `RenderVerticalText.highlightedCharIndices`'s doc comment.
+  final Set<int>? highlightedCharIndices;
+
+  /// The background color for [highlightedCharIndices]. Both must be
+  /// non-null together for anything to actually paint (see
+  /// `RenderVerticalText.paint`).
+  final Color? highlightColor;
 
   /// The layout math [RenderVerticalText] computes internally *when it
   /// achieves exactly [size]* -- exposed here purely so tests (and future
@@ -127,6 +138,8 @@ class VerticalTextView extends StatelessWidget {
         lineHeightFactor: lineHeightFactor,
         columnSpacingFactor: columnSpacingFactor,
         onCharacterTapped: onCharacterTapped,
+        highlightedCharIndices: highlightedCharIndices,
+        highlightColor: highlightColor,
       ),
     );
   }

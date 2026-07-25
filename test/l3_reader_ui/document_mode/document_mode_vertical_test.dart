@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:japanese_immersion_reader/app/settings_repository.dart';
+import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/token_gloss_view.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/word_lookup_sheet.dart';
+import 'package:japanese_immersion_reader/l3_reader_ui/vertical_text/render_vertical_text.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/vertical_text/vertical_text.dart';
 
 import '../card_mode/card_mode_test_helpers.dart';
@@ -130,6 +133,49 @@ void main() {
       expect(wordCollectionRepository.removeCalls.single.reading, 'ネコ');
       expect(find.textContaining('Removed'), findsOneWidget);
     });
+  });
+
+  group('word highlighting', () {
+    testWidgets(
+      'a collected word\'s char span is highlighted with the '
+      'Settings-configured color',
+      (tester) async {
+        const customColor = Color(0xFF3388CC);
+        final settingsRepository = FakeSettingsRepository(
+          const AppSettings(
+            llmApiKey: null,
+            llmExplanationsEnabled: true,
+            ttsEnabled: false,
+            pitchAccentAudioEnabled: false,
+            highlightColor: customColor,
+          ),
+        );
+        await pumpDocumentModeScreen(
+          tester,
+          document: buildVerticalTestDocument(),
+          tokenizer: tokenizer,
+          dictionaryRepository: dictionaryRepository,
+          wordCollectionRepository: wordCollectionRepository,
+          settingsRepository: settingsRepository,
+        );
+        await tester.pumpAndSettle();
+
+        wordCollectionRepository.emitCollectedWordIds({
+          contentDerivedWordId(dictForm: '猫', reading: 'ネコ'),
+        });
+        await tester.pumpAndSettle();
+
+        final renderObject = tester.renderObject<RenderVerticalText>(
+          find.descendant(
+            of: find.byKey(const ValueKey('sent-v-0')),
+            matching: find.byType(RawVerticalText),
+          ),
+        );
+        // '猫が走る。': 猫 is charIndex 0 only.
+        expect(renderObject.highlightedCharIndices, {0});
+        expect(renderObject.highlightColor, customColor);
+      },
+    );
   });
 
   group('grammar breakdown popup', () {

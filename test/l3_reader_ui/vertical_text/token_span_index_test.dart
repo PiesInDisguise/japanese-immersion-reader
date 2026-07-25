@@ -64,4 +64,33 @@ void main() {
       }
     });
   });
+
+  group('charRangeForToken', () {
+    test('single-character tokens each get a length-1 range', () {
+      final index = TokenSpanIndex(tokens);
+      expect(index.charRangeForToken(0), (0, 1)); // 猫
+      expect(index.charRangeForToken(1), (1, 2)); // が
+      expect(index.charRangeForToken(3), (4, 5)); // 。
+    });
+
+    test('a multi-character token gets the full span it occupies', () {
+      final index = TokenSpanIndex(tokens);
+      expect(index.charRangeForToken(2), (2, 4)); // 走る
+    });
+
+    test('is the exact inverse of tokenIndexForCharIndex over every char', () {
+      final index = TokenSpanIndex(tokens);
+      for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+        final (start, end) = index.charRangeForToken(tokenIndex);
+        for (var charIndex = start; charIndex < end; charIndex++) {
+          expect(index.tokenIndexForCharIndex(charIndex), tokenIndex);
+        }
+      }
+    });
+
+    test('a single all-encompassing placeholder token spans the whole text', () {
+      final index = TokenSpanIndex(const [Token(surface: '猫が走る。')]);
+      expect(index.charRangeForToken(0), (0, 5));
+    });
+  });
 }

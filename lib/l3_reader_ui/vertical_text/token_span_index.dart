@@ -82,4 +82,15 @@ class TokenSpanIndex {
     }
     return candidate;
   }
+
+  /// The reverse of [tokenIndexForCharIndex]: the half-open char-index range
+  /// `[start, end)`, into the same flattened surface text, that
+  /// `tokens[tokenIndex]` occupies. Used by the word-highlighting feature
+  /// (`VerticalSentenceView`) to turn "this token is a collected word" into
+  /// the set of char indices `RenderVerticalText` should paint a highlight
+  /// background behind.
+  (int start, int end) charRangeForToken(int tokenIndex) {
+    final start = _starts[tokenIndex];
+    return (start, start + tokens[tokenIndex].surface.length);
+  }
 }

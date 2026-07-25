@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:japanese_immersion_reader/l3_reader_ui/vertical_text/render_vertical_text.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/vertical_text/vertical_text.dart';
 
 void main() {
@@ -141,5 +142,48 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
+  });
+
+  group('word highlighting', () {
+    testWidgets(
+      'forwards highlightedCharIndices/highlightColor to the render object '
+      'and paints without error',
+      (tester) async {
+        const highlightColor = Color(0x66FFEE58);
+        await tester.pumpWidget(
+          Center(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: VerticalTextView(
+                text: sampleVerticalText,
+                size: viewportSize,
+                fontSize: fontSize,
+                lineHeightFactor: lineHeightFactor,
+                columnSpacingFactor: columnSpacingFactor,
+                highlightedCharIndices: const {0, 1, 2},
+                highlightColor: highlightColor,
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        final renderObject = tester.renderObject<RenderVerticalText>(
+          find.byType(RawVerticalText),
+        );
+        expect(renderObject.highlightedCharIndices, {0, 1, 2});
+        expect(renderObject.highlightColor, highlightColor);
+      },
+    );
+
+    testWidgets('defaults to no highlighting when unset', (tester) async {
+      await tester.pumpWidget(buildTestee());
+
+      final renderObject = tester.renderObject<RenderVerticalText>(
+        find.byType(RawVerticalText),
+      );
+      expect(renderObject.highlightedCharIndices, isNull);
+      expect(renderObject.highlightColor, isNull);
+    });
   });
 }

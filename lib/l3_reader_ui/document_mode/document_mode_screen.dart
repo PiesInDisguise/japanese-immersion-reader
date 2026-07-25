@@ -638,6 +638,8 @@ class _SentenceRowViewState extends State<_SentenceRowView> {
               onWordTap: widget.onWordTap,
               onWordLongPress: widget.onWordLongPress,
               onSentenceDoubleTap: widget.onSentenceDoubleTap,
+              collectedWordIds: widget.collectedWordIds,
+              highlightColor: widget.highlightColor,
             );
           }
 

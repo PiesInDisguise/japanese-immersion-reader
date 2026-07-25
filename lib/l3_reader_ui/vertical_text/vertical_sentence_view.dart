@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 
 import 'token_span_index.dart';
@@ -112,6 +113,8 @@ class VerticalSentenceView extends StatelessWidget {
     this.fontSize = 20.0,
     this.lineHeightFactor = 1.5,
     this.columnSpacingFactor = 1.5,
+    this.collectedWordIds = const {},
+    this.highlightColor,
   });
 
   /// The sentence's real tokens, in order. Never empty in practice (see
@@ -154,6 +157,20 @@ class VerticalSentenceView extends StatelessWidget {
   /// [lineHeightFactor] for why 1.5.
   final double columnSpacingFactor;
 
+  /// Every collected word's `contentDerivedWordId` (word-highlighting
+  /// feature) -- mirrors `_SentenceRowView`'s own `collectedWordIds` param
+  /// in `document_mode_screen.dart`. A token whose identity is in this set
+  /// gets [highlightColor] painted behind every char index its span covers
+  /// (see `TokenSpanIndex.charRangeForToken`, `build`'s own construction of
+  /// the resulting highlighted-char-index set).
+  final Set<String> collectedWordIds;
+
+  /// The Settings-configured highlight color. Null (the default, matching
+  /// [collectedWordIds]'s empty default) simply highlights nothing --
+  /// `RenderVerticalText.paint` requires both a color and a matching char
+  /// index to actually paint anything.
+  final Color? highlightColor;
+
   String get _text => tokens.map((t) => t.surface).join();
 
   @override
@@ -176,6 +193,15 @@ class VerticalSentenceView extends StatelessWidget {
       columnSpacingFactor: columnSpacingFactor,
     ).contentSize;
 
+    final highlightedCharIndices = <int>{};
+    for (var i = 0; i < tokens.length; i++) {
+      if (!collectedWordIds.contains(_wordId(tokens[i]))) continue;
+      final (start, end) = tokenSpans.charRangeForToken(i);
+      for (var charIndex = start; charIndex < end; charIndex++) {
+        highlightedCharIndices.add(charIndex);
+      }
+    }
+
     // Explicit onSurface color: RenderVerticalText paints raw TextPainters
     // straight from this style (see render_vertical_text.dart), never going
     // through a Text/RichText widget that would otherwise pick up
@@ -191,6 +217,8 @@ class VerticalSentenceView extends StatelessWidget {
       textStyle: TextStyle(color: theme.colorScheme.onSurface),
       onCharacterTapped: (charIndex) =>
           onWordTap(tokens[tokenSpans.tokenIndexForCharIndex(charIndex)]),
+      highlightedCharIndices: highlightedCharIndices,
+      highlightColor: highlightColor,
     );
 
     void handleLongPressStart(LongPressStartDetails details) {
@@ -212,4 +240,18 @@ class VerticalSentenceView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Mirrors `document_mode_screen.dart`'s own private `_wordId`/
+/// `_collectionIdentity` exactly (Dart privacy is per-file, so this can't
+/// just import that one) -- must stay in lockstep with
+/// `DocumentModeController.mineWord`'s `token.dictForm ?? token.surface` /
+/// `token.reading ?? token.surface` fallback, since this is only used to
+/// check membership in [VerticalSentenceView.collectedWordIds], never to
+/// mine/remove.
+String _wordId(Token token) {
+  return contentDerivedWordId(
+    dictForm: token.dictForm ?? token.surface,
+    reading: token.reading ?? token.surface,
+  );
 }
