@@ -17,13 +17,18 @@ void main() {
   _writeEpub('assets/fixtures/epub_ruby_forms.epub', _buildRubyFormsEpub());
   _writeEpub('assets/fixtures/epub_plain_text.epub', _buildPlainTextEpub());
   _writeEpub('assets/fixtures/epub_malformed.epub', _buildMalformedEpub());
+  _writeEpub('assets/fixtures/epub_cover_epub3.epub', _buildEpub3CoverEpub());
+  _writeEpub('assets/fixtures/epub_cover_epub2.epub', _buildEpub2CoverEpub());
 }
 
 void _writeEpub(String path, Uint8List bytes) {
   File(path).writeAsBytesSync(bytes);
 }
 
-Uint8List _buildEpub(Map<String, String> textEntries) {
+Uint8List _buildEpub(
+  Map<String, String> textEntries, {
+  Map<String, Uint8List> binaryEntries = const {},
+}) {
   final archive = Archive();
 
   // The OCF spec requires 'mimetype' to be the first entry, stored
@@ -35,6 +40,9 @@ Uint8List _buildEpub(Map<String, String> textEntries) {
 
   textEntries.forEach((name, content) {
     archive.add(ArchiveFile.string(name, content));
+  });
+  binaryEntries.forEach((name, bytes) {
+    archive.add(ArchiveFile(name, bytes.length, bytes));
   });
 
   return Uint8List.fromList(ZipEncoder().encode(archive));
@@ -291,4 +299,119 @@ Uint8List _buildMalformedEpub() {
     'OEBPS/toc.ncx': ncx,
     'OEBPS/chapter1.xhtml': chapter1,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Fixtures 4-5: cover art (cover_art_extractor_test.dart). The embedded
+// "cover" content is a small marker byte sequence, not a real decodable
+// image -- the extractor-level test only asserts raw-byte pass-through from
+// the manifest item, it never decodes the bytes as an image.
+// ---------------------------------------------------------------------------
+
+final _fakeCoverBytes = Uint8List.fromList(utf8.encode('FAKE_COVER_BYTES'));
+
+/// EPUB3-style cover declaration: `<item properties="cover-image">`.
+Uint8List _buildEpub3CoverEpub() {
+  const opf = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>表紙付きの本 (EPUB3)</dc:title>
+    <dc:language>ja</dc:language>
+    <dc:identifier id="pub-id">urn:uuid:cover-epub3-0001</dc:identifier>
+  </metadata>
+  <manifest>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="cover-img" href="cover.png" media-type="image/png" properties="cover-image"/>
+    <item id="chap1" href="chapter1.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine>
+    <itemref idref="chap1"/>
+  </spine>
+</package>
+''';
+
+  const nav = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head><title>Nav</title></head>
+<body>
+<nav epub:type="toc" id="toc">
+<ol><li><a href="chapter1.xhtml">第一章</a></li></ol>
+</nav>
+</body>
+</html>
+''';
+
+  const chapter1 = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>第一章</title></head>
+<body><p>表紙のある本です。</p></body>
+</html>
+''';
+
+  return _buildEpub(
+    {
+      'META-INF/container.xml': _containerXml,
+      'OEBPS/content.opf': opf,
+      'OEBPS/nav.xhtml': nav,
+      'OEBPS/chapter1.xhtml': chapter1,
+    },
+    binaryEntries: {'OEBPS/cover.png': _fakeCoverBytes},
+  );
+}
+
+/// EPUB2-style cover declaration: no `properties` attribute at all, instead
+/// `<metadata><meta name="cover" content="ITEM_ID">` pointing at the
+/// manifest item by id.
+Uint8List _buildEpub2CoverEpub() {
+  const opf = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="pub-id">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>表紙付きの本 (EPUB2)</dc:title>
+    <dc:language>ja</dc:language>
+    <dc:identifier id="pub-id">urn:uuid:cover-epub2-0001</dc:identifier>
+    <meta name="cover" content="cover-img"/>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="cover-img" href="cover.png" media-type="image/png"/>
+    <item id="chap1" href="chapter1.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="chap1"/>
+  </spine>
+</package>
+''';
+
+  const ncx = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+<head><meta name="dtb:uid" content="urn:uuid:cover-epub2-0001"/></head>
+<docTitle><text>表紙付きの本 (EPUB2)</text></docTitle>
+<navMap>
+<navPoint id="np1" playOrder="1"><navLabel><text>第一章</text></navLabel><content src="chapter1.xhtml"/></navPoint>
+</navMap>
+</ncx>
+''';
+
+  const chapter1 = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>第一章</title></head>
+<body><p>表紙のある本です。</p></body>
+</html>
+''';
+
+  return _buildEpub(
+    {
+      'META-INF/container.xml': _containerXml,
+      'OEBPS/content.opf': opf,
+      'OEBPS/toc.ncx': ncx,
+      'OEBPS/chapter1.xhtml': chapter1,
+    },
+    binaryEntries: {'OEBPS/cover.png': _fakeCoverBytes},
+  );
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:xml/xml.dart' as xml;
@@ -39,6 +40,15 @@ String readEntryAsString(Archive archive, String name) {
     throw StateError('EPUB entry has no content: $name');
   }
   return utf8.decode(bytes);
+}
+
+/// Reads a zip entry's raw bytes, or `null` if the entry doesn't exist or
+/// has no content -- the binary-safe sibling of [readEntryAsString], which
+/// UTF-8-decodes and throws. Cover art needs raw image bytes, and its
+/// caller treats "not found" as "no cover" rather than a hard error.
+Uint8List? readEntryAsBytes(Archive archive, String name) {
+  final file = archive.findFile(name) ?? archive.findFile('/$name');
+  return file?.readBytes();
 }
 
 /// The directory portion of an archive-relative path, `''` if `path` has no
@@ -102,6 +112,29 @@ Map<String, ManifestItem> parseManifest(
     result[id] = ManifestItem(id, href, mediaType, properties);
   }
   return result;
+}
+
+/// The manifest item for this EPUB's cover image: EPUB3's
+/// `<item properties="cover-image">` (the identical `properties`-`Set`
+/// pattern `EpubImporter` already uses for `properties.contains('nav')`),
+/// falling back to EPUB2's `<metadata><meta name="cover" content="ITEM_ID">`.
+/// `null` if neither is declared -- a common, honest case (not every EPUB
+/// has a cover), not a parse error.
+ManifestItem? findCoverManifestItem(
+  xml.XmlDocument opfDoc,
+  Map<String, ManifestItem> manifest,
+) {
+  for (final item in manifest.values) {
+    if (item.properties.contains('cover-image')) return item;
+  }
+  final metadataElements = opfDoc.findAllElements('metadata');
+  if (metadataElements.isEmpty) return null;
+  for (final meta in metadataElements.first.findElements('meta')) {
+    if (meta.getAttribute('name') == 'cover') {
+      return manifest[meta.getAttribute('content')];
+    }
+  }
+  return null;
 }
 
 /// Parses the OPF `<spine>` into the linear reading order of chapter content
