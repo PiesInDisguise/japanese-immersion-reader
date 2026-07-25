@@ -33,13 +33,21 @@ import 'reading_order.dart';
 class PdfTextImporter implements Importer {
   const PdfTextImporter();
 
+  /// [preOpened], if supplied, is reused instead of opening [file] a second
+  /// time -- `lib/l1_ingestion/unified_importer.dart` already opens the PDF
+  /// once to run `detectPdfKind` before picking an importer, and threading
+  /// that same handle through here avoids re-parsing a possibly-large file
+  /// from scratch. This importer only disposes a handle it opened itself;
+  /// a caller-supplied [preOpened] remains the caller's responsibility.
   @override
   Future<Document> import(
     File file, {
     required void Function(ImportProgress progress) onProgress,
+    PdfDocument? preOpened,
   }) async {
     await pdfrxInitialize();
-    final pdfDocument = await PdfDocument.openFile(file.path);
+    final ownsHandle = preOpened == null;
+    final pdfDocument = preOpened ?? await PdfDocument.openFile(file.path);
     try {
       final documentId = await _documentIdFor(file);
       final pageCount = pdfDocument.pages.length;
@@ -86,7 +94,7 @@ class PdfTextImporter implements Importer {
         chapters: [chapter],
       );
     } finally {
-      await pdfDocument.dispose();
+      if (ownsHandle) await pdfDocument.dispose();
     }
   }
 

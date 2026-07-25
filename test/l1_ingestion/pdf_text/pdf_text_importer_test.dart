@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l1_ingestion/importer.dart';
 import 'package:japanese_immersion_reader/l1_ingestion/pdf_text/pdf_text_importer.dart';
+import 'package:pdfrx_engine/pdfrx_engine.dart';
 
 import '../../core/document_contract.dart';
 
@@ -176,6 +177,28 @@ void main() {
       );
 
       checkSentenceIdsStable(first, second);
+    });
+  });
+
+  group('PdfTextImporter - preOpened', () {
+    test('reuses a caller-supplied PdfDocument instead of opening its own, '
+        'and does not dispose it', () async {
+      await pdfrxInitialize();
+      final path = 'assets/fixtures/synthetic_horizontal_ja.pdf';
+      final preOpened = await PdfDocument.openFile(path);
+
+      final document = await importer.import(
+        File(path),
+        onProgress: (_) {},
+        preOpened: preOpened,
+      );
+
+      checkDocumentContract(document, expectSourceRects: true);
+      expect(document.chapters.single.blocks.single.sentences, hasLength(3));
+      // Still usable -- proves import() didn't dispose a handle it was
+      // only lent, not given ownership of.
+      expect(preOpened.pages, isNotEmpty);
+      await preOpened.dispose();
     });
   });
 }

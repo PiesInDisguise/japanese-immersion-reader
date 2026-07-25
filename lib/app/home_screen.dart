@@ -4,14 +4,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
-import 'package:japanese_immersion_reader/l1_ingestion/epub/epub_importer.dart';
-import 'package:japanese_immersion_reader/l1_ingestion/pdf_scanned/real_ocr_engine.dart';
-import 'package:japanese_immersion_reader/l1_ingestion/pdf_scanned/scanned_pdf_importer.dart';
-import 'package:japanese_immersion_reader/l1_ingestion/pdf_text/pdf_text_importer.dart';
+import 'package:japanese_immersion_reader/l1_ingestion/unified_importer.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
 import 'package:japanese_immersion_reader/l5_srs/review_ui/review_screen.dart';
-import 'package:path/path.dart' as p;
 
 import 'library_screen.dart';
 import 'remote_browse_screen.dart';
@@ -94,64 +90,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _loadSampleVerticalPdf() =>
       _openDocument(loadSampleVerticalPdf);
 
-  Future<void> _importEpub() => _openDocument(() async {
+  /// One button for every sideloaded source format: [importAnyFile] inspects
+  /// the picked file's extension and, for a `.pdf`, its actual text-layer
+  /// content, to route to [EpubImporter]/[PdfTextImporter]/
+  /// [ScannedPdfImporter] automatically -- the reader never has to know or
+  /// pick which importer a given file needs.
+  ///
+  /// Real OCR (docs/research/r3-ocr.md, r6-manga-text-detection.md): if the
+  /// picked file turns out to be a scanned PDF, `RealOcrEngine.create` (the
+  /// default `ocrEngineFactory`) downloads and loads both real ONNX models
+  /// (comic-text-detector region detection + Manga OCR recognition) on first
+  /// use -- ~550MB combined, so that first import can take a while with only
+  /// the bare spinner below for feedback (no per-step progress UI exists yet,
+  /// matching every other import button on this placeholder screen -- see
+  /// class doc comment). Subsequent imports reuse the cached models.
+  Future<void> _importBook() => _openDocument(() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['epub'],
+      allowedExtensions: ['epub', 'pdf'],
     );
     final path = result?.files.single.path;
     if (path == null) throw StateError('No file selected.');
-    return EpubImporter().import(File(path), onProgress: (_) {});
-  });
-
-  Future<void> _importPdf() => _openDocument(() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-    final path = result?.files.single.path;
-    if (path == null) throw StateError('No file selected.');
-    return PdfTextImporter().import(File(path), onProgress: (_) {});
-  });
-
-  /// Real OCR (docs/research/r3-ocr.md, r6-manga-text-detection.md):
-  /// [RealOcrEngine.create] downloads and loads both real ONNX models
-  /// (comic-text-detector region detection + Manga OCR recognition) on
-  /// first use -- ~550MB combined, so the first import via this button can
-  /// take a while with only the bare spinner below for feedback (no
-  /// per-step progress UI exists yet, matching every other import button on
-  /// this placeholder screen -- see class doc comment). Subsequent imports
-  /// reuse the cached models.
-  Future<void> _importScannedPdf() => _openDocument(() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-    final path = result?.files.single.path;
-    if (path == null) throw StateError('No file selected.');
-    return ScannedPdfImporter(
-      RealOcrEngine.create,
-    ).import(File(path), onProgress: (_) {});
+    return importAnyFile(File(path), onProgress: (_) {});
   });
 
   /// Spec §5's remote book sources: [RemoteBrowseScreen] handles connecting
   /// to/listing/downloading from a WebDAV or OPDS source and pops with the
-  /// downloaded local file -- this just picks the right importer by
-  /// extension, same as a sideloaded file would get. Scanned/image-only
-  /// PDFs aren't auto-detected here (a remote PDF is imported as
-  /// text-layer, matching the "Import PDF..." button); use the sideload
-  /// flow for a scanned PDF that needs OCR.
+  /// downloaded local file -- this hands it to the same [importAnyFile]
+  /// routing the sideload button uses, including scanned-PDF detection.
   Future<void> _importFromRemote() => _openDocument(() async {
     final file = await Navigator.of(
       context,
     ).push<File>(MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()));
     if (file == null) throw StateError('No book selected.');
-    final extension = p.extension(file.path).toLowerCase();
-    return switch (extension) {
-      '.epub' => EpubImporter().import(file, onProgress: (_) {}),
-      '.pdf' => PdfTextImporter().import(file, onProgress: (_) {}),
-      _ => throw StateError('Unsupported remote file type: $extension'),
-    };
+    return importAnyFile(file, onProgress: (_) {});
   });
 
   @override
@@ -187,18 +159,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: _importEpub,
-                child: const Text('Import EPUB...'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _importPdf,
-                child: const Text('Import PDF...'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _importScannedPdf,
-                child: const Text('Import Scanned PDF (OCR)...'),
+                onPressed: _importBook,
+                child: const Text('Import Book...'),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
