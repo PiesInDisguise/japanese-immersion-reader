@@ -375,6 +375,7 @@ Future<void> pumpCardModeScreen(
   required FakeTokenizer tokenizer,
   required FakeDictionaryRepository dictionaryRepository,
   required FakeWordCollectionRepository wordCollectionRepository,
+  FakeSettingsRepository? settingsRepository,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -388,7 +389,7 @@ Future<void> pumpCardModeScreen(
           wordCollectionRepository,
         ),
         settingsRepositoryProvider.overrideWithValue(
-          FakeSettingsRepository(),
+          settingsRepository ?? FakeSettingsRepository(),
         ),
       ],
       child: const MaterialApp(home: CardModeScreen()),
@@ -408,6 +409,7 @@ Future<void> pumpDocumentModeScreen(
   required FakeTokenizer tokenizer,
   required FakeDictionaryRepository dictionaryRepository,
   required FakeWordCollectionRepository wordCollectionRepository,
+  FakeSettingsRepository? settingsRepository,
 }) {
   return tester.pumpWidget(
     ProviderScope(
@@ -421,7 +423,7 @@ Future<void> pumpDocumentModeScreen(
           wordCollectionRepository,
         ),
         settingsRepositoryProvider.overrideWithValue(
-          FakeSettingsRepository(),
+          settingsRepository ?? FakeSettingsRepository(),
         ),
       ],
       child: const MaterialApp(home: DocumentModeScreen()),

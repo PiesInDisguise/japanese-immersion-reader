@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
+import 'package:japanese_immersion_reader/app/settings_repository.dart';
+import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_controller.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/token_gloss_view.dart';
@@ -221,6 +223,80 @@ void main() {
         expect(find.textContaining('Removed'), findsOneWidget);
       },
     );
+  });
+
+  group('word highlighting', () {
+    testWidgets(
+      'a collected word is highlighted with the default color; an '
+      'uncollected word is not',
+      (tester) async {
+        await pumpScreen(tester);
+        await tester.pumpAndSettle();
+
+        wordCollectionRepository.emitCollectedWordIds({
+          contentDerivedWordId(dictForm: '猫', reading: 'ネコ'),
+        });
+        await tester.pumpAndSettle();
+
+        final catBox = tester.widget<DecoratedBox>(
+          find
+              .ancestor(
+                of: find.text('猫'),
+                matching: find.byType(DecoratedBox),
+              )
+              .first,
+        );
+        expect(
+          (catBox.decoration as BoxDecoration).color,
+          defaultHighlightColor,
+        );
+
+        final particleBox = tester.widget<DecoratedBox>(
+          find
+              .ancestor(of: find.text('が'), matching: find.byType(DecoratedBox))
+              .first,
+        );
+        expect(
+          (particleBox.decoration as BoxDecoration).color,
+          Colors.transparent,
+        );
+      },
+    );
+
+    testWidgets('highlight uses the Settings-configured color, not a '
+        'hardcoded default', (tester) async {
+      const customColor = Color(0xFF3388CC);
+      final settingsRepository = FakeSettingsRepository(
+        const AppSettings(
+          llmApiKey: null,
+          llmExplanationsEnabled: true,
+          ttsEnabled: false,
+          pitchAccentAudioEnabled: false,
+          highlightColor: customColor,
+        ),
+      );
+      await pumpCardModeScreen(
+        tester,
+        document: buildTestDocument(),
+        tokenizer: tokenizer,
+        dictionaryRepository: dictionaryRepository,
+        wordCollectionRepository: wordCollectionRepository,
+        settingsRepository: settingsRepository,
+      );
+      await tester.pumpAndSettle();
+
+      wordCollectionRepository.emitCollectedWordIds({
+        contentDerivedWordId(dictForm: '猫', reading: 'ネコ'),
+      });
+      await tester.pumpAndSettle();
+
+      final catBox = tester.widget<DecoratedBox>(
+        find
+            .ancestor(of: find.text('猫'), matching: find.byType(DecoratedBox))
+            .first,
+      );
+      expect((catBox.decoration as BoxDecoration).color, customColor);
+    });
   });
 
   group('flip', () {

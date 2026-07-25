@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:japanese_immersion_reader/app/services.dart';
+import 'package:japanese_immersion_reader/app/settings_repository.dart';
+import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 
@@ -477,6 +480,11 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final collectedWordIds =
+        ref.watch(collectedWordIdsProvider).value ?? const <String>{};
+    final highlightColor =
+        ref.watch(appSettingsProvider).value?.highlightColor ??
+        defaultHighlightColor;
     return Column(
       children: [
         Expanded(
@@ -499,6 +507,8 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
                   onWordLongPress: _handleWordLongPress,
                   onSentenceDoubleTap: (tokens) =>
                       _handleSentenceDoubleTap(row.sentence, tokens),
+                  collectedWordIds: collectedWordIds,
+                  highlightColor: highlightColor,
                 ),
               };
             },
@@ -570,6 +580,8 @@ class _SentenceRowView extends StatefulWidget {
     required this.onWordTap,
     required this.onWordLongPress,
     required this.onSentenceDoubleTap,
+    required this.collectedWordIds,
+    required this.highlightColor,
   });
 
   final Sentence sentence;
@@ -579,6 +591,8 @@ class _SentenceRowView extends StatefulWidget {
   final ValueChanged<Token> onWordTap;
   final ValueChanged<Token> onWordLongPress;
   final ValueChanged<List<Token>> onSentenceDoubleTap;
+  final Set<String> collectedWordIds;
+  final Color highlightColor;
 
   @override
   State<_SentenceRowView> createState() => _SentenceRowViewState();
@@ -647,9 +661,16 @@ class _SentenceRowViewState extends State<_SentenceRowView> {
                   onLongPress: () => widget.onWordLongPress(token),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Text(
-                      token.surface,
-                      style: const TextStyle(fontSize: 20, height: 1.8),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: widget.collectedWordIds.contains(_wordId(token))
+                            ? widget.highlightColor
+                            : Colors.transparent,
+                      ),
+                      child: Text(
+                        token.surface,
+                        style: const TextStyle(fontSize: 20, height: 1.8),
+                      ),
                     ),
                   ),
                 ),
@@ -672,3 +693,13 @@ class _SentenceRowViewState extends State<_SentenceRowView> {
   dictForm: token.dictForm ?? token.surface,
   reading: token.reading ?? token.surface,
 );
+
+/// Mirrors `card_mode_screen.dart`'s own private `_wordId` exactly, for the
+/// same "Dart privacy is per-file" reason as `_collectionIdentity` above.
+String _wordId(Token token) {
+  final identity = _collectionIdentity(token);
+  return contentDerivedWordId(
+    dictForm: identity.dictForm,
+    reading: identity.reading,
+  );
+}

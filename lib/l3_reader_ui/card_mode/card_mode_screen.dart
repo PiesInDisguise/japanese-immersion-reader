@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
+import 'package:japanese_immersion_reader/app/settings_repository.dart';
+import 'package:japanese_immersion_reader/core/ids/stable_id.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 
@@ -286,6 +288,11 @@ class _CardAreaState extends ConsumerState<_CardArea> {
   Widget build(BuildContext context) {
     final state = widget.state;
     final isFlipped = state.isFlipped;
+    final collectedWordIds =
+        ref.watch(collectedWordIdsProvider).value ?? const <String>{};
+    final highlightColor =
+        ref.watch(appSettingsProvider).value?.highlightColor ??
+        defaultHighlightColor;
     return GestureDetector(
       key: const Key('cardModeCardArea'),
       behavior: HitTestBehavior.opaque,
@@ -331,6 +338,8 @@ class _CardAreaState extends ConsumerState<_CardArea> {
                       tokens: state.tokens,
                       onWordTap: _handleWordTap,
                       onWordLongPress: _handleWordLongPress,
+                      collectedWordIds: collectedWordIds,
+                      highlightColor: highlightColor,
                     ),
             ),
           ),
@@ -340,25 +349,32 @@ class _CardAreaState extends ConsumerState<_CardArea> {
   }
 }
 
-/// Plain-text rendering of one sentence's tokens (spec §6: no
-/// underlines/tints regardless of collection state, even though the data to
-/// support that marking exists). Each token is independently tappable/
-/// long-press-able; the surrounding space (this widget's own padding, plus
-/// whatever `_CardArea`'s Card doesn't fill) is "empty card space" that
-/// falls through to `_CardArea`'s own tap-to-flip handler, since these
-/// per-token `GestureDetector`s only claim the pixels their own `Text`
-/// occupies.
+/// Plain-text rendering of one sentence's tokens, with a translucent
+/// background behind any token whose collection identity is already in
+/// [collectedWordIds] (word-highlighting feature) -- the color comes from
+/// spec §14's Settings-configurable highlight color, document-wide rather
+/// than per-book, since [collectedWordIds] itself is keyed off
+/// `contentDerivedWordId`, not any per-document state. Each token is
+/// independently tappable/long-press-able; the surrounding space (this
+/// widget's own padding, plus whatever `_CardArea`'s Card doesn't fill) is
+/// "empty card space" that falls through to `_CardArea`'s own tap-to-flip
+/// handler, since these per-token `GestureDetector`s only claim the pixels
+/// their own `Text` occupies.
 class _FrontFace extends StatelessWidget {
   const _FrontFace({
     super.key,
     required this.tokens,
     required this.onWordTap,
     required this.onWordLongPress,
+    required this.collectedWordIds,
+    required this.highlightColor,
   });
 
   final List<Token> tokens;
   final ValueChanged<Token> onWordTap;
   final ValueChanged<Token> onWordLongPress;
+  final Set<String> collectedWordIds;
+  final Color highlightColor;
 
   @override
   Widget build(BuildContext context) {
@@ -372,9 +388,16 @@ class _FrontFace extends StatelessWidget {
               onLongPress: () => onWordLongPress(token),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Text(
-                  token.surface,
-                  style: const TextStyle(fontSize: 26, height: 1.8),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: collectedWordIds.contains(_wordId(token))
+                        ? highlightColor
+                        : Colors.transparent,
+                  ),
+                  child: Text(
+                    token.surface,
+                    style: const TextStyle(fontSize: 26, height: 1.8),
+                  ),
                 ),
               ),
             ),
@@ -382,6 +405,14 @@ class _FrontFace extends StatelessWidget {
       ),
     );
   }
+}
+
+String _wordId(Token token) {
+  final identity = _collectionIdentity(token);
+  return contentDerivedWordId(
+    dictForm: identity.dictForm,
+    reading: identity.reading,
+  );
 }
 
 /// The collection identity a tapped [token] resolves to -- must mirror
