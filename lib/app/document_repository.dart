@@ -123,6 +123,47 @@ class DocumentRepository {
     )..orderBy([(d) => OrderingTerm.desc(d.updatedAt)])).get();
   }
 
+  /// Sets [documentId]'s cover unconditionally -- the user's own deliberate
+  /// pick (Library's tap-to-customize flow) always wins, even over a
+  /// previously-set auto-extracted or user-picked cover. A targeted UPDATE
+  /// by id: no-ops if [documentId] has no row yet, so callers must only
+  /// invoke this after [save] has guaranteed the row exists.
+  Future<void> updateCoverImagePath(String documentId, String coverImagePath) {
+    return (_db.update(_db.documents)..where((d) => d.id.equals(documentId)))
+        .write(DocumentsCompanion(coverImagePath: Value(coverImagePath)));
+  }
+
+  /// Sets [documentId]'s cover only if it doesn't already have one --
+  /// import-time auto-extraction must never clobber a user-picked custom
+  /// cover on a later re-import of the same source file (same
+  /// content-derived [Document.id], so the same row).
+  Future<void> setAutoExtractedCoverIfAbsent(
+    String documentId,
+    String coverImagePath,
+  ) {
+    return (_db.update(_db.documents)
+          ..where((d) => d.id.equals(documentId) & d.coverImagePath.isNull()))
+        .write(DocumentsCompanion(coverImagePath: Value(coverImagePath)));
+  }
+
+  /// Persists the reading position (spec §5) for [documentId] -- a targeted
+  /// UPDATE, not a [save] round-trip, since this fires on every card
+  /// swipe/scroll sentence-boundary change and must not re-serialize every
+  /// chapter/sentence each time.
+  Future<void> updateLastSentenceId(String documentId, String sentenceId) {
+    return (_db.update(_db.documents)..where((d) => d.id.equals(documentId)))
+        .write(DocumentsCompanion(lastSentenceId: Value(sentenceId)));
+  }
+
+  /// The persisted reading position for [documentId], or `null` if none was
+  /// ever saved (never opened, or opened before this feature existed).
+  Future<String?> lastSentenceId(String documentId) async {
+    final row = await (_db.select(
+      _db.documents,
+    )..where((d) => d.id.equals(documentId))).getSingleOrNull();
+    return row?.lastSentenceId;
+  }
+
   /// Reconstructs a full, in-memory [Document] -- every chapter/block/
   /// sentence/token -- from what [save] persisted, so the Library screen
   /// can reopen a book without re-picking/re-importing its source file.

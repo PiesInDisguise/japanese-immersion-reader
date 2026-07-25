@@ -60,6 +60,20 @@ class Documents extends Table {
   DateTimeColumn get addedAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
+  /// Absolute path to a locally-stored cover image (see `CoverArtStore`) --
+  /// either auto-extracted at import time (EPUB manifest cover / PDF page-1
+  /// render) or picked by the user via the Library's tap-to-customize flow.
+  /// Nullable: no cover extracted/picked yet, in which case the Library
+  /// falls back to a per-source-type placeholder icon.
+  TextColumn get coverImagePath =>
+      text().nullable().named('cover_image_path')();
+
+  /// The stable Sentence ID (spec §5) either reading mode last showed for
+  /// this document, so reopening resumes exactly where the user left off.
+  /// Nullable: never opened, or opened before this feature existed.
+  TextColumn get lastSentenceId =>
+      text().nullable().named('last_sentence_id')();
+
   @override
   Set<Column> get primaryKey => {id};
 }

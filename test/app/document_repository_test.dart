@@ -136,6 +136,69 @@ void main() {
     );
   });
 
+  group('cover image / reading position', () {
+    test('updateCoverImagePath and updateLastSentenceId round-trip, and '
+        'survive a re-save untouched', () async {
+      await repository.save(_buildDocument());
+      await repository.updateCoverImagePath('doc-1', '/covers/doc-1');
+      await repository.updateLastSentenceId('doc-1', 'sent-1');
+
+      var row = await (db.select(
+        db.documents,
+      )..where((d) => d.id.equals('doc-1'))).getSingle();
+      expect(row.coverImagePath, '/covers/doc-1');
+      expect(row.lastSentenceId, 'sent-1');
+      expect(await repository.lastSentenceId('doc-1'), 'sent-1');
+
+      // save() must not clobber either column back to null on a re-save
+      // (e.g. reopening the book) -- proves the nullable-column-omission
+      // behavior this design relies on, not just informal reasoning.
+      await repository.save(_buildDocument());
+      row = await (db.select(
+        db.documents,
+      )..where((d) => d.id.equals('doc-1'))).getSingle();
+      expect(row.coverImagePath, '/covers/doc-1');
+      expect(row.lastSentenceId, 'sent-1');
+    });
+
+    test('updateCoverImagePath overwrites an existing cover unconditionally', () async {
+      await repository.save(_buildDocument());
+      await repository.updateCoverImagePath('doc-1', '/covers/first');
+      await repository.updateCoverImagePath('doc-1', '/covers/second');
+
+      final row = await (db.select(
+        db.documents,
+      )..where((d) => d.id.equals('doc-1'))).getSingle();
+      expect(row.coverImagePath, '/covers/second');
+    });
+
+    test('setAutoExtractedCoverIfAbsent sets a cover when none exists', () async {
+      await repository.save(_buildDocument());
+      await repository.setAutoExtractedCoverIfAbsent('doc-1', '/covers/auto');
+
+      final row = await (db.select(
+        db.documents,
+      )..where((d) => d.id.equals('doc-1'))).getSingle();
+      expect(row.coverImagePath, '/covers/auto');
+    });
+
+    test('setAutoExtractedCoverIfAbsent never overwrites an existing cover '
+        '(auto-extraction must not clobber a user-picked one)', () async {
+      await repository.save(_buildDocument());
+      await repository.updateCoverImagePath('doc-1', '/covers/user-picked');
+      await repository.setAutoExtractedCoverIfAbsent('doc-1', '/covers/auto');
+
+      final row = await (db.select(
+        db.documents,
+      )..where((d) => d.id.equals('doc-1'))).getSingle();
+      expect(row.coverImagePath, '/covers/user-picked');
+    });
+
+    test('lastSentenceId returns null before anything is saved', () async {
+      expect(await repository.lastSentenceId('doc-1'), isNull);
+    });
+  });
+
   group('listDocuments', () {
     test('returns an empty list before anything is saved', () async {
       expect(await repository.listDocuments(), isEmpty);

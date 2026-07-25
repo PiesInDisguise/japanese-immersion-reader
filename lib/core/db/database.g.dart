@@ -60,6 +60,28 @@ class $DocumentsTable extends Documents
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _coverImagePathMeta = const VerificationMeta(
+    'coverImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> coverImagePath = GeneratedColumn<String>(
+    'cover_image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSentenceIdMeta = const VerificationMeta(
+    'lastSentenceId',
+  );
+  @override
+  late final GeneratedColumn<String> lastSentenceId = GeneratedColumn<String>(
+    'last_sentence_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -67,6 +89,8 @@ class $DocumentsTable extends Documents
     sourceType,
     addedAt,
     updatedAt,
+    coverImagePath,
+    lastSentenceId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -117,6 +141,24 @@ class $DocumentsTable extends Documents
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('cover_image_path')) {
+      context.handle(
+        _coverImagePathMeta,
+        coverImagePath.isAcceptableOrUnknown(
+          data['cover_image_path']!,
+          _coverImagePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_sentence_id')) {
+      context.handle(
+        _lastSentenceIdMeta,
+        lastSentenceId.isAcceptableOrUnknown(
+          data['last_sentence_id']!,
+          _lastSentenceIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -146,6 +188,14 @@ class $DocumentsTable extends Documents
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      coverImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_image_path'],
+      ),
+      lastSentenceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_sentence_id'],
+      ),
     );
   }
 
@@ -161,12 +211,26 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
   final String sourceType;
   final DateTime addedAt;
   final DateTime updatedAt;
+
+  /// Absolute path to a locally-stored cover image (see `CoverArtStore`) --
+  /// either auto-extracted at import time (EPUB manifest cover / PDF page-1
+  /// render) or picked by the user via the Library's tap-to-customize flow.
+  /// Nullable: no cover extracted/picked yet, in which case the Library
+  /// falls back to a per-source-type placeholder icon.
+  final String? coverImagePath;
+
+  /// The stable Sentence ID (spec §5) either reading mode last showed for
+  /// this document, so reopening resumes exactly where the user left off.
+  /// Nullable: never opened, or opened before this feature existed.
+  final String? lastSentenceId;
   const DocumentRow({
     required this.id,
     required this.title,
     required this.sourceType,
     required this.addedAt,
     required this.updatedAt,
+    this.coverImagePath,
+    this.lastSentenceId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -176,6 +240,12 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
     map['source_type'] = Variable<String>(sourceType);
     map['added_at'] = Variable<DateTime>(addedAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || coverImagePath != null) {
+      map['cover_image_path'] = Variable<String>(coverImagePath);
+    }
+    if (!nullToAbsent || lastSentenceId != null) {
+      map['last_sentence_id'] = Variable<String>(lastSentenceId);
+    }
     return map;
   }
 
@@ -186,6 +256,12 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
       sourceType: Value(sourceType),
       addedAt: Value(addedAt),
       updatedAt: Value(updatedAt),
+      coverImagePath: coverImagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverImagePath),
+      lastSentenceId: lastSentenceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSentenceId),
     );
   }
 
@@ -200,6 +276,8 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
       sourceType: serializer.fromJson<String>(json['sourceType']),
       addedAt: serializer.fromJson<DateTime>(json['addedAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      coverImagePath: serializer.fromJson<String?>(json['coverImagePath']),
+      lastSentenceId: serializer.fromJson<String?>(json['lastSentenceId']),
     );
   }
   @override
@@ -211,6 +289,8 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
       'sourceType': serializer.toJson<String>(sourceType),
       'addedAt': serializer.toJson<DateTime>(addedAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'coverImagePath': serializer.toJson<String?>(coverImagePath),
+      'lastSentenceId': serializer.toJson<String?>(lastSentenceId),
     };
   }
 
@@ -220,12 +300,20 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
     String? sourceType,
     DateTime? addedAt,
     DateTime? updatedAt,
+    Value<String?> coverImagePath = const Value.absent(),
+    Value<String?> lastSentenceId = const Value.absent(),
   }) => DocumentRow(
     id: id ?? this.id,
     title: title ?? this.title,
     sourceType: sourceType ?? this.sourceType,
     addedAt: addedAt ?? this.addedAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    coverImagePath: coverImagePath.present
+        ? coverImagePath.value
+        : this.coverImagePath,
+    lastSentenceId: lastSentenceId.present
+        ? lastSentenceId.value
+        : this.lastSentenceId,
   );
   DocumentRow copyWithCompanion(DocumentsCompanion data) {
     return DocumentRow(
@@ -236,6 +324,12 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
           : this.sourceType,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      coverImagePath: data.coverImagePath.present
+          ? data.coverImagePath.value
+          : this.coverImagePath,
+      lastSentenceId: data.lastSentenceId.present
+          ? data.lastSentenceId.value
+          : this.lastSentenceId,
     );
   }
 
@@ -246,13 +340,23 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
           ..write('title: $title, ')
           ..write('sourceType: $sourceType, ')
           ..write('addedAt: $addedAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('coverImagePath: $coverImagePath, ')
+          ..write('lastSentenceId: $lastSentenceId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, sourceType, addedAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    sourceType,
+    addedAt,
+    updatedAt,
+    coverImagePath,
+    lastSentenceId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -261,7 +365,9 @@ class DocumentRow extends DataClass implements Insertable<DocumentRow> {
           other.title == this.title &&
           other.sourceType == this.sourceType &&
           other.addedAt == this.addedAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.coverImagePath == this.coverImagePath &&
+          other.lastSentenceId == this.lastSentenceId);
 }
 
 class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
@@ -270,6 +376,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
   final Value<String> sourceType;
   final Value<DateTime> addedAt;
   final Value<DateTime> updatedAt;
+  final Value<String?> coverImagePath;
+  final Value<String?> lastSentenceId;
   final Value<int> rowid;
   const DocumentsCompanion({
     this.id = const Value.absent(),
@@ -277,6 +385,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
     this.sourceType = const Value.absent(),
     this.addedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.coverImagePath = const Value.absent(),
+    this.lastSentenceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DocumentsCompanion.insert({
@@ -285,6 +395,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
     required String sourceType,
     required DateTime addedAt,
     required DateTime updatedAt,
+    this.coverImagePath = const Value.absent(),
+    this.lastSentenceId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -297,6 +409,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
     Expression<String>? sourceType,
     Expression<DateTime>? addedAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? coverImagePath,
+    Expression<String>? lastSentenceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -305,6 +419,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
       if (sourceType != null) 'source_type': sourceType,
       if (addedAt != null) 'added_at': addedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (coverImagePath != null) 'cover_image_path': coverImagePath,
+      if (lastSentenceId != null) 'last_sentence_id': lastSentenceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -315,6 +431,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
     Value<String>? sourceType,
     Value<DateTime>? addedAt,
     Value<DateTime>? updatedAt,
+    Value<String?>? coverImagePath,
+    Value<String?>? lastSentenceId,
     Value<int>? rowid,
   }) {
     return DocumentsCompanion(
@@ -323,6 +441,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
       sourceType: sourceType ?? this.sourceType,
       addedAt: addedAt ?? this.addedAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      coverImagePath: coverImagePath ?? this.coverImagePath,
+      lastSentenceId: lastSentenceId ?? this.lastSentenceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -345,6 +465,12 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (coverImagePath.present) {
+      map['cover_image_path'] = Variable<String>(coverImagePath.value);
+    }
+    if (lastSentenceId.present) {
+      map['last_sentence_id'] = Variable<String>(lastSentenceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -359,6 +485,8 @@ class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
           ..write('sourceType: $sourceType, ')
           ..write('addedAt: $addedAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('coverImagePath: $coverImagePath, ')
+          ..write('lastSentenceId: $lastSentenceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7222,6 +7350,8 @@ typedef $$DocumentsTableCreateCompanionBuilder =
       required String sourceType,
       required DateTime addedAt,
       required DateTime updatedAt,
+      Value<String?> coverImagePath,
+      Value<String?> lastSentenceId,
       Value<int> rowid,
     });
 typedef $$DocumentsTableUpdateCompanionBuilder =
@@ -7231,6 +7361,8 @@ typedef $$DocumentsTableUpdateCompanionBuilder =
       Value<String> sourceType,
       Value<DateTime> addedAt,
       Value<DateTime> updatedAt,
+      Value<String?> coverImagePath,
+      Value<String?> lastSentenceId,
       Value<int> rowid,
     });
 
@@ -7356,6 +7488,16 @@ class $$DocumentsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverImagePath => $composableBuilder(
+    column: $table.coverImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSentenceId => $composableBuilder(
+    column: $table.lastSentenceId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7494,6 +7636,16 @@ class $$DocumentsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get coverImagePath => $composableBuilder(
+    column: $table.coverImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSentenceId => $composableBuilder(
+    column: $table.lastSentenceId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DocumentsTableAnnotationComposer
@@ -7521,6 +7673,16 @@ class $$DocumentsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get coverImagePath => $composableBuilder(
+    column: $table.coverImagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastSentenceId => $composableBuilder(
+    column: $table.lastSentenceId,
+    builder: (column) => column,
+  );
 
   Expression<T> chaptersRefs<T extends Object>(
     Expression<T> Function($$ChaptersTableAnnotationComposer a) f,
@@ -7664,6 +7826,8 @@ class $$DocumentsTableTableManager
                 Value<String> sourceType = const Value.absent(),
                 Value<DateTime> addedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> coverImagePath = const Value.absent(),
+                Value<String?> lastSentenceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DocumentsCompanion(
                 id: id,
@@ -7671,6 +7835,8 @@ class $$DocumentsTableTableManager
                 sourceType: sourceType,
                 addedAt: addedAt,
                 updatedAt: updatedAt,
+                coverImagePath: coverImagePath,
+                lastSentenceId: lastSentenceId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7680,6 +7846,8 @@ class $$DocumentsTableTableManager
                 required String sourceType,
                 required DateTime addedAt,
                 required DateTime updatedAt,
+                Value<String?> coverImagePath = const Value.absent(),
+                Value<String?> lastSentenceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DocumentsCompanion.insert(
                 id: id,
@@ -7687,6 +7855,8 @@ class $$DocumentsTableTableManager
                 sourceType: sourceType,
                 addedAt: addedAt,
                 updatedAt: updatedAt,
+                coverImagePath: coverImagePath,
+                lastSentenceId: lastSentenceId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

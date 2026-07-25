@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +93,12 @@ class AppDatabase extends _$AppDatabase {
       // schemaVersion 7: customizable mined-word highlight color.
       if (from < 7) {
         await m.addColumn(settings, settings.highlightColorValue);
+      }
+      // schemaVersion 8: cover art + persisted reading position (Library
+      // view).
+      if (from < 8) {
+        await m.addColumn(documents, documents.coverImagePath);
+        await m.addColumn(documents, documents.lastSentenceId);
       }
     },
   );
