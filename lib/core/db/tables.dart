@@ -479,6 +479,15 @@ class Settings extends Table {
   IntColumn get highlightColorValue =>
       integer().nullable().named('highlight_color_value')();
 
+  /// Spec §6/§14: "Mining — auto-add on/off." When on, tapping a word mines
+  /// it immediately (no separate "Add to Collection" tap needed) --
+  /// `WordLookupSheet`'s `autoMine` param. Off by default, matching this
+  /// app's existing tap-then-explicit-add flow (spec's "Auto-add OFF"
+  /// behavior) as the unchanged default.
+  BoolColumn get autoAddToCollection => boolean()
+      .withDefault(const Constant(false))
+      .named('auto_add_to_collection')();
+
   @override
   Set<Column> get primaryKey => {id};
 }

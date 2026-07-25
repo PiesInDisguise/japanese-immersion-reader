@@ -204,6 +204,42 @@ void main() {
         expect(wordCollectionRepository.undoCalls.single.entryId, '猫|ネコ');
       },
     );
+
+    testWidgets(
+      'with auto-add enabled, tapping a word mines it immediately -- no '
+      '"Add to Collection" tap needed',
+      (tester) async {
+        await pumpCardModeScreen(
+          tester,
+          document: buildTestDocument(),
+          tokenizer: tokenizer,
+          dictionaryRepository: dictionaryRepository,
+          wordCollectionRepository: wordCollectionRepository,
+          settingsRepository: FakeSettingsRepository(
+            const AppSettings(
+              llmApiKey: null,
+              llmExplanationsEnabled: true,
+              ttsEnabled: false,
+              pitchAccentAudioEnabled: false,
+              autoAddToCollection: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('猫'));
+        // Bounded pumps, same reasoning as the manual-mine test above: the
+        // undo SnackBar auto-dismisses, and pumpAndSettle would fast-forward
+        // straight through it.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(find.byType(WordLookupSheet), findsNothing);
+        expect(wordCollectionRepository.mineCalls, hasLength(1));
+        expect(wordCollectionRepository.mineCalls.single.dictForm, '猫');
+        expect(find.text('Undo'), findsOneWidget);
+      },
+    );
   });
 
   group('long-press remove', () {

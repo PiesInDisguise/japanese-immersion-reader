@@ -11,7 +11,8 @@ import 'services.dart';
 
 /// Spec §14's real settings surface so far: the BYO Anthropic API key and
 /// grammar-explanation (spec §8 layer 3) toggle, spec §9's TTS/
-/// pitch-accent-audio toggles, and spec §10's dictionary import/installed
+/// pitch-accent-audio toggles, the mined-word highlight color, spec §6's
+/// auto-add-to-collection toggle, and spec §10's dictionary import/installed
 /// list. Reachable from [HomeScreen]'s app bar.
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -219,6 +220,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onPressed: () => _pickHighlightColor(settings.highlightColor),
                   child: const Text('Change...'),
                 ),
+              ),
+              const Divider(height: 32),
+              const Text(
+                'Mining (spec §6)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Auto-add to collection'),
+                subtitle: const Text(
+                  'Tapping a word mines it immediately -- no need to press '
+                  '"Add to Collection" in the lookup popup.',
+                ),
+                value: settings.autoAddToCollection,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(autoAddToCollection: value),
               ),
               const Divider(height: 32),
               const Text(

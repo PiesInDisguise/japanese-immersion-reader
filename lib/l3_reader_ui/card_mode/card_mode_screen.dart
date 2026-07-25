@@ -203,6 +203,10 @@ class _CardAreaState extends ConsumerState<_CardArea> {
   Future<void> _handleWordTap(Token token) async {
     final messenger = ScaffoldMessenger.of(context);
     final controller = ref.read(cardModeControllerProvider.notifier);
+    // Spec §6's "Auto-add ON" (Settings > Mining) -- WordLookupSheet fires
+    // `mine` itself as soon as its lookup resolves when this is true.
+    final autoAdd =
+        ref.read(appSettingsProvider).value?.autoAddToCollection ?? false;
     final mined = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -214,6 +218,7 @@ class _CardAreaState extends ConsumerState<_CardArea> {
         speak: controller.speak,
         checkPitchAccentActive: controller.pitchAccentAudioActive,
         playPitchAccentAudio: controller.playPitchAccentAudio,
+        autoMine: autoAdd,
       ),
     );
     if (mined == true && mounted) {

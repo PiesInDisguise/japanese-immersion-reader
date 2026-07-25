@@ -36,6 +36,7 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
+    bool? autoAddToCollection,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
@@ -45,6 +46,8 @@ class FakeSettingsRepository extends SettingsRepository {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
+      autoAddToCollection:
+          autoAddToCollection ?? _settings.autoAddToCollection,
     );
   }
 }

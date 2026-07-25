@@ -20,6 +20,7 @@ class AppSettings {
     required this.ttsEnabled,
     required this.pitchAccentAudioEnabled,
     this.highlightColor = defaultHighlightColor,
+    this.autoAddToCollection = false,
   });
 
   static const defaults = AppSettings(
@@ -28,6 +29,7 @@ class AppSettings {
     ttsEnabled: false,
     pitchAccentAudioEnabled: false,
     highlightColor: defaultHighlightColor,
+    autoAddToCollection: false,
   );
 
   final String? llmApiKey;
@@ -35,6 +37,10 @@ class AppSettings {
   final bool ttsEnabled;
   final bool pitchAccentAudioEnabled;
   final Color highlightColor;
+
+  /// Spec §6/§14: "Mining — auto-add on/off." See `WordLookupSheet.autoMine`
+  /// for what this actually changes at the UI level.
+  final bool autoAddToCollection;
 
   /// Whether spec §8 layer 3 should actually attempt a real network call --
   /// both the toggle *and* a configured API key are required, not just the
@@ -81,6 +87,7 @@ class SettingsRepository {
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
+    bool? autoAddToCollection,
   }) async {
     final current = await read();
     await _db
@@ -99,6 +106,9 @@ class SettingsRepository {
             highlightColorValue: Value(
               (highlightColor ?? current.highlightColor).toARGB32(),
             ),
+            autoAddToCollection: Value(
+              autoAddToCollection ?? current.autoAddToCollection,
+            ),
             // Spec §13 sync-readiness -- see tables.dart's own audit note.
             updatedAt: Value(DateTime.now().toUtc()),
           ),
@@ -113,5 +123,6 @@ class SettingsRepository {
     highlightColor: row.highlightColorValue == null
         ? defaultHighlightColor
         : Color(row.highlightColorValue!),
+    autoAddToCollection: row.autoAddToCollection,
   );
 }

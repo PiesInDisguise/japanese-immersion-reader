@@ -304,6 +304,10 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
   Future<void> _handleWordTap(String sentenceId, Token token) async {
     final messenger = ScaffoldMessenger.of(context);
     final controller = ref.read(documentModeControllerProvider.notifier);
+    // Spec §6's "Auto-add ON" (Settings > Mining) -- WordLookupSheet fires
+    // `mine` itself as soon as its lookup resolves when this is true.
+    final autoAdd =
+        ref.read(appSettingsProvider).value?.autoAddToCollection ?? false;
     final mined = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -316,6 +320,7 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
         speak: controller.speak,
         checkPitchAccentActive: controller.pitchAccentAudioActive,
         playPitchAccentAudio: controller.playPitchAccentAudio,
+        autoMine: autoAdd,
       ),
     );
     if (mined == true && mounted) {

@@ -44,9 +44,16 @@ class WordLookupSheet extends StatefulWidget {
     this.speak,
     this.checkPitchAccentActive,
     this.playPitchAccentAudio,
+    this.autoMine = false,
   });
 
   final Token token;
+
+  /// Spec §6's "Auto-add ON": when true, [mine] fires automatically as soon
+  /// as [lookup] resolves -- the same effect as the user pressing "Add to
+  /// Collection" themselves, without the extra tap. Defaults to `false`,
+  /// matching this app's existing tap-then-explicit-add flow.
+  final bool autoMine;
 
   /// Looks up dictionary senses for [token]. Wired by the caller to
   /// whichever mode's controller is current -- e.g.
@@ -98,6 +105,16 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
     // re-triggers the lookup.
     _lookupFuture = widget.lookup();
     _initAudioAvailability();
+    if (widget.autoMine) {
+      // Same `_mine` path the "Add to Collection" button uses (including
+      // its pop-with-true-on-success behavior, which is what tells the
+      // caller to show the undo toast) -- auto-add is just that same
+      // action firing automatically instead of waiting for a tap. Fires
+      // once, as soon as the lookup this sheet already started resolves.
+      _lookupFuture.then((hits) {
+        if (mounted) _mine(hits);
+      });
+    }
   }
 
   Future<void> _initAudioAvailability() async {

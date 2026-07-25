@@ -38,6 +38,7 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? ttsEnabled,
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
+    bool? autoAddToCollection,
   }) async {
     if (highlightColor != null) highlightColorUpdates.add(highlightColor);
     _settings = AppSettings(
@@ -48,6 +49,8 @@ class FakeSettingsRepository extends SettingsRepository {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
+      autoAddToCollection:
+          autoAddToCollection ?? _settings.autoAddToCollection,
     );
   }
 }
@@ -143,5 +146,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fakeSettings.highlightColorUpdates, isEmpty);
+  });
+
+  testWidgets('toggling auto-add to collection updates settings', (
+    tester,
+  ) async {
+    final fakeSettings = await _pumpSettingsScreen(tester);
+    expect((await fakeSettings.read()).autoAddToCollection, isFalse);
+
+    await tester.scrollUntilVisible(
+      find.text('Auto-add to collection'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Auto-add to collection'));
+    await tester.pumpAndSettle();
+
+    expect((await fakeSettings.read()).autoAddToCollection, isTrue);
   });
 }

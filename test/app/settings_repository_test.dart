@@ -24,6 +24,28 @@ void main() {
       expect(settings.ttsEnabled, isFalse);
       expect(settings.pitchAccentAudioEnabled, isFalse);
       expect(settings.highlightColor, defaultHighlightColor);
+      expect(settings.autoAddToCollection, isFalse);
+    });
+
+    test('update() round-trips autoAddToCollection, leaving other fields '
+        'alone', () async {
+      await repository.update(ttsEnabled: true);
+
+      await repository.update(autoAddToCollection: true);
+      var settings = await repository.read();
+      expect(settings.autoAddToCollection, isTrue);
+      expect(settings.ttsEnabled, isTrue, reason: 'earlier field preserved');
+
+      await repository.update(llmApiKey: 'sk-abc');
+      settings = await repository.read();
+      expect(
+        settings.autoAddToCollection,
+        isTrue,
+        reason: 'untouched by an unrelated update',
+      );
+
+      await repository.update(autoAddToCollection: false);
+      expect((await repository.read()).autoAddToCollection, isFalse);
     });
 
     test('update() round-trips highlightColor, leaving other fields alone', () async {
