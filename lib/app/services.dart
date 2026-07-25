@@ -13,6 +13,7 @@ import 'package:japanese_immersion_reader/l6_audio/pitch_accent/pitch_accent_aud
 import 'package:japanese_immersion_reader/l6_audio/pitch_accent/pitch_accent_player.dart';
 import 'package:japanese_immersion_reader/l6_audio/tts/tts_service.dart';
 
+import 'cover_art_store.dart';
 import 'dictionary_paths.dart';
 import 'document_repository.dart';
 import 'explanation_repository.dart';
@@ -87,6 +88,13 @@ final explanationRepositoryProvider = Provider<ExplanationRepository>((ref) {
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
   return DocumentRepository(ref.watch(appDatabaseProvider));
 });
+
+/// The Library's per-book cover-art file store (see `CoverArtStore`'s own
+/// doc comment). A single shared instance for the app's lifetime, matching
+/// every other file-backed store this app has (no per-call construction
+/// needed -- it holds no per-book state itself, just a directory to
+/// resolve).
+final coverArtStoreProvider = Provider<CoverArtStore>((ref) => CoverArtStore());
 
 final readingActivityRepositoryProvider =
     Provider<ReadingActivityRepository>((ref) {
