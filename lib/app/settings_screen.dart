@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_importer.dart';
 
+import 'app_theme.dart';
 import 'services.dart';
 import 'settings_repository.dart';
 
@@ -156,6 +157,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: (value) => ref
                     .read(settingsRepositoryProvider)
                     .update(useCustomTheme: value),
+              ),
+              const SizedBox(height: 8),
+              const Text('Palette presets'),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 92,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: themePresets.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final preset = themePresets[index];
+                    return _ThemePresetSwatch(
+                      preset: preset,
+                      onTap: () => ref
+                          .read(settingsRepositoryProvider)
+                          .update(
+                            useCustomTheme: true,
+                            themeBackgroundColor: preset.background,
+                            themeTextColor: preset.text,
+                            themeCardColor: preset.card,
+                            themeAccentColor: preset.accent,
+                          ),
+                    );
+                  },
+                ),
               ),
               if (settings.useCustomTheme) ...[
                 _ColorSettingTile(
@@ -533,6 +561,69 @@ class _ColorSettingTile extends StatelessWidget {
           if (picked != null) onPick(picked);
         },
         child: const Text('Change...'),
+      ),
+    );
+  }
+}
+
+/// One tappable palette-preset card: a 2x2 swatch of the preset's four
+/// colors (background/text/card/accent, same order as [_ColorSettingTile]'s
+/// own rows) plus its name -- tapping it applies all four via [onTap]
+/// rather than requiring the four individual color pickers.
+class _ThemePresetSwatch extends StatelessWidget {
+  const _ThemePresetSwatch({required this.preset, required this.onTap});
+
+  final ThemePreset preset;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).dividerColor),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(child: ColoredBox(color: preset.background)),
+                        Expanded(child: ColoredBox(color: preset.text)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(child: ColoredBox(color: preset.card)),
+                        Expanded(child: ColoredBox(color: preset.accent)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              preset.name,
+              style: Theme.of(context).textTheme.labelSmall,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

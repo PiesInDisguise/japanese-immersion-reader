@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:japanese_immersion_reader/app/app_theme.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
 import 'package:japanese_immersion_reader/app/settings_repository.dart';
 import 'package:japanese_immersion_reader/app/settings_screen.dart';
@@ -272,4 +273,24 @@ void main() {
     expect(fakeSettings.themeBackgroundColorUpdates, hasLength(1));
     expect(fakeSettings.highlightColorUpdates, isEmpty);
   });
+
+  testWidgets(
+    'tapping a palette preset applies all four of its colors and turns on '
+    'the custom theme, in one shot',
+    (tester) async {
+      final fakeSettings = await _pumpSettingsScreen(tester);
+      expect((await fakeSettings.read()).useCustomTheme, isFalse);
+
+      final preset = themePresets.first;
+      await tester.tap(find.text(preset.name));
+      await tester.pumpAndSettle();
+
+      final updated = await fakeSettings.read();
+      expect(updated.useCustomTheme, isTrue);
+      expect(updated.themeBackgroundColor, preset.background);
+      expect(updated.themeTextColor, preset.text);
+      expect(updated.themeCardColor, preset.card);
+      expect(updated.themeAccentColor, preset.accent);
+    },
+  );
 }
