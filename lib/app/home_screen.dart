@@ -120,34 +120,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// the bare spinner below for feedback (no per-step progress UI exists yet,
   /// matching every other import button on this placeholder screen -- see
   /// class doc comment). Subsequent imports reuse the cached models.
-  Future<void> _importBook() {
-    File? importedFile;
-    return _openDocument(() async {
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['epub', 'pdf'],
-      );
-      final path = result?.files.single.path;
-      if (path == null) throw StateError('No file selected.');
-      importedFile = File(path);
-      return importAnyFile(importedFile!, onProgress: (_) {});
-    }, afterSave: (document) => _extractAndStoreCover(document, importedFile));
+  /// The picker itself runs *before* [_openDocument] (not inside its `load`
+  /// callback) so backing out of it -- a normal, expected action, not an
+  /// error -- just quietly does nothing, mirroring [_openLibrary]'s own
+  /// "nothing picked -> return" handling instead of surfacing a scary
+  /// "No file selected" error box.
+  Future<void> _importBook() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['epub', 'pdf'],
+    );
+    final path = result?.files.single.path;
+    if (path == null) return;
+    final importedFile = File(path);
+    await _openDocument(
+      () => importAnyFile(importedFile, onProgress: (_) {}),
+      afterSave: (document) => _extractAndStoreCover(document, importedFile),
+    );
   }
 
   /// Spec §5's remote book sources: [RemoteBrowseScreen] handles connecting
   /// to/listing/downloading from a WebDAV or OPDS source and pops with the
   /// downloaded local file -- this hands it to the same [importAnyFile]
   /// routing the sideload button uses, including scanned-PDF detection.
-  Future<void> _importFromRemote() {
-    File? remoteFile;
-    return _openDocument(() async {
-      final file = await Navigator.of(context).push<File>(
-        MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()),
-      );
-      if (file == null) throw StateError('No book selected.');
-      remoteFile = file;
-      return importAnyFile(file, onProgress: (_) {});
-    }, afterSave: (document) => _extractAndStoreCover(document, remoteFile));
+  /// Same "back out -> do nothing" reasoning as [_importBook].
+  Future<void> _importFromRemote() async {
+    final file = await Navigator.of(
+      context,
+    ).push<File>(MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()));
+    if (file == null) return;
+    await _openDocument(
+      () => importAnyFile(file, onProgress: (_) {}),
+      afterSave: (document) => _extractAndStoreCover(document, file),
+    );
   }
 
   /// Best-effort Library cover-art extraction (see `extractCoverArt`'s own
