@@ -223,6 +223,7 @@ class _CardAreaState extends ConsumerState<_CardArea> {
       messenger.showSnackBar(
         SnackBar(
           content: Text('Added "${token.surface}" to your collection'),
+          duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: 'Undo',
             onPressed: () =>
@@ -243,6 +244,7 @@ class _CardAreaState extends ConsumerState<_CardArea> {
     messenger.showSnackBar(
       SnackBar(
         content: Text('Removed "${token.surface}" from your collection'),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -262,6 +264,7 @@ class _CardAreaState extends ConsumerState<_CardArea> {
       messenger.showSnackBar(
         SnackBar(
           content: Text('Added "${match.point.pattern}" to your collection'),
+          duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: 'Undo',
             onPressed: () =>
@@ -281,6 +284,7 @@ class _CardAreaState extends ConsumerState<_CardArea> {
     messenger.showSnackBar(
       SnackBar(
         content: Text('Removed "${match.point.pattern}" from your collection'),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
