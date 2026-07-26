@@ -371,7 +371,7 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
           // TokenGlossView needs a bounded height from an ancestor -- a
           // Dialog's child otherwise sizes to content, which is unbounded
           // for a list.
-          constraints: const BoxConstraints(maxWidth: 420, maxHeight: 480),
+          constraints: const BoxConstraints(maxWidth: 640, maxHeight: 560),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
