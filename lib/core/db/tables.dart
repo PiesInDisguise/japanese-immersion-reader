@@ -532,6 +532,35 @@ class Settings extends Table {
       .withDefault(const Constant(true))
       .named('review_swipe_right_enabled')();
 
+  /// Global text-size multiplier applied app-wide (via a `TextScaler` at the
+  /// `MaterialApp` root, see `main.dart`) -- one scale for everything rather
+  /// than per-screen controls, per the user's own stated preference.
+  RealColumn get fontScale =>
+      real().withDefault(const Constant(1.0)).named('font_scale')();
+
+  /// Gates whether [themeBackgroundColorValue]/[themeTextColorValue]/
+  /// [themeCardColorValue]/[themeAccentColorValue] are actually applied
+  /// (`app/app_theme.dart`'s `buildAppTheme`) -- off by default so a fresh
+  /// install looks exactly like it always has (the plain teal
+  /// `ColorScheme.fromSeed` theme `main.dart` already builds), even though
+  /// the four color columns below always hold *some* value.
+  BoolColumn get useCustomTheme =>
+      boolean().withDefault(const Constant(false)).named('use_custom_theme')();
+
+  /// The four color columns below are nullable with the same "null means
+  /// use the app-level default constant" convention as
+  /// [highlightColorValue] above, rather than a not-null column with a
+  /// literal default baked into the schema -- keeps the actual default
+  /// values defined once, in Dart, next to [AppSettings] itself.
+  IntColumn get themeBackgroundColorValue =>
+      integer().nullable().named('theme_background_color_value')();
+  IntColumn get themeTextColorValue =>
+      integer().nullable().named('theme_text_color_value')();
+  IntColumn get themeCardColorValue =>
+      integer().nullable().named('theme_card_color_value')();
+  IntColumn get themeAccentColorValue =>
+      integer().nullable().named('theme_accent_color_value')();
+
   @override
   Set<Column> get primaryKey => {id};
 }

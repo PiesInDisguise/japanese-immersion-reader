@@ -7,6 +7,16 @@ import 'package:japanese_immersion_reader/core/db/database.dart';
 /// no customized value yet.
 const defaultHighlightColor = Color(0x66FFEE58);
 
+/// Defaults for the custom-theme color slots (`AppSettings.useCustomTheme`)
+/// -- a plain light theme, deliberately unrelated to the app's actual
+/// default `ColorScheme.fromSeed(seedColor: Colors.teal)` look
+/// (`main.dart`): these are never seen until a user turns the toggle on and
+/// starts from them, not what a fresh install looks like.
+const defaultThemeBackgroundColor = Color(0xFFFFFFFF);
+const defaultThemeTextColor = Color(0xFF1A1C1B);
+const defaultThemeCardColor = Color(0xFFF3F3F3);
+const defaultThemeAccentColor = Color(0xFF009688);
+
 /// The single row of user-configurable settings this app has real UI for so
 /// far -- spec §14's LLM section (API key, grammar-explanation on/off), spec
 /// §9's audio section (TTS/pitch-accent-audio on/off), and the mined-word
@@ -26,6 +36,12 @@ class AppSettings {
     this.reviewSwipeDownEnabled = true,
     this.reviewSwipeLeftEnabled = true,
     this.reviewSwipeRightEnabled = true,
+    this.fontScale = 1.0,
+    this.useCustomTheme = false,
+    this.themeBackgroundColor = defaultThemeBackgroundColor,
+    this.themeTextColor = defaultThemeTextColor,
+    this.themeCardColor = defaultThemeCardColor,
+    this.themeAccentColor = defaultThemeAccentColor,
   });
 
   static const defaults = AppSettings(
@@ -40,6 +56,12 @@ class AppSettings {
     reviewSwipeDownEnabled: true,
     reviewSwipeLeftEnabled: true,
     reviewSwipeRightEnabled: true,
+    fontScale: 1.0,
+    useCustomTheme: false,
+    themeBackgroundColor: defaultThemeBackgroundColor,
+    themeTextColor: defaultThemeTextColor,
+    themeCardColor: defaultThemeCardColor,
+    themeAccentColor: defaultThemeAccentColor,
   );
 
   final String? llmApiKey;
@@ -65,6 +87,19 @@ class AppSettings {
   final bool reviewSwipeDownEnabled;
   final bool reviewSwipeLeftEnabled;
   final bool reviewSwipeRightEnabled;
+
+  /// App-wide text-size multiplier -- see
+  /// `core/db/tables.dart`'s `Settings.fontScale` doc comment.
+  final double fontScale;
+
+  /// See `core/db/tables.dart`'s `Settings.useCustomTheme` doc comment for
+  /// why this gate exists separately from the four color fields below
+  /// always holding a real value.
+  final bool useCustomTheme;
+  final Color themeBackgroundColor;
+  final Color themeTextColor;
+  final Color themeCardColor;
+  final Color themeAccentColor;
 
   /// Whether spec §8 layer 3 should actually attempt a real network call --
   /// both the toggle *and* a configured API key are required, not just the
@@ -117,6 +152,12 @@ class SettingsRepository {
     bool? reviewSwipeDownEnabled,
     bool? reviewSwipeLeftEnabled,
     bool? reviewSwipeRightEnabled,
+    double? fontScale,
+    bool? useCustomTheme,
+    Color? themeBackgroundColor,
+    Color? themeTextColor,
+    Color? themeCardColor,
+    Color? themeAccentColor,
   }) async {
     final current = await read();
     await _db
@@ -153,6 +194,20 @@ class SettingsRepository {
             reviewSwipeRightEnabled: Value(
               reviewSwipeRightEnabled ?? current.reviewSwipeRightEnabled,
             ),
+            fontScale: Value(fontScale ?? current.fontScale),
+            useCustomTheme: Value(useCustomTheme ?? current.useCustomTheme),
+            themeBackgroundColorValue: Value(
+              (themeBackgroundColor ?? current.themeBackgroundColor).toARGB32(),
+            ),
+            themeTextColorValue: Value(
+              (themeTextColor ?? current.themeTextColor).toARGB32(),
+            ),
+            themeCardColorValue: Value(
+              (themeCardColor ?? current.themeCardColor).toARGB32(),
+            ),
+            themeAccentColorValue: Value(
+              (themeAccentColor ?? current.themeAccentColor).toARGB32(),
+            ),
             // Spec §13 sync-readiness -- see tables.dart's own audit note.
             updatedAt: Value(DateTime.now().toUtc()),
           ),
@@ -173,5 +228,19 @@ class SettingsRepository {
     reviewSwipeDownEnabled: row.reviewSwipeDownEnabled,
     reviewSwipeLeftEnabled: row.reviewSwipeLeftEnabled,
     reviewSwipeRightEnabled: row.reviewSwipeRightEnabled,
+    fontScale: row.fontScale,
+    useCustomTheme: row.useCustomTheme,
+    themeBackgroundColor: row.themeBackgroundColorValue == null
+        ? defaultThemeBackgroundColor
+        : Color(row.themeBackgroundColorValue!),
+    themeTextColor: row.themeTextColorValue == null
+        ? defaultThemeTextColor
+        : Color(row.themeTextColorValue!),
+    themeCardColor: row.themeCardColorValue == null
+        ? defaultThemeCardColor
+        : Color(row.themeCardColorValue!),
+    themeAccentColor: row.themeAccentColorValue == null
+        ? defaultThemeAccentColor
+        : Color(row.themeAccentColorValue!),
   );
 }

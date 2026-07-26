@@ -6531,6 +6531,74 @@ class $SettingsTable extends Settings
         ),
         defaultValue: const Constant(true),
       );
+  static const VerificationMeta _fontScaleMeta = const VerificationMeta(
+    'fontScale',
+  );
+  @override
+  late final GeneratedColumn<double> fontScale = GeneratedColumn<double>(
+    'font_scale',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _useCustomThemeMeta = const VerificationMeta(
+    'useCustomTheme',
+  );
+  @override
+  late final GeneratedColumn<bool> useCustomTheme = GeneratedColumn<bool>(
+    'use_custom_theme',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("use_custom_theme" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _themeBackgroundColorValueMeta =
+      const VerificationMeta('themeBackgroundColorValue');
+  @override
+  late final GeneratedColumn<int> themeBackgroundColorValue =
+      GeneratedColumn<int>(
+        'theme_background_color_value',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _themeTextColorValueMeta =
+      const VerificationMeta('themeTextColorValue');
+  @override
+  late final GeneratedColumn<int> themeTextColorValue = GeneratedColumn<int>(
+    'theme_text_color_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _themeCardColorValueMeta =
+      const VerificationMeta('themeCardColorValue');
+  @override
+  late final GeneratedColumn<int> themeCardColorValue = GeneratedColumn<int>(
+    'theme_card_color_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _themeAccentColorValueMeta =
+      const VerificationMeta('themeAccentColorValue');
+  @override
+  late final GeneratedColumn<int> themeAccentColorValue = GeneratedColumn<int>(
+    'theme_accent_color_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6546,6 +6614,12 @@ class $SettingsTable extends Settings
     reviewSwipeDownEnabled,
     reviewSwipeLeftEnabled,
     reviewSwipeRightEnabled,
+    fontScale,
+    useCustomTheme,
+    themeBackgroundColorValue,
+    themeTextColorValue,
+    themeCardColorValue,
+    themeAccentColorValue,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6661,6 +6735,57 @@ class $SettingsTable extends Settings
         ),
       );
     }
+    if (data.containsKey('font_scale')) {
+      context.handle(
+        _fontScaleMeta,
+        fontScale.isAcceptableOrUnknown(data['font_scale']!, _fontScaleMeta),
+      );
+    }
+    if (data.containsKey('use_custom_theme')) {
+      context.handle(
+        _useCustomThemeMeta,
+        useCustomTheme.isAcceptableOrUnknown(
+          data['use_custom_theme']!,
+          _useCustomThemeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('theme_background_color_value')) {
+      context.handle(
+        _themeBackgroundColorValueMeta,
+        themeBackgroundColorValue.isAcceptableOrUnknown(
+          data['theme_background_color_value']!,
+          _themeBackgroundColorValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('theme_text_color_value')) {
+      context.handle(
+        _themeTextColorValueMeta,
+        themeTextColorValue.isAcceptableOrUnknown(
+          data['theme_text_color_value']!,
+          _themeTextColorValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('theme_card_color_value')) {
+      context.handle(
+        _themeCardColorValueMeta,
+        themeCardColorValue.isAcceptableOrUnknown(
+          data['theme_card_color_value']!,
+          _themeCardColorValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('theme_accent_color_value')) {
+      context.handle(
+        _themeAccentColorValueMeta,
+        themeAccentColorValue.isAcceptableOrUnknown(
+          data['theme_accent_color_value']!,
+          _themeAccentColorValueMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6722,6 +6847,30 @@ class $SettingsTable extends Settings
         DriftSqlType.bool,
         data['${effectivePrefix}review_swipe_right_enabled'],
       )!,
+      fontScale: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}font_scale'],
+      )!,
+      useCustomTheme: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}use_custom_theme'],
+      )!,
+      themeBackgroundColorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}theme_background_color_value'],
+      ),
+      themeTextColorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}theme_text_color_value'],
+      ),
+      themeCardColorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}theme_card_color_value'],
+      ),
+      themeAccentColorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}theme_accent_color_value'],
+      ),
     );
   }
 
@@ -6804,6 +6953,29 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   final bool reviewSwipeDownEnabled;
   final bool reviewSwipeLeftEnabled;
   final bool reviewSwipeRightEnabled;
+
+  /// Global text-size multiplier applied app-wide (via a `TextScaler` at the
+  /// `MaterialApp` root, see `main.dart`) -- one scale for everything rather
+  /// than per-screen controls, per the user's own stated preference.
+  final double fontScale;
+
+  /// Gates whether [themeBackgroundColorValue]/[themeTextColorValue]/
+  /// [themeCardColorValue]/[themeAccentColorValue] are actually applied
+  /// (`app/app_theme.dart`'s `buildAppTheme`) -- off by default so a fresh
+  /// install looks exactly like it always has (the plain teal
+  /// `ColorScheme.fromSeed` theme `main.dart` already builds), even though
+  /// the four color columns below always hold *some* value.
+  final bool useCustomTheme;
+
+  /// The four color columns below are nullable with the same "null means
+  /// use the app-level default constant" convention as
+  /// [highlightColorValue] above, rather than a not-null column with a
+  /// literal default baked into the schema -- keeps the actual default
+  /// values defined once, in Dart, next to [AppSettings] itself.
+  final int? themeBackgroundColorValue;
+  final int? themeTextColorValue;
+  final int? themeCardColorValue;
+  final int? themeAccentColorValue;
   const SettingsRow({
     required this.id,
     this.llmApiKey,
@@ -6818,6 +6990,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     required this.reviewSwipeDownEnabled,
     required this.reviewSwipeLeftEnabled,
     required this.reviewSwipeRightEnabled,
+    required this.fontScale,
+    required this.useCustomTheme,
+    this.themeBackgroundColorValue,
+    this.themeTextColorValue,
+    this.themeCardColorValue,
+    this.themeAccentColorValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6843,6 +7021,22 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     map['review_swipe_down_enabled'] = Variable<bool>(reviewSwipeDownEnabled);
     map['review_swipe_left_enabled'] = Variable<bool>(reviewSwipeLeftEnabled);
     map['review_swipe_right_enabled'] = Variable<bool>(reviewSwipeRightEnabled);
+    map['font_scale'] = Variable<double>(fontScale);
+    map['use_custom_theme'] = Variable<bool>(useCustomTheme);
+    if (!nullToAbsent || themeBackgroundColorValue != null) {
+      map['theme_background_color_value'] = Variable<int>(
+        themeBackgroundColorValue,
+      );
+    }
+    if (!nullToAbsent || themeTextColorValue != null) {
+      map['theme_text_color_value'] = Variable<int>(themeTextColorValue);
+    }
+    if (!nullToAbsent || themeCardColorValue != null) {
+      map['theme_card_color_value'] = Variable<int>(themeCardColorValue);
+    }
+    if (!nullToAbsent || themeAccentColorValue != null) {
+      map['theme_accent_color_value'] = Variable<int>(themeAccentColorValue);
+    }
     return map;
   }
 
@@ -6867,6 +7061,21 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       reviewSwipeDownEnabled: Value(reviewSwipeDownEnabled),
       reviewSwipeLeftEnabled: Value(reviewSwipeLeftEnabled),
       reviewSwipeRightEnabled: Value(reviewSwipeRightEnabled),
+      fontScale: Value(fontScale),
+      useCustomTheme: Value(useCustomTheme),
+      themeBackgroundColorValue:
+          themeBackgroundColorValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(themeBackgroundColorValue),
+      themeTextColorValue: themeTextColorValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(themeTextColorValue),
+      themeCardColorValue: themeCardColorValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(themeCardColorValue),
+      themeAccentColorValue: themeAccentColorValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(themeAccentColorValue),
     );
   }
 
@@ -6907,6 +7116,20 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       reviewSwipeRightEnabled: serializer.fromJson<bool>(
         json['reviewSwipeRightEnabled'],
       ),
+      fontScale: serializer.fromJson<double>(json['fontScale']),
+      useCustomTheme: serializer.fromJson<bool>(json['useCustomTheme']),
+      themeBackgroundColorValue: serializer.fromJson<int?>(
+        json['themeBackgroundColorValue'],
+      ),
+      themeTextColorValue: serializer.fromJson<int?>(
+        json['themeTextColorValue'],
+      ),
+      themeCardColorValue: serializer.fromJson<int?>(
+        json['themeCardColorValue'],
+      ),
+      themeAccentColorValue: serializer.fromJson<int?>(
+        json['themeAccentColorValue'],
+      ),
     );
   }
   @override
@@ -6932,6 +7155,14 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'reviewSwipeRightEnabled': serializer.toJson<bool>(
         reviewSwipeRightEnabled,
       ),
+      'fontScale': serializer.toJson<double>(fontScale),
+      'useCustomTheme': serializer.toJson<bool>(useCustomTheme),
+      'themeBackgroundColorValue': serializer.toJson<int?>(
+        themeBackgroundColorValue,
+      ),
+      'themeTextColorValue': serializer.toJson<int?>(themeTextColorValue),
+      'themeCardColorValue': serializer.toJson<int?>(themeCardColorValue),
+      'themeAccentColorValue': serializer.toJson<int?>(themeAccentColorValue),
     };
   }
 
@@ -6949,6 +7180,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     bool? reviewSwipeDownEnabled,
     bool? reviewSwipeLeftEnabled,
     bool? reviewSwipeRightEnabled,
+    double? fontScale,
+    bool? useCustomTheme,
+    Value<int?> themeBackgroundColorValue = const Value.absent(),
+    Value<int?> themeTextColorValue = const Value.absent(),
+    Value<int?> themeCardColorValue = const Value.absent(),
+    Value<int?> themeAccentColorValue = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     llmApiKey: llmApiKey.present ? llmApiKey.value : this.llmApiKey,
@@ -6971,6 +7208,20 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         reviewSwipeLeftEnabled ?? this.reviewSwipeLeftEnabled,
     reviewSwipeRightEnabled:
         reviewSwipeRightEnabled ?? this.reviewSwipeRightEnabled,
+    fontScale: fontScale ?? this.fontScale,
+    useCustomTheme: useCustomTheme ?? this.useCustomTheme,
+    themeBackgroundColorValue: themeBackgroundColorValue.present
+        ? themeBackgroundColorValue.value
+        : this.themeBackgroundColorValue,
+    themeTextColorValue: themeTextColorValue.present
+        ? themeTextColorValue.value
+        : this.themeTextColorValue,
+    themeCardColorValue: themeCardColorValue.present
+        ? themeCardColorValue.value
+        : this.themeCardColorValue,
+    themeAccentColorValue: themeAccentColorValue.present
+        ? themeAccentColorValue.value
+        : this.themeAccentColorValue,
   );
   SettingsRow copyWithCompanion(SettingsCompanion data) {
     return SettingsRow(
@@ -7007,6 +7258,22 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       reviewSwipeRightEnabled: data.reviewSwipeRightEnabled.present
           ? data.reviewSwipeRightEnabled.value
           : this.reviewSwipeRightEnabled,
+      fontScale: data.fontScale.present ? data.fontScale.value : this.fontScale,
+      useCustomTheme: data.useCustomTheme.present
+          ? data.useCustomTheme.value
+          : this.useCustomTheme,
+      themeBackgroundColorValue: data.themeBackgroundColorValue.present
+          ? data.themeBackgroundColorValue.value
+          : this.themeBackgroundColorValue,
+      themeTextColorValue: data.themeTextColorValue.present
+          ? data.themeTextColorValue.value
+          : this.themeTextColorValue,
+      themeCardColorValue: data.themeCardColorValue.present
+          ? data.themeCardColorValue.value
+          : this.themeCardColorValue,
+      themeAccentColorValue: data.themeAccentColorValue.present
+          ? data.themeAccentColorValue.value
+          : this.themeAccentColorValue,
     );
   }
 
@@ -7025,7 +7292,13 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('reviewSwipeUpEnabled: $reviewSwipeUpEnabled, ')
           ..write('reviewSwipeDownEnabled: $reviewSwipeDownEnabled, ')
           ..write('reviewSwipeLeftEnabled: $reviewSwipeLeftEnabled, ')
-          ..write('reviewSwipeRightEnabled: $reviewSwipeRightEnabled')
+          ..write('reviewSwipeRightEnabled: $reviewSwipeRightEnabled, ')
+          ..write('fontScale: $fontScale, ')
+          ..write('useCustomTheme: $useCustomTheme, ')
+          ..write('themeBackgroundColorValue: $themeBackgroundColorValue, ')
+          ..write('themeTextColorValue: $themeTextColorValue, ')
+          ..write('themeCardColorValue: $themeCardColorValue, ')
+          ..write('themeAccentColorValue: $themeAccentColorValue')
           ..write(')'))
         .toString();
   }
@@ -7045,6 +7318,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     reviewSwipeDownEnabled,
     reviewSwipeLeftEnabled,
     reviewSwipeRightEnabled,
+    fontScale,
+    useCustomTheme,
+    themeBackgroundColorValue,
+    themeTextColorValue,
+    themeCardColorValue,
+    themeAccentColorValue,
   );
   @override
   bool operator ==(Object other) =>
@@ -7062,7 +7341,13 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.reviewSwipeUpEnabled == this.reviewSwipeUpEnabled &&
           other.reviewSwipeDownEnabled == this.reviewSwipeDownEnabled &&
           other.reviewSwipeLeftEnabled == this.reviewSwipeLeftEnabled &&
-          other.reviewSwipeRightEnabled == this.reviewSwipeRightEnabled);
+          other.reviewSwipeRightEnabled == this.reviewSwipeRightEnabled &&
+          other.fontScale == this.fontScale &&
+          other.useCustomTheme == this.useCustomTheme &&
+          other.themeBackgroundColorValue == this.themeBackgroundColorValue &&
+          other.themeTextColorValue == this.themeTextColorValue &&
+          other.themeCardColorValue == this.themeCardColorValue &&
+          other.themeAccentColorValue == this.themeAccentColorValue);
 }
 
 class SettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -7079,6 +7364,12 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<bool> reviewSwipeDownEnabled;
   final Value<bool> reviewSwipeLeftEnabled;
   final Value<bool> reviewSwipeRightEnabled;
+  final Value<double> fontScale;
+  final Value<bool> useCustomTheme;
+  final Value<int?> themeBackgroundColorValue;
+  final Value<int?> themeTextColorValue;
+  final Value<int?> themeCardColorValue;
+  final Value<int?> themeAccentColorValue;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.llmApiKey = const Value.absent(),
@@ -7093,6 +7384,12 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.reviewSwipeDownEnabled = const Value.absent(),
     this.reviewSwipeLeftEnabled = const Value.absent(),
     this.reviewSwipeRightEnabled = const Value.absent(),
+    this.fontScale = const Value.absent(),
+    this.useCustomTheme = const Value.absent(),
+    this.themeBackgroundColorValue = const Value.absent(),
+    this.themeTextColorValue = const Value.absent(),
+    this.themeCardColorValue = const Value.absent(),
+    this.themeAccentColorValue = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -7108,6 +7405,12 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.reviewSwipeDownEnabled = const Value.absent(),
     this.reviewSwipeLeftEnabled = const Value.absent(),
     this.reviewSwipeRightEnabled = const Value.absent(),
+    this.fontScale = const Value.absent(),
+    this.useCustomTheme = const Value.absent(),
+    this.themeBackgroundColorValue = const Value.absent(),
+    this.themeTextColorValue = const Value.absent(),
+    this.themeCardColorValue = const Value.absent(),
+    this.themeAccentColorValue = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
@@ -7123,6 +7426,12 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<bool>? reviewSwipeDownEnabled,
     Expression<bool>? reviewSwipeLeftEnabled,
     Expression<bool>? reviewSwipeRightEnabled,
+    Expression<double>? fontScale,
+    Expression<bool>? useCustomTheme,
+    Expression<int>? themeBackgroundColorValue,
+    Expression<int>? themeTextColorValue,
+    Expression<int>? themeCardColorValue,
+    Expression<int>? themeAccentColorValue,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -7147,6 +7456,16 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
         'review_swipe_left_enabled': reviewSwipeLeftEnabled,
       if (reviewSwipeRightEnabled != null)
         'review_swipe_right_enabled': reviewSwipeRightEnabled,
+      if (fontScale != null) 'font_scale': fontScale,
+      if (useCustomTheme != null) 'use_custom_theme': useCustomTheme,
+      if (themeBackgroundColorValue != null)
+        'theme_background_color_value': themeBackgroundColorValue,
+      if (themeTextColorValue != null)
+        'theme_text_color_value': themeTextColorValue,
+      if (themeCardColorValue != null)
+        'theme_card_color_value': themeCardColorValue,
+      if (themeAccentColorValue != null)
+        'theme_accent_color_value': themeAccentColorValue,
     });
   }
 
@@ -7164,6 +7483,12 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<bool>? reviewSwipeDownEnabled,
     Value<bool>? reviewSwipeLeftEnabled,
     Value<bool>? reviewSwipeRightEnabled,
+    Value<double>? fontScale,
+    Value<bool>? useCustomTheme,
+    Value<int?>? themeBackgroundColorValue,
+    Value<int?>? themeTextColorValue,
+    Value<int?>? themeCardColorValue,
+    Value<int?>? themeAccentColorValue,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -7185,6 +7510,14 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
           reviewSwipeLeftEnabled ?? this.reviewSwipeLeftEnabled,
       reviewSwipeRightEnabled:
           reviewSwipeRightEnabled ?? this.reviewSwipeRightEnabled,
+      fontScale: fontScale ?? this.fontScale,
+      useCustomTheme: useCustomTheme ?? this.useCustomTheme,
+      themeBackgroundColorValue:
+          themeBackgroundColorValue ?? this.themeBackgroundColorValue,
+      themeTextColorValue: themeTextColorValue ?? this.themeTextColorValue,
+      themeCardColorValue: themeCardColorValue ?? this.themeCardColorValue,
+      themeAccentColorValue:
+          themeAccentColorValue ?? this.themeAccentColorValue,
     );
   }
 
@@ -7244,6 +7577,28 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
         reviewSwipeRightEnabled.value,
       );
     }
+    if (fontScale.present) {
+      map['font_scale'] = Variable<double>(fontScale.value);
+    }
+    if (useCustomTheme.present) {
+      map['use_custom_theme'] = Variable<bool>(useCustomTheme.value);
+    }
+    if (themeBackgroundColorValue.present) {
+      map['theme_background_color_value'] = Variable<int>(
+        themeBackgroundColorValue.value,
+      );
+    }
+    if (themeTextColorValue.present) {
+      map['theme_text_color_value'] = Variable<int>(themeTextColorValue.value);
+    }
+    if (themeCardColorValue.present) {
+      map['theme_card_color_value'] = Variable<int>(themeCardColorValue.value);
+    }
+    if (themeAccentColorValue.present) {
+      map['theme_accent_color_value'] = Variable<int>(
+        themeAccentColorValue.value,
+      );
+    }
     return map;
   }
 
@@ -7262,7 +7617,13 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('reviewSwipeUpEnabled: $reviewSwipeUpEnabled, ')
           ..write('reviewSwipeDownEnabled: $reviewSwipeDownEnabled, ')
           ..write('reviewSwipeLeftEnabled: $reviewSwipeLeftEnabled, ')
-          ..write('reviewSwipeRightEnabled: $reviewSwipeRightEnabled')
+          ..write('reviewSwipeRightEnabled: $reviewSwipeRightEnabled, ')
+          ..write('fontScale: $fontScale, ')
+          ..write('useCustomTheme: $useCustomTheme, ')
+          ..write('themeBackgroundColorValue: $themeBackgroundColorValue, ')
+          ..write('themeTextColorValue: $themeTextColorValue, ')
+          ..write('themeCardColorValue: $themeCardColorValue, ')
+          ..write('themeAccentColorValue: $themeAccentColorValue')
           ..write(')'))
         .toString();
   }
@@ -13581,6 +13942,12 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<bool> reviewSwipeDownEnabled,
       Value<bool> reviewSwipeLeftEnabled,
       Value<bool> reviewSwipeRightEnabled,
+      Value<double> fontScale,
+      Value<bool> useCustomTheme,
+      Value<int?> themeBackgroundColorValue,
+      Value<int?> themeTextColorValue,
+      Value<int?> themeCardColorValue,
+      Value<int?> themeAccentColorValue,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -13597,6 +13964,12 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<bool> reviewSwipeDownEnabled,
       Value<bool> reviewSwipeLeftEnabled,
       Value<bool> reviewSwipeRightEnabled,
+      Value<double> fontScale,
+      Value<bool> useCustomTheme,
+      Value<int?> themeBackgroundColorValue,
+      Value<int?> themeTextColorValue,
+      Value<int?> themeCardColorValue,
+      Value<int?> themeAccentColorValue,
     });
 
 class $$SettingsTableFilterComposer
@@ -13670,6 +14043,36 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get reviewSwipeRightEnabled => $composableBuilder(
     column: $table.reviewSwipeRightEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fontScale => $composableBuilder(
+    column: $table.fontScale,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get useCustomTheme => $composableBuilder(
+    column: $table.useCustomTheme,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get themeBackgroundColorValue => $composableBuilder(
+    column: $table.themeBackgroundColorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get themeTextColorValue => $composableBuilder(
+    column: $table.themeTextColorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get themeCardColorValue => $composableBuilder(
+    column: $table.themeCardColorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get themeAccentColorValue => $composableBuilder(
+    column: $table.themeAccentColorValue,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -13747,6 +14150,36 @@ class $$SettingsTableOrderingComposer
     column: $table.reviewSwipeRightEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get fontScale => $composableBuilder(
+    column: $table.fontScale,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get useCustomTheme => $composableBuilder(
+    column: $table.useCustomTheme,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get themeBackgroundColorValue => $composableBuilder(
+    column: $table.themeBackgroundColorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get themeTextColorValue => $composableBuilder(
+    column: $table.themeTextColorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get themeCardColorValue => $composableBuilder(
+    column: $table.themeCardColorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get themeAccentColorValue => $composableBuilder(
+    column: $table.themeAccentColorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -13816,6 +14249,34 @@ class $$SettingsTableAnnotationComposer
     column: $table.reviewSwipeRightEnabled,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get fontScale =>
+      $composableBuilder(column: $table.fontScale, builder: (column) => column);
+
+  GeneratedColumn<bool> get useCustomTheme => $composableBuilder(
+    column: $table.useCustomTheme,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get themeBackgroundColorValue => $composableBuilder(
+    column: $table.themeBackgroundColorValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get themeTextColorValue => $composableBuilder(
+    column: $table.themeTextColorValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get themeCardColorValue => $composableBuilder(
+    column: $table.themeCardColorValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get themeAccentColorValue => $composableBuilder(
+    column: $table.themeAccentColorValue,
+    builder: (column) => column,
+  );
 }
 
 class $$SettingsTableTableManager
@@ -13862,6 +14323,12 @@ class $$SettingsTableTableManager
                 Value<bool> reviewSwipeDownEnabled = const Value.absent(),
                 Value<bool> reviewSwipeLeftEnabled = const Value.absent(),
                 Value<bool> reviewSwipeRightEnabled = const Value.absent(),
+                Value<double> fontScale = const Value.absent(),
+                Value<bool> useCustomTheme = const Value.absent(),
+                Value<int?> themeBackgroundColorValue = const Value.absent(),
+                Value<int?> themeTextColorValue = const Value.absent(),
+                Value<int?> themeCardColorValue = const Value.absent(),
+                Value<int?> themeAccentColorValue = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 llmApiKey: llmApiKey,
@@ -13876,6 +14343,12 @@ class $$SettingsTableTableManager
                 reviewSwipeDownEnabled: reviewSwipeDownEnabled,
                 reviewSwipeLeftEnabled: reviewSwipeLeftEnabled,
                 reviewSwipeRightEnabled: reviewSwipeRightEnabled,
+                fontScale: fontScale,
+                useCustomTheme: useCustomTheme,
+                themeBackgroundColorValue: themeBackgroundColorValue,
+                themeTextColorValue: themeTextColorValue,
+                themeCardColorValue: themeCardColorValue,
+                themeAccentColorValue: themeAccentColorValue,
               ),
           createCompanionCallback:
               ({
@@ -13892,6 +14365,12 @@ class $$SettingsTableTableManager
                 Value<bool> reviewSwipeDownEnabled = const Value.absent(),
                 Value<bool> reviewSwipeLeftEnabled = const Value.absent(),
                 Value<bool> reviewSwipeRightEnabled = const Value.absent(),
+                Value<double> fontScale = const Value.absent(),
+                Value<bool> useCustomTheme = const Value.absent(),
+                Value<int?> themeBackgroundColorValue = const Value.absent(),
+                Value<int?> themeTextColorValue = const Value.absent(),
+                Value<int?> themeCardColorValue = const Value.absent(),
+                Value<int?> themeAccentColorValue = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 llmApiKey: llmApiKey,
@@ -13906,6 +14385,12 @@ class $$SettingsTableTableManager
                 reviewSwipeDownEnabled: reviewSwipeDownEnabled,
                 reviewSwipeLeftEnabled: reviewSwipeLeftEnabled,
                 reviewSwipeRightEnabled: reviewSwipeRightEnabled,
+                fontScale: fontScale,
+                useCustomTheme: useCustomTheme,
+                themeBackgroundColorValue: themeBackgroundColorValue,
+                themeTextColorValue: themeTextColorValue,
+                themeCardColorValue: themeCardColorValue,
+                themeAccentColorValue: themeAccentColorValue,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

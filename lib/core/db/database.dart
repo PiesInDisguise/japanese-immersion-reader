@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -119,6 +119,16 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(settings, settings.reviewSwipeDownEnabled);
         await m.addColumn(settings, settings.reviewSwipeLeftEnabled);
         await m.addColumn(settings, settings.reviewSwipeRightEnabled);
+      }
+      // schemaVersion 12: app-wide font-size scaling + a custom
+      // background/text/card/accent color theme.
+      if (from < 12) {
+        await m.addColumn(settings, settings.fontScale);
+        await m.addColumn(settings, settings.useCustomTheme);
+        await m.addColumn(settings, settings.themeBackgroundColorValue);
+        await m.addColumn(settings, settings.themeTextColorValue);
+        await m.addColumn(settings, settings.themeCardColorValue);
+        await m.addColumn(settings, settings.themeAccentColorValue);
       }
     },
   );

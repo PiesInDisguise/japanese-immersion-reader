@@ -8,6 +8,7 @@ import 'package:japanese_immersion_reader/core/db/database.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_importer.dart';
 
 import 'services.dart';
+import 'settings_repository.dart';
 
 /// Spec §14's real settings surface so far: the BYO Anthropic API key and
 /// grammar-explanation (spec §8 layer 3) toggle, spec §9's TTS/
@@ -112,6 +113,95 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              const Text(
+                'Appearance',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('Applies everywhere in the app, including cards.'),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Text('Font size'),
+                  Expanded(
+                    child: Slider(
+                      value: settings.fontScale,
+                      min: 0.8,
+                      max: 2.0,
+                      divisions: 24,
+                      label: '${(settings.fontScale * 100).round()}%',
+                      onChanged: (value) => ref
+                          .read(settingsRepositoryProvider)
+                          .update(fontScale: value),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      '${(settings.fontScale * 100).round()}%',
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Use custom theme colors'),
+                subtitle: const Text(
+                  'Off uses the app\'s normal look; on lets you set your '
+                  'own background, text, card, and accent colors together.',
+                ),
+                value: settings.useCustomTheme,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(useCustomTheme: value),
+              ),
+              if (settings.useCustomTheme) ...[
+                _ColorSettingTile(
+                  label: 'Background',
+                  color: settings.themeBackgroundColor,
+                  onPick: (color) => ref
+                      .read(settingsRepositoryProvider)
+                      .update(themeBackgroundColor: color),
+                ),
+                _ColorSettingTile(
+                  label: 'Text',
+                  color: settings.themeTextColor,
+                  onPick: (color) => ref
+                      .read(settingsRepositoryProvider)
+                      .update(themeTextColor: color),
+                ),
+                _ColorSettingTile(
+                  label: 'Card',
+                  color: settings.themeCardColor,
+                  onPick: (color) => ref
+                      .read(settingsRepositoryProvider)
+                      .update(themeCardColor: color),
+                ),
+                _ColorSettingTile(
+                  label: 'Accent',
+                  color: settings.themeAccentColor,
+                  onPick: (color) => ref
+                      .read(settingsRepositoryProvider)
+                      .update(themeAccentColor: color),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => ref
+                        .read(settingsRepositoryProvider)
+                        .update(
+                          themeBackgroundColor: defaultThemeBackgroundColor,
+                          themeTextColor: defaultThemeTextColor,
+                          themeCardColor: defaultThemeCardColor,
+                          themeAccentColor: defaultThemeAccentColor,
+                        ),
+                    child: const Text('Reset colors to defaults'),
+                  ),
+                ),
+              ],
+              const Divider(height: 32),
               const Text(
                 'Grammar explanations (spec §8, layer 3)',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -361,39 +451,89 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  /// The word-highlighting feature's color picker: a local `pickerColor`
-  /// tracks live `onColorChanged` edits inside the dialog (an HSV picker has
-  /// no natural "confirm" gesture of its own -- dragging the wheel fires
-  /// continuously), and only the dialog's own "Save" button commits that
-  /// value via `SettingsRepository.update`. Cancelling leaves the stored
-  /// color untouched.
+  /// The word-highlighting feature's color picker.
   Future<void> _pickHighlightColor(Color current) async {
-    var pickerColor = current;
-    final picked = await showDialog<Color>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Highlight color'),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: pickerColor,
-            onColorChanged: (color) => pickerColor = color,
-            enableAlpha: true,
-            labelTypes: const [],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(pickerColor),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
+    final picked = await _pickColorDialog(context, 'Highlight color', current);
     if (picked == null) return;
     await ref.read(settingsRepositoryProvider).update(highlightColor: picked);
+  }
+}
+
+/// Shared by [_SettingsScreenState._pickHighlightColor] and
+/// [_ColorSettingTile] (the four custom-theme color slots): a local
+/// `pickerColor` tracks live `onColorChanged` edits inside the dialog (an
+/// HSV picker has no natural "confirm" gesture of its own -- dragging the
+/// wheel fires continuously), and only the dialog's own "Save" button
+/// returns that value. Cancelling (or dismissing) returns `null`, leaving
+/// whatever setting the caller would have updated untouched. A top-level
+/// function (not a method on either widget's state) since both just need a
+/// [BuildContext], not any other state.
+Future<Color?> _pickColorDialog(
+  BuildContext context,
+  String title,
+  Color current,
+) {
+  var pickerColor = current;
+  return showDialog<Color>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(title),
+      content: SingleChildScrollView(
+        child: ColorPicker(
+          pickerColor: pickerColor,
+          onColorChanged: (color) => pickerColor = color,
+          enableAlpha: true,
+          labelTypes: const [],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(pickerColor),
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// One row of the custom-theme color picker (Background/Text/Card/Accent):
+/// a swatch + label + "Change..." button, mirroring the word-highlight
+/// color row's own layout exactly.
+class _ColorSettingTile extends StatelessWidget {
+  const _ColorSettingTile({
+    required this.label,
+    required this.color,
+    required this.onPick,
+  });
+
+  final String label;
+  final Color color;
+  final ValueChanged<Color> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: color,
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+      ),
+      title: Text(label),
+      trailing: OutlinedButton(
+        onPressed: () async {
+          final picked = await _pickColorDialog(context, '$label color', color);
+          if (picked != null) onPick(picked);
+        },
+        child: const Text('Change...'),
+      ),
+    );
   }
 }

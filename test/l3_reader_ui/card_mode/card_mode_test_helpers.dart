@@ -187,6 +187,12 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? reviewSwipeDownEnabled,
     bool? reviewSwipeLeftEnabled,
     bool? reviewSwipeRightEnabled,
+    double? fontScale,
+    bool? useCustomTheme,
+    Color? themeBackgroundColor,
+    Color? themeTextColor,
+    Color? themeCardColor,
+    Color? themeAccentColor,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
@@ -207,6 +213,13 @@ class FakeSettingsRepository extends SettingsRepository {
           reviewSwipeLeftEnabled ?? _settings.reviewSwipeLeftEnabled,
       reviewSwipeRightEnabled:
           reviewSwipeRightEnabled ?? _settings.reviewSwipeRightEnabled,
+      fontScale: fontScale ?? _settings.fontScale,
+      useCustomTheme: useCustomTheme ?? _settings.useCustomTheme,
+      themeBackgroundColor:
+          themeBackgroundColor ?? _settings.themeBackgroundColor,
+      themeTextColor: themeTextColor ?? _settings.themeTextColor,
+      themeCardColor: themeCardColor ?? _settings.themeCardColor,
+      themeAccentColor: themeAccentColor ?? _settings.themeAccentColor,
     );
   }
 }
