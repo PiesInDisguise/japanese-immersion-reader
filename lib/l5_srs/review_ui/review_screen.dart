@@ -251,7 +251,7 @@ class _OriginalSentenceSection extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           sentence,
-          style: theme.textTheme.titleMedium,
+          style: theme.textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
       ],
