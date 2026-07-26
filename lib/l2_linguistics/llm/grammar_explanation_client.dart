@@ -108,14 +108,7 @@ class AnthropicGrammarExplanationClient implements GrammarExplanationClient {
         'List each component on its own line as a bullet, in the format '
         'word（reading） = meaning, with hiragana readings for kanji. For '
         'する-verb nouns, you may gloss them in verb form (e.g. 複製する = '
-        'to copy).\n'
-        'After the components, give a short literal gloss of that chunk in '
-        'quotes.\n'
-        'Where the grammar is genuinely non-obvious, explain it in a bit '
-        'more depth — walk through patterns like ～たり, nominalizing こと, '
-        'or set constructions with examples if helpful. Keep routine '
-        'chunks (simple particles, obvious vocab) short and don\'t '
-        'over-explain them.\n\n'
+        'to copy).\n\n'
         'Don\'t include a structure outline or diagram. Finish with a '
         'natural English translation of the whole sentence.';
   }

@@ -1,38 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
-import 'package:japanese_immersion_reader/l2_linguistics/kana.dart';
 
 /// Card Mode's flip side (spec §6) and Document Mode's double-tap grammar
-/// popup (spec §7): spec §8's three-layer grammar breakdown, minus layer 3
-/// (the LLM explanation -- a later phase, network-dependent, meant to
-/// stream in beneath these two offline layers rather than block them).
+/// popup (spec §7): spec §8's grammar breakdown -- layer 1 (the per-token
+/// Sudachi gloss table) has been removed from display; only layers 2/3
+/// remain.
 ///
-/// **Layer 1, token gloss** *(always shown)*: every token's full Sudachi
-/// analysis -- surface, dictionary form, reading, part of speech, and
-/// inflection chain -- one row per token.
+/// **Layer 2, matched grammar points** *(shown first, when any matched)*:
+/// spec §8's curated grammar-point database, matched against this sentence
+/// (see `ReaderMiningSession.matchGrammar` / `grammar_matcher.dart`). Each
+/// matched point is its own tappable card -- tap opens `GrammarPointSheet`
+/// to mine it, long-press removes it, mirroring word tap/long-press
+/// semantics exactly (spec §8: "tappable and mines into the grammar
+/// dictionary"). Omitted entirely (no empty section/divider) when nothing
+/// matched, which is the common case for any database covering only ~200
+/// patterns against arbitrary prose.
 ///
-/// **Layer 2, matched grammar points** *(shown above layer 1 when any
-/// matched)*: spec §8's curated grammar-point database, matched against
-/// this sentence (see `ReaderMiningSession.matchGrammar` /
-/// `grammar_matcher.dart`). Each matched point is its own tappable card --
-/// tap opens `GrammarPointSheet` to mine it, long-press removes it,
-/// mirroring word tap/long-press semantics exactly (spec §8: "tappable and
-/// mines into the grammar dictionary"). Omitted entirely (no empty
-/// section/divider) when nothing matched, which is the common case for any
-/// database covering only ~200 patterns against arbitrary prose.
-///
-/// **Layer 3, LLM explanation** *(shown below layer 1, streaming in)*: spec
+/// **Layer 3, LLM explanation** *(shown below layer 2, streaming in)*: spec
 /// §8's optional, network-dependent sentence explanation
-/// (`ReaderMiningSession.explainSentence`) -- streams in beneath the two
-/// offline layers rather than blocking them, and is omitted entirely (like
-/// layer 2) when [sentence]/[checkExplanationsActive]/[explainSentence]
-/// aren't all supplied, or when [checkExplanationsActive] resolves false
-/// (no API key configured / toggled off in Settings).
+/// (`ReaderMiningSession.explainSentence`) -- omitted entirely (like layer
+/// 2) when [sentence]/[checkExplanationsActive]/[explainSentence] aren't
+/// all supplied, or when [checkExplanationsActive] resolves false (no API
+/// key configured / toggled off in Settings).
 class TokenGlossView extends StatefulWidget {
   const TokenGlossView({
     super.key,
-    required this.tokens,
     this.grammarMatches = const [],
     this.onGrammarPointTap,
     this.onGrammarPointLongPress,
@@ -40,8 +33,6 @@ class TokenGlossView extends StatefulWidget {
     this.checkExplanationsActive,
     this.explainSentence,
   });
-
-  final List<Token> tokens;
 
   /// Spec §8 layer 2's matches for this gloss's sentence. Empty (the
   /// default) renders identically to before layer 2 existed -- callers that
@@ -117,18 +108,12 @@ class _TokenGlossViewState extends State<TokenGlossView> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8),
       children: [
-        if (widget.grammarMatches.isNotEmpty) ...[
+        if (widget.grammarMatches.isNotEmpty)
           _GrammarPointsSection(
             matches: widget.grammarMatches,
             onTap: widget.onGrammarPointTap,
             onLongPress: widget.onGrammarPointLongPress,
           ),
-          const Divider(height: 32, thickness: 1.5),
-        ],
-        for (var i = 0; i < widget.tokens.length; i++) ...[
-          if (i > 0) const Divider(height: 24),
-          _TokenGlossRow(token: widget.tokens[i]),
-        ],
         if (_active == true && _stream != null) ...[
           const Divider(height: 32, thickness: 1.5),
           _ExplanationSection(stream: _stream!),
@@ -280,70 +265,6 @@ class _GrammarPointChip extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _TokenGlossRow extends StatelessWidget {
-  const _TokenGlossRow({required this.token});
-
-  final Token token;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(token.surface, style: theme.textTheme.headlineSmall),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 20,
-            runSpacing: 6,
-            children: [
-              if (token.dictForm != null && token.dictForm != token.surface)
-                _Field(label: 'Dictionary form', value: token.dictForm!),
-              if (token.reading != null)
-                _Field(
-                  label: 'Reading',
-                  value: katakanaToHiragana(token.reading!),
-                ),
-              if (token.pos != null)
-                _Field(label: 'Part of speech', value: token.pos!),
-              if (token.inflection != null)
-                _Field(label: 'Inflection', value: token.inflection!),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Field extends StatelessWidget {
-  const _Field({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.outline,
-            letterSpacing: 0.5,
-          ),
-        ),
-        Text(value, style: theme.textTheme.bodyLarge),
-      ],
     );
   }
 }

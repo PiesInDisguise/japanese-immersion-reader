@@ -25,7 +25,8 @@ class CardModeScreen extends ConsumerWidget {
     // Spec §9: TTS is off by default -- only show the "speak this sentence"
     // action once the toggle is actually on, rather than a button that
     // silently does nothing.
-    final ttsEnabled = ref.watch(appSettingsProvider).value?.ttsEnabled ?? false;
+    final ttsEnabled =
+        ref.watch(appSettingsProvider).value?.ttsEnabled ?? false;
     return Scaffold(
       appBar: AppBar(
         title: Text(_titleFor(asyncState)),
@@ -279,9 +280,7 @@ class _CardAreaState extends ConsumerState<_CardArea> {
     if (!mounted) return;
     messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          'Removed "${match.point.pattern}" from your collection',
-        ),
+        content: Text('Removed "${match.point.pattern}" from your collection'),
       ),
     );
   }
@@ -323,7 +322,6 @@ class _CardAreaState extends ConsumerState<_CardArea> {
               child: isFlipped
                   ? TokenGlossView(
                       key: ValueKey('${state.cardIndex}-back'),
-                      tokens: state.tokens,
                       grammarMatches: state.grammarMatches,
                       onGrammarPointTap: _handleGrammarPointTap,
                       onGrammarPointLongPress: _handleGrammarPointLongPress,

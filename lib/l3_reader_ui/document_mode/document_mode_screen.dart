@@ -407,7 +407,6 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
                 const SizedBox(height: 12),
                 Flexible(
                   child: TokenGlossView(
-                    tokens: tokens,
                     grammarMatches: grammarMatches,
                     onGrammarPointTap: (match) =>
                         _handleGrammarPointTap(sentence.id, match),
@@ -472,9 +471,7 @@ class _DocumentModeBodyState extends ConsumerState<_DocumentModeBody> {
     if (!mounted) return;
     messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          'Removed "${match.point.pattern}" from your collection',
-        ),
+        content: Text('Removed "${match.point.pattern}" from your collection'),
       ),
     );
   }

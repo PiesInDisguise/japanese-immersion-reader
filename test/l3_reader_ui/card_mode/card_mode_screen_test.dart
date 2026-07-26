@@ -262,42 +262,33 @@ void main() {
   });
 
   group('word highlighting', () {
-    testWidgets(
-      'a collected word is highlighted with the default color; an '
-      'uncollected word is not',
-      (tester) async {
-        await pumpScreen(tester);
-        await tester.pumpAndSettle();
+    testWidgets('a collected word is highlighted with the default color; an '
+        'uncollected word is not', (tester) async {
+      await pumpScreen(tester);
+      await tester.pumpAndSettle();
 
-        wordCollectionRepository.emitCollectedWordIds({
-          contentDerivedWordId(dictForm: '猫', reading: 'ネコ'),
-        });
-        await tester.pumpAndSettle();
+      wordCollectionRepository.emitCollectedWordIds({
+        contentDerivedWordId(dictForm: '猫', reading: 'ネコ'),
+      });
+      await tester.pumpAndSettle();
 
-        final catBox = tester.widget<DecoratedBox>(
-          find
-              .ancestor(
-                of: find.text('猫'),
-                matching: find.byType(DecoratedBox),
-              )
-              .first,
-        );
-        expect(
-          (catBox.decoration as BoxDecoration).color,
-          defaultHighlightColor,
-        );
+      final catBox = tester.widget<DecoratedBox>(
+        find
+            .ancestor(of: find.text('猫'), matching: find.byType(DecoratedBox))
+            .first,
+      );
+      expect((catBox.decoration as BoxDecoration).color, defaultHighlightColor);
 
-        final particleBox = tester.widget<DecoratedBox>(
-          find
-              .ancestor(of: find.text('が'), matching: find.byType(DecoratedBox))
-              .first,
-        );
-        expect(
-          (particleBox.decoration as BoxDecoration).color,
-          Colors.transparent,
-        );
-      },
-    );
+      final particleBox = tester.widget<DecoratedBox>(
+        find
+            .ancestor(of: find.text('が'), matching: find.byType(DecoratedBox))
+            .first,
+      );
+      expect(
+        (particleBox.decoration as BoxDecoration).color,
+        Colors.transparent,
+      );
+    });
 
     testWidgets('highlight uses the Settings-configured color, not a '
         'hardcoded default', (tester) async {
@@ -351,14 +342,12 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(TokenGlossView), findsOneWidget);
-        expect(find.text('五段-ラ行;終止形-一般'), findsOneWidget);
 
         await tester.tapAt(cardTopLeft + const Offset(16, 16));
         await tester.pumpAndSettle();
 
         expect(find.byType(TokenGlossView), findsNothing);
         expect(find.text('猫'), findsOneWidget);
-        expect(find.text('五段-ラ行;終止形-一般'), findsNothing);
       },
     );
   });
