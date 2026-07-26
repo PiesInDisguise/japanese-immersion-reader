@@ -10,9 +10,10 @@ import 'definition_rendering.dart';
 /// doesn't cover most of the reading surface behind it. Both Card Mode's and
 /// Document Mode's `_handleWordTap` call this instead of constructing
 /// [WordLookupSheet]/`showModalBottomSheet` directly, so the popup's size
-/// and position stay in one place. Returns whatever [WordLookupSheet] itself
-/// pops with (`true` if the word was mined during this popup's lifetime).
-Future<bool?> showWordLookupPopup({
+/// and position stay in one place. Returns `true` if the word was mined at
+/// any point during this popup's lifetime, regardless of what actually
+/// closed the popup.
+Future<bool> showWordLookupPopup({
   required BuildContext context,
   required Token token,
   required Future<List<DictionaryLookupHit>> Function() lookup,
@@ -23,8 +24,14 @@ Future<bool?> showWordLookupPopup({
   Future<bool> Function({required String expression, required String reading})?
   playPitchAccentAudio,
   bool autoMine = false,
-}) {
-  return showDialog<bool>(
+}) async {
+  // Whether the word got mined survives independently of *how* the dialog
+  // closes -- pressing "Add to Collection" pops immediately (see `_mine`),
+  // but `autoMine` deliberately does not (see `_autoMine`'s own doc
+  // comment), so the dialog might instead close via a barrier tap/Esc/back,
+  // none of which carry a `true` pop result themselves.
+  var mined = false;
+  await showDialog<void>(
     context: context,
     builder: (_) => Align(
       alignment: const Alignment(0, -0.3),
@@ -43,11 +50,13 @@ Future<bool?> showWordLookupPopup({
             checkPitchAccentActive: checkPitchAccentActive,
             playPitchAccentAudio: playPitchAccentAudio,
             autoMine: autoMine,
+            onMined: () => mined = true,
           ),
         ),
       ),
     ),
   );
+  return mined;
 }
 
 /// Card Mode's and Document Mode's shared tap-a-word popup (spec §6/§7/§10):
@@ -67,9 +76,11 @@ Future<bool?> showWordLookupPopup({
 /// Mode, the containing sentence) rather than this widget knowing about
 /// either.
 ///
-/// Pops itself with `true` (via [Navigator.pop]) if the word was mined
-/// during this sheet's lifetime, `null`/`false` otherwise. The caller uses
-/// that to decide whether to show the undo toast -- the toast itself lives
+/// Calls [onMined] the moment a mine actually happens, and (for a manual
+/// "Add to Collection" tap only, not `autoMine`) also closes the sheet --
+/// see [showWordLookupPopup], which turns that callback into its own return
+/// value regardless of how the sheet ends up closing. The caller uses that
+/// to decide whether to show the undo toast -- the toast itself lives
 /// outside this sheet, since spec's undo toast is meant to keep working even
 /// after this popup has closed.
 ///
@@ -90,6 +101,7 @@ class WordLookupSheet extends StatefulWidget {
     this.checkPitchAccentActive,
     this.playPitchAccentAudio,
     this.autoMine = false,
+    this.onMined,
   });
 
   final Token token;
@@ -112,6 +124,12 @@ class WordLookupSheet extends StatefulWidget {
   /// sentenceId: ...)` for Document Mode, closing over whichever sentence
   /// contains [token].
   final Future<void> Function(List<DictionaryLookupHit> senses) mine;
+
+  /// Fired the moment a mine actually happens (manual button press or
+  /// `autoMine`), regardless of whether that closes the sheet -- lets
+  /// [showWordLookupPopup] know whether to report a mine happened even when
+  /// `autoMine` mines without closing (see that method's own doc comment).
+  final VoidCallback? onMined;
 
   /// `ReaderMiningSession.ttsActive` (via whichever mode controller owns
   /// this session), checked once at open so the speaker button can be
@@ -141,6 +159,7 @@ class WordLookupSheet extends StatefulWidget {
 class _WordLookupSheetState extends State<WordLookupSheet> {
   late final Future<List<DictionaryLookupHit>> _lookupFuture;
   bool _mining = false;
+  bool _mined = false;
   bool _ttsActive = false;
   bool _pitchAccentActive = false;
   bool _playingPitchAccent = false;
@@ -154,13 +173,13 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
     _lookupFuture = widget.lookup();
     _initAudioAvailability();
     if (widget.autoMine) {
-      // Same `_mine` path the "Add to Collection" button uses (including
-      // its pop-with-true-on-success behavior, which is what tells the
-      // caller to show the undo toast) -- auto-add is just that same
-      // action firing automatically instead of waiting for a tap. Fires
-      // once, as soon as the lookup this sheet already started resolves.
+      // Fires once, as soon as the lookup this sheet already started
+      // resolves -- but via `_autoMine`, not `_mine`: unlike a manual "Add
+      // to Collection" tap, this isn't a user action that should also close
+      // the sheet. Auto-add's whole point is the user still gets to read
+      // the definition; only mining itself should happen automatically.
       _lookupFuture.then((hits) {
-        if (mounted) _mine(hits);
+        if (mounted) _autoMine(hits);
       });
     }
   }
@@ -179,10 +198,33 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
     });
   }
 
+  /// The "Add to Collection" button's handler -- an explicit user action,
+  /// so (unlike [_autoMine]) closing the sheet immediately afterward is the
+  /// expected, wanted behavior.
   Future<void> _mine(List<DictionaryLookupHit> hits) async {
     setState(() => _mining = true);
     await widget.mine(hits);
-    if (mounted) Navigator.of(context).pop(true);
+    widget.onMined?.call();
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  /// Spec §6's "Auto-add ON": mines [hits] without closing the sheet --
+  /// the user tapped a word to see its definition, and auto-add shouldn't
+  /// take that away by immediately dismissing the popup the moment mining
+  /// finishes (which, for a fast local lookup, could be near-instant). The
+  /// sheet stays open until the user dismisses it themselves; the "Add to
+  /// Collection" button just reflects the already-mined state meanwhile
+  /// (see `build`'s use of [_mined]).
+  Future<void> _autoMine(List<DictionaryLookupHit> hits) async {
+    setState(() => _mining = true);
+    await widget.mine(hits);
+    widget.onMined?.call();
+    if (mounted) {
+      setState(() {
+        _mining = false;
+        _mined = true;
+      });
+    }
   }
 
   Future<void> _speakWord() => widget.speak!(widget.token.surface);
@@ -288,9 +330,15 @@ class _WordLookupSheetState extends State<WordLookupSheet> {
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.bookmark_add_outlined),
-                      label: const Text('Add to Collection'),
-                      onPressed: _mining ? null : () => _mine(hits),
+                          : Icon(
+                              _mined
+                                  ? Icons.bookmark_added
+                                  : Icons.bookmark_add_outlined,
+                            ),
+                      label: Text(
+                        _mined ? 'Added to Collection' : 'Add to Collection',
+                      ),
+                      onPressed: (_mining || _mined) ? null : () => _mine(hits),
                     ),
                   ],
                 );
