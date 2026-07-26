@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The OCR pipeline fetches ONNX model weights over HTTP on first use,
+         the grammar-explanation feature calls the Anthropic API, and remote
+         book import fetches files by URL: all need this explicitly for a
+         release build (debug builds get network access for free, which is
+         why this was easy to miss during dev-only testing). -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="japanese_immersion_reader"
         android:name="${applicationName}"

@@ -64,6 +64,15 @@ dependencies:
   flutter_tts: ^4.2.5
   audioplayers: ^6.8.1
   flutter_colorpicker: ^1.1.0
+
+# See vendor/README.md: file_picker's upstream Android build.gradle
+# conflicts with audioplayers_android under this project's required
+# `android.builtInKotlin=false` -- this points at a locally-patched copy
+# instead, otherwise identical to the pinned file_picker version above.
+dependency_overrides:
+  file_picker:
+    path: vendor/file_picker
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -27,15 +27,30 @@ Future<void> ensureSudachiNativeLibraryInitialized() async {
 /// after a plain `cargo build` (debug profile), so callers don't silently
 /// depend on which one was last run.
 ///
-/// Like `dictionary_paths.dart`'s dev fallback, this is a placeholder for
-/// real native-library bundling (a `.dll`/`.so`/`.dylib` shipped with the
-/// packaged app via CMake/Gradle/an Xcode build phase, or a Dart
-/// native-assets hook), which is out of scope for this pass -- see
-/// docs/research/r4-tokenizer.md §6. It only works when running from a
-/// dev machine with `rust/target/{release,debug}` already built via
-/// `cargo build`.
+/// Android is bundled for real (see below) via a Gradle-driven cargo-ndk
+/// build. Every other platform is still the dev-machine placeholder this
+/// doc comment used to describe as the only case: like
+/// `dictionary_paths.dart`'s dev fallback, desktop bundling (a
+/// `.dll`/`.so`/`.dylib` shipped with the packaged app via CMake/an Xcode
+/// build phase, or a Dart native-assets hook) is out of scope for this pass
+/// -- see docs/research/r4-tokenizer.md §6. Those platforms only work when
+/// running from a dev machine with `rust/target/{release,debug}` already
+/// built via `cargo build`.
 ExternalLibrary _loadSudachiTokenizerLibrary() {
   const stem = 'sudachi_tokenizer';
+
+  if (Platform.isAndroid) {
+    // Android has no equivalent of a filesystem-path lookup relative to the
+    // process's cwd -- the library is instead bundled per-ABI under
+    // android/app/src/main/jniLibs/<abi>/libsudachi_tokenizer.so (built by
+    // the `cargoNdkBuild` Gradle task in android/app/build.gradle.kts,
+    // wired to run before every build) and extracted alongside the app's
+    // other native libraries at install time, where the system linker can
+    // already find it by its bare name with no path -- same convention
+    // every other Android NDK-backed Flutter plugin uses.
+    return ExternalLibrary.open('lib$stem.so');
+  }
+
   final String fileName;
   if (Platform.isWindows) {
     fileName = '$stem.dll';
