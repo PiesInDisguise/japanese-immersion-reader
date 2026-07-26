@@ -162,7 +162,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const Text('Palette presets'),
               const SizedBox(height: 8),
               SizedBox(
-                height: 92,
+                height: 108,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: themePresets.length,
@@ -584,34 +584,39 @@ class _ThemePresetSwatch extends StatelessWidget {
       child: SizedBox(
         width: 72,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).dividerColor),
-              ),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(child: ColoredBox(color: preset.background)),
-                        Expanded(child: ColoredBox(color: preset.text)),
-                      ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Expanded(child: Container(color: preset.background)),
+                          Expanded(child: Container(color: preset.text)),
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(child: ColoredBox(color: preset.card)),
-                        Expanded(child: ColoredBox(color: preset.accent)),
-                      ],
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Expanded(child: Container(color: preset.card)),
+                          Expanded(child: Container(color: preset.accent)),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 4),
