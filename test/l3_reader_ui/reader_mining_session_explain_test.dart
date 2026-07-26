@@ -43,6 +43,11 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
     bool? autoAddToCollection,
+    bool? reviewShowSentenceOnFront,
+    bool? reviewSwipeUpEnabled,
+    bool? reviewSwipeDownEnabled,
+    bool? reviewSwipeLeftEnabled,
+    bool? reviewSwipeRightEnabled,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
@@ -52,8 +57,17 @@ class FakeSettingsRepository extends SettingsRepository {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
-      autoAddToCollection:
-          autoAddToCollection ?? _settings.autoAddToCollection,
+      autoAddToCollection: autoAddToCollection ?? _settings.autoAddToCollection,
+      reviewShowSentenceOnFront:
+          reviewShowSentenceOnFront ?? _settings.reviewShowSentenceOnFront,
+      reviewSwipeUpEnabled:
+          reviewSwipeUpEnabled ?? _settings.reviewSwipeUpEnabled,
+      reviewSwipeDownEnabled:
+          reviewSwipeDownEnabled ?? _settings.reviewSwipeDownEnabled,
+      reviewSwipeLeftEnabled:
+          reviewSwipeLeftEnabled ?? _settings.reviewSwipeLeftEnabled,
+      reviewSwipeRightEnabled:
+          reviewSwipeRightEnabled ?? _settings.reviewSwipeRightEnabled,
     );
   }
 }
@@ -100,8 +114,11 @@ final _testSessionProvider = Provider<ReaderMiningSession>(
   (ref) => ReaderMiningSession(ref),
 );
 
-Sentence _sentence(String id, String surface) =>
-    Sentence(id: id, index: 0, tokens: [Token(surface: surface)]);
+Sentence _sentence(String id, String surface) => Sentence(
+  id: id,
+  index: 0,
+  tokens: [Token(surface: surface)],
+);
 
 void main() {
   group('ReaderMiningSession.explanationsActive', () {

@@ -21,6 +21,11 @@ class AppSettings {
     required this.pitchAccentAudioEnabled,
     this.highlightColor = defaultHighlightColor,
     this.autoAddToCollection = false,
+    this.reviewShowSentenceOnFront = false,
+    this.reviewSwipeUpEnabled = true,
+    this.reviewSwipeDownEnabled = true,
+    this.reviewSwipeLeftEnabled = true,
+    this.reviewSwipeRightEnabled = true,
   });
 
   static const defaults = AppSettings(
@@ -30,6 +35,11 @@ class AppSettings {
     pitchAccentAudioEnabled: false,
     highlightColor: defaultHighlightColor,
     autoAddToCollection: false,
+    reviewShowSentenceOnFront: false,
+    reviewSwipeUpEnabled: true,
+    reviewSwipeDownEnabled: true,
+    reviewSwipeLeftEnabled: true,
+    reviewSwipeRightEnabled: true,
   );
 
   final String? llmApiKey;
@@ -41,6 +51,20 @@ class AppSettings {
   /// Spec §6/§14: "Mining — auto-add on/off." See `WordLookupSheet.autoMine`
   /// for what this actually changes at the UI level.
   final bool autoAddToCollection;
+
+  /// Spec §12 review screen: show a word card's original source sentence
+  /// (with the word itself highlighted) as its front, instead of the bare
+  /// word. See `core/db/tables.dart`'s `Settings.reviewShowSentenceOnFront`
+  /// for the full reasoning.
+  final bool reviewShowSentenceOnFront;
+
+  /// Review-screen swipe-to-rate, one flag per direction -- see
+  /// `core/db/tables.dart`'s matching columns for why these are separate
+  /// per-direction toggles rather than one on/off switch.
+  final bool reviewSwipeUpEnabled;
+  final bool reviewSwipeDownEnabled;
+  final bool reviewSwipeLeftEnabled;
+  final bool reviewSwipeRightEnabled;
 
   /// Whether spec §8 layer 3 should actually attempt a real network call --
   /// both the toggle *and* a configured API key are required, not just the
@@ -88,6 +112,11 @@ class SettingsRepository {
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
     bool? autoAddToCollection,
+    bool? reviewShowSentenceOnFront,
+    bool? reviewSwipeUpEnabled,
+    bool? reviewSwipeDownEnabled,
+    bool? reviewSwipeLeftEnabled,
+    bool? reviewSwipeRightEnabled,
   }) async {
     final current = await read();
     await _db
@@ -109,6 +138,21 @@ class SettingsRepository {
             autoAddToCollection: Value(
               autoAddToCollection ?? current.autoAddToCollection,
             ),
+            reviewShowSentenceOnFront: Value(
+              reviewShowSentenceOnFront ?? current.reviewShowSentenceOnFront,
+            ),
+            reviewSwipeUpEnabled: Value(
+              reviewSwipeUpEnabled ?? current.reviewSwipeUpEnabled,
+            ),
+            reviewSwipeDownEnabled: Value(
+              reviewSwipeDownEnabled ?? current.reviewSwipeDownEnabled,
+            ),
+            reviewSwipeLeftEnabled: Value(
+              reviewSwipeLeftEnabled ?? current.reviewSwipeLeftEnabled,
+            ),
+            reviewSwipeRightEnabled: Value(
+              reviewSwipeRightEnabled ?? current.reviewSwipeRightEnabled,
+            ),
             // Spec §13 sync-readiness -- see tables.dart's own audit note.
             updatedAt: Value(DateTime.now().toUtc()),
           ),
@@ -124,5 +168,10 @@ class SettingsRepository {
         ? defaultHighlightColor
         : Color(row.highlightColorValue!),
     autoAddToCollection: row.autoAddToCollection,
+    reviewShowSentenceOnFront: row.reviewShowSentenceOnFront,
+    reviewSwipeUpEnabled: row.reviewSwipeUpEnabled,
+    reviewSwipeDownEnabled: row.reviewSwipeDownEnabled,
+    reviewSwipeLeftEnabled: row.reviewSwipeLeftEnabled,
+    reviewSwipeRightEnabled: row.reviewSwipeRightEnabled,
   );
 }

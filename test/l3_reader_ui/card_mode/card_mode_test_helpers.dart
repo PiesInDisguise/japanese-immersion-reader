@@ -182,6 +182,11 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
     bool? autoAddToCollection,
+    bool? reviewShowSentenceOnFront,
+    bool? reviewSwipeUpEnabled,
+    bool? reviewSwipeDownEnabled,
+    bool? reviewSwipeLeftEnabled,
+    bool? reviewSwipeRightEnabled,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
@@ -191,8 +196,17 @@ class FakeSettingsRepository extends SettingsRepository {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
-      autoAddToCollection:
-          autoAddToCollection ?? _settings.autoAddToCollection,
+      autoAddToCollection: autoAddToCollection ?? _settings.autoAddToCollection,
+      reviewShowSentenceOnFront:
+          reviewShowSentenceOnFront ?? _settings.reviewShowSentenceOnFront,
+      reviewSwipeUpEnabled:
+          reviewSwipeUpEnabled ?? _settings.reviewSwipeUpEnabled,
+      reviewSwipeDownEnabled:
+          reviewSwipeDownEnabled ?? _settings.reviewSwipeDownEnabled,
+      reviewSwipeLeftEnabled:
+          reviewSwipeLeftEnabled ?? _settings.reviewSwipeLeftEnabled,
+      reviewSwipeRightEnabled:
+          reviewSwipeRightEnabled ?? _settings.reviewSwipeRightEnabled,
     );
   }
 }
@@ -209,11 +223,14 @@ class FakeSettingsRepository extends SettingsRepository {
 class FakeDocumentRepository extends DocumentRepository {
   FakeDocumentRepository() : super(_inertDatabase());
 
-  final List<({String documentId, String sentenceId})> updateLastSentenceIdCalls =
-      [];
+  final List<({String documentId, String sentenceId})>
+  updateLastSentenceIdCalls = [];
 
   @override
-  Future<void> updateLastSentenceId(String documentId, String sentenceId) async {
+  Future<void> updateLastSentenceId(
+    String documentId,
+    String sentenceId,
+  ) async {
     updateLastSentenceIdCalls.add((
       documentId: documentId,
       sentenceId: sentenceId,

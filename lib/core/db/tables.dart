@@ -456,8 +456,9 @@ class Settings extends Table {
   /// to be additive/optional (spec §8: "already fully usable without it"),
   /// so the only real gate on whether it actually runs is whether an API key
   /// is present, not this toggle needing an extra opt-in step too.
-  BoolColumn get llmExplanationsEnabled =>
-      boolean().withDefault(const Constant(true)).named('llm_explanations_enabled')();
+  BoolColumn get llmExplanationsEnabled => boolean()
+      .withDefault(const Constant(true))
+      .named('llm_explanations_enabled')();
 
   /// Spec §9/§14: "TTS on/off" -- unlike [llmExplanationsEnabled], this
   /// defaults *off*: spec §9 states audio is "optional, off by default" and
@@ -498,6 +499,38 @@ class Settings extends Table {
   BoolColumn get autoAddToCollection => boolean()
       .withDefault(const Constant(false))
       .named('auto_add_to_collection')();
+
+  /// Spec §12 review screen: show the word's original source sentence (with
+  /// the word itself highlighted, found by re-tokenizing the sentence at
+  /// review-queue-build time and matching by dictForm/reading -- see
+  /// `ReviewController.build`) as the front of a word review card, instead
+  /// of just the bare word. Off by default -- the bare-word recognition
+  /// front is this app's original, unchanged behavior. Grammar cards are
+  /// unaffected either way: there's no single "word" to highlight for those.
+  BoolColumn get reviewShowSentenceOnFront => boolean()
+      .withDefault(const Constant(false))
+      .named('review_show_sentence_on_front')();
+
+  /// Review-screen swipe-to-rate, one toggle per direction so a user who
+  /// only wants (say) up/down can disable left/right rather than all-or-
+  /// nothing. The direction-to-rating mapping itself
+  /// (up=Easy/right=Good/left=Hard/down=Again -- see
+  /// `review_screen.dart`'s `_ratingForSwipe`) is fixed, not configurable;
+  /// only whether each direction is live at all. All default on: the
+  /// on-screen rating buttons are always shown regardless, so enabling
+  /// swipe never removes an existing way to rate a card.
+  BoolColumn get reviewSwipeUpEnabled => boolean()
+      .withDefault(const Constant(true))
+      .named('review_swipe_up_enabled')();
+  BoolColumn get reviewSwipeDownEnabled => boolean()
+      .withDefault(const Constant(true))
+      .named('review_swipe_down_enabled')();
+  BoolColumn get reviewSwipeLeftEnabled => boolean()
+      .withDefault(const Constant(true))
+      .named('review_swipe_left_enabled')();
+  BoolColumn get reviewSwipeRightEnabled => boolean()
+      .withDefault(const Constant(true))
+      .named('review_swipe_right_enabled')();
 
   @override
   Set<Column> get primaryKey => {id};

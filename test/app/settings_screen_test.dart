@@ -39,6 +39,11 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
     bool? autoAddToCollection,
+    bool? reviewShowSentenceOnFront,
+    bool? reviewSwipeUpEnabled,
+    bool? reviewSwipeDownEnabled,
+    bool? reviewSwipeLeftEnabled,
+    bool? reviewSwipeRightEnabled,
   }) async {
     if (highlightColor != null) highlightColorUpdates.add(highlightColor);
     _settings = AppSettings(
@@ -49,8 +54,17 @@ class FakeSettingsRepository extends SettingsRepository {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
-      autoAddToCollection:
-          autoAddToCollection ?? _settings.autoAddToCollection,
+      autoAddToCollection: autoAddToCollection ?? _settings.autoAddToCollection,
+      reviewShowSentenceOnFront:
+          reviewShowSentenceOnFront ?? _settings.reviewShowSentenceOnFront,
+      reviewSwipeUpEnabled:
+          reviewSwipeUpEnabled ?? _settings.reviewSwipeUpEnabled,
+      reviewSwipeDownEnabled:
+          reviewSwipeDownEnabled ?? _settings.reviewSwipeDownEnabled,
+      reviewSwipeLeftEnabled:
+          reviewSwipeLeftEnabled ?? _settings.reviewSwipeLeftEnabled,
+      reviewSwipeRightEnabled:
+          reviewSwipeRightEnabled ?? _settings.reviewSwipeRightEnabled,
     );
   }
 }

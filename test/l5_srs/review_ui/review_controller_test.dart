@@ -9,13 +9,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:japanese_immersion_reader/app/document_repository.dart';
 import 'package:japanese_immersion_reader/app/services.dart';
+import 'package:japanese_immersion_reader/app/settings_repository.dart';
 import 'package:japanese_immersion_reader/core/db/database.dart';
+import 'package:japanese_immersion_reader/core/models/models.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/dictionary/dictionary_repository.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_matcher.dart';
 import 'package:japanese_immersion_reader/l2_linguistics/grammar/grammar_point.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/grammar_collection_repository.dart';
 import 'package:japanese_immersion_reader/l4_mining/collection/word_collection_repository.dart';
 import 'package:japanese_immersion_reader/l5_srs/review_ui/review_controller.dart';
+
+import '../../l3_reader_ui/card_mode/card_mode_test_helpers.dart'
+    show FakeSettingsRepository, FakeTokenizer;
 
 AppDatabase? _sharedInertDatabase;
 AppDatabase _inertDatabase() => _sharedInertDatabase ??= AppDatabase();
@@ -162,10 +167,10 @@ void main() {
   setUp(() {
     wordRepository = FakeWordCollectionRepository();
     grammarRepository = FakeGrammarCollectionRepository();
-    dictionaryRepository = FakeDictionaryRepository({'猫': [_catHit()]});
-    documentRepository = FakeDocumentRepository({
-      'sentence-1': '猫が好きです。',
+    dictionaryRepository = FakeDictionaryRepository({
+      '猫': [_catHit()],
     });
+    documentRepository = FakeDocumentRepository({'sentence-1': '猫が好きです。'});
 
     container = ProviderContainer(
       overrides: [
@@ -178,6 +183,10 @@ void main() {
         grammarDatabaseProvider.overrideWith(
           (ref) async => GrammarMatcher([_grammarPoint]),
         ),
+        // Default settings (reviewShowSentenceOnFront off) -- most tests
+        // don't care about it, and this keeps `build()`'s
+        // `tokenizerProvider` watch un-triggered for them.
+        settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository()),
       ],
     );
     addTearDown(container.dispose);
@@ -189,66 +198,67 @@ void main() {
     expect(state.isComplete, isTrue);
   });
 
-  test('builds word cards with dictionary meaning and source context', () async {
-    wordRepository.dueWords = [
-      DueWord(
-        id: 'word-1',
-        dictForm: '猫',
-        reading: 'ねこ',
-        senseIds: const [1],
-        due: DateTime.utc(2026, 1, 1),
-      ),
-    ];
-    wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
-
-    final state = await container.read(reviewControllerProvider.future);
-
-    expect(state.cards, hasLength(1));
-    final card = state.cards.single;
-    expect(card.kind, ReviewCardKind.word);
-    expect(card.front, '猫 (ねこ)');
-    expect(card.back, 'cat; feline');
-    expect(card.contextSentence, '猫が好きです。');
-  });
-
   test(
-    'builds a word card whose definitions mix plain strings and '
-    'structured-content entries, without crashing',
+    'builds word cards with dictionary meaning and source context',
     () async {
-      dictionaryRepository = FakeDictionaryRepository({
-        '難しい': [_structuredContentHit()],
-      });
-      container.dispose();
-      container = ProviderContainer(
-        overrides: [
-          wordCollectionRepositoryProvider.overrideWithValue(wordRepository),
-          grammarCollectionRepositoryProvider.overrideWithValue(
-            grammarRepository,
-          ),
-          dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
-          documentRepositoryProvider.overrideWithValue(documentRepository),
-          grammarDatabaseProvider.overrideWith(
-            (ref) async => GrammarMatcher([_grammarPoint]),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
       wordRepository.dueWords = [
         DueWord(
-          id: 'word-2',
-          dictForm: '難しい',
-          reading: 'むずかしい',
-          senseIds: const [2],
+          id: 'word-1',
+          dictForm: '猫',
+          reading: 'ねこ',
+          senseIds: const [1],
           due: DateTime.utc(2026, 1, 1),
         ),
       ];
+      wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
 
       final state = await container.read(reviewControllerProvider.future);
 
       expect(state.cards, hasLength(1));
-      expect(state.cards.single.back, 'difficult; hard, tough');
+      final card = state.cards.single;
+      expect(card.kind, ReviewCardKind.word);
+      expect(card.front, '猫 (ねこ)');
+      expect(card.back, 'cat; feline');
+      expect(card.contextSentence, '猫が好きです。');
     },
   );
+
+  test('builds a word card whose definitions mix plain strings and '
+      'structured-content entries, without crashing', () async {
+    dictionaryRepository = FakeDictionaryRepository({
+      '難しい': [_structuredContentHit()],
+    });
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        wordCollectionRepositoryProvider.overrideWithValue(wordRepository),
+        grammarCollectionRepositoryProvider.overrideWithValue(
+          grammarRepository,
+        ),
+        dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
+        documentRepositoryProvider.overrideWithValue(documentRepository),
+        grammarDatabaseProvider.overrideWith(
+          (ref) async => GrammarMatcher([_grammarPoint]),
+        ),
+        settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository()),
+      ],
+    );
+    addTearDown(container.dispose);
+    wordRepository.dueWords = [
+      DueWord(
+        id: 'word-2',
+        dictForm: '難しい',
+        reading: 'むずかしい',
+        senseIds: const [2],
+        due: DateTime.utc(2026, 1, 1),
+      ),
+    ];
+
+    final state = await container.read(reviewControllerProvider.future);
+
+    expect(state.cards, hasLength(1));
+    expect(state.cards.single.back, 'difficult; hard, tough');
+  });
 
   test('builds grammar cards from the grammar-point database', () async {
     grammarRepository.dueGrammars = [
@@ -311,39 +321,219 @@ void main() {
     expect(state.index, 0);
   });
 
-  test('rate calls the right repository\'s review() and advances the queue', () async {
-    wordRepository.dueWords = [
-      DueWord(
-        id: 'word-1',
-        dictForm: '猫',
-        reading: 'ねこ',
-        senseIds: const [],
-        due: DateTime.utc(2026, 1, 1),
-      ),
-    ];
-    grammarRepository.dueGrammars = [
-      DueGrammar(
-        id: 'grammar-1',
-        grammarPointId: 'te-iru-progressive',
-        due: DateTime.utc(2026, 1, 2),
-      ),
-    ];
-    await container.read(reviewControllerProvider.future);
+  test(
+    'rate calls the right repository\'s review() and advances the queue',
+    () async {
+      wordRepository.dueWords = [
+        DueWord(
+          id: 'word-1',
+          dictForm: '猫',
+          reading: 'ねこ',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      grammarRepository.dueGrammars = [
+        DueGrammar(
+          id: 'grammar-1',
+          grammarPointId: 'te-iru-progressive',
+          due: DateTime.utc(2026, 1, 2),
+        ),
+      ];
+      await container.read(reviewControllerProvider.future);
 
-    final notifier = container.read(reviewControllerProvider.notifier);
-    await notifier.rate(Rating.good);
+      final notifier = container.read(reviewControllerProvider.notifier);
+      await notifier.rate(Rating.good);
 
-    expect(wordRepository.reviewCalls, [(id: 'word-1', rating: Rating.good)]);
-    var state = container.read(reviewControllerProvider).value!;
-    expect(state.index, 1);
-    expect(state.isRevealed, isFalse);
-    expect(state.current!.entryId, 'grammar-1');
+      expect(wordRepository.reviewCalls, [(id: 'word-1', rating: Rating.good)]);
+      var state = container.read(reviewControllerProvider).value!;
+      expect(state.index, 1);
+      expect(state.isRevealed, isFalse);
+      expect(state.current!.entryId, 'grammar-1');
 
-    await notifier.rate(Rating.again);
-    expect(grammarRepository.reviewCalls, [
-      (id: 'grammar-1', rating: Rating.again),
-    ]);
-    state = container.read(reviewControllerProvider).value!;
-    expect(state.isComplete, isTrue);
+      await notifier.rate(Rating.again);
+      expect(grammarRepository.reviewCalls, [
+        (id: 'grammar-1', rating: Rating.again),
+      ]);
+      state = container.read(reviewControllerProvider).value!;
+      expect(state.isComplete, isTrue);
+    },
+  );
+
+  group('reviewShowSentenceOnFront', () {
+    const showSentenceSettings = AppSettings(
+      llmApiKey: null,
+      llmExplanationsEnabled: true,
+      ttsEnabled: false,
+      pitchAccentAudioEnabled: false,
+      reviewShowSentenceOnFront: true,
+    );
+
+    test('off by default: no highlight span is computed, and the tokenizer is '
+        'never even asked for one', () async {
+      wordRepository.dueWords = [
+        DueWord(
+          id: 'word-1',
+          dictForm: '猫',
+          reading: 'ねこ',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
+
+      final state = await container.read(reviewControllerProvider.future);
+
+      final card = state.cards.single;
+      expect(card.frontHighlightStart, isNull);
+      expect(card.frontHighlightEnd, isNull);
+    });
+
+    test('when on, re-tokenizes the context sentence and highlights the span '
+        'whose dictForm matches -- even though the word\'s own stored '
+        '`reading` (from whenever it was first mined) no longer matches this '
+        'sentence\'s conjugation', () async {
+      documentRepository = FakeDocumentRepository({'sentence-1': '猫が走った。'});
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          wordCollectionRepositoryProvider.overrideWithValue(wordRepository),
+          grammarCollectionRepositoryProvider.overrideWithValue(
+            grammarRepository,
+          ),
+          dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
+          documentRepositoryProvider.overrideWithValue(documentRepository),
+          grammarDatabaseProvider.overrideWith(
+            (ref) async => GrammarMatcher([_grammarPoint]),
+          ),
+          settingsRepositoryProvider.overrideWithValue(
+            FakeSettingsRepository(showSentenceSettings),
+          ),
+          tokenizerProvider.overrideWith(
+            (ref) async => FakeTokenizer({
+              '猫が走った。': const [
+                Token(surface: '猫', dictForm: '猫', reading: 'ネコ'),
+                Token(surface: 'が', dictForm: 'が', reading: 'ガ'),
+                Token(surface: '走った', dictForm: '走る', reading: 'ハシッタ'),
+                Token(surface: '。', dictForm: '。', reading: '。'),
+              ],
+            }),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      wordRepository.dueWords = [
+        // Stored `reading` (ハシル, dictForm 走る's own reading) is
+        // deliberately different from the token's actual surface reading
+        // (ハシッタ) above -- proof this matches on dictForm alone.
+        DueWord(
+          id: 'word-1',
+          dictForm: '走る',
+          reading: 'ハシル',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
+
+      final state = await container.read(reviewControllerProvider.future);
+
+      final card = state.cards.single;
+      expect(card.contextSentence, '猫が走った。');
+      // '猫'(1) + 'が'(1) = offset 2; '走った' is 3 characters.
+      expect(card.frontHighlightStart, 2);
+      expect(card.frontHighlightEnd, 5);
+    });
+
+    test('falls back to no highlight span (but still keeps the context '
+        "sentence) when the word can't be relocated in it", () async {
+      documentRepository = FakeDocumentRepository({'sentence-1': '犬が鳴いた。'});
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          wordCollectionRepositoryProvider.overrideWithValue(wordRepository),
+          grammarCollectionRepositoryProvider.overrideWithValue(
+            grammarRepository,
+          ),
+          dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
+          documentRepositoryProvider.overrideWithValue(documentRepository),
+          grammarDatabaseProvider.overrideWith(
+            (ref) async => GrammarMatcher([_grammarPoint]),
+          ),
+          settingsRepositoryProvider.overrideWithValue(
+            FakeSettingsRepository(showSentenceSettings),
+          ),
+          tokenizerProvider.overrideWith(
+            (ref) async => FakeTokenizer({
+              '犬が鳴いた。': const [
+                Token(surface: '犬', dictForm: '犬', reading: 'イヌ'),
+                Token(surface: 'が', dictForm: 'が', reading: 'ガ'),
+                Token(surface: '鳴いた', dictForm: '鳴く', reading: 'ナイタ'),
+                Token(surface: '。', dictForm: '。', reading: '。'),
+              ],
+            }),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      wordRepository.dueWords = [
+        DueWord(
+          id: 'word-1',
+          dictForm: '猫',
+          reading: 'ネコ',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
+
+      final state = await container.read(reviewControllerProvider.future);
+
+      final card = state.cards.single;
+      expect(card.contextSentence, '犬が鳴いた。');
+      expect(card.frontHighlightStart, isNull);
+      expect(card.frontHighlightEnd, isNull);
+    });
+
+    test('never applies to grammar cards', () async {
+      grammarRepository.dueGrammars = [
+        DueGrammar(
+          id: 'grammar-1',
+          grammarPointId: 'te-iru-progressive',
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      grammarRepository.sentenceIdsByEntry['grammar-1'] = 'sentence-1';
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          wordCollectionRepositoryProvider.overrideWithValue(wordRepository),
+          grammarCollectionRepositoryProvider.overrideWithValue(
+            grammarRepository,
+          ),
+          dictionaryRepositoryProvider.overrideWithValue(dictionaryRepository),
+          documentRepositoryProvider.overrideWithValue(documentRepository),
+          grammarDatabaseProvider.overrideWith(
+            (ref) async => GrammarMatcher([_grammarPoint]),
+          ),
+          settingsRepositoryProvider.overrideWithValue(
+            FakeSettingsRepository(showSentenceSettings),
+          ),
+          tokenizerProvider.overrideWith(
+            (ref) async => FakeTokenizer({'猫が好きです。': const []}),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final state = await container.read(reviewControllerProvider.future);
+
+      final card = state.cards.single;
+      expect(card.kind, ReviewCardKind.grammar);
+      expect(card.frontHighlightStart, isNull);
+      expect(card.frontHighlightEnd, isNull);
+    });
   });
 }

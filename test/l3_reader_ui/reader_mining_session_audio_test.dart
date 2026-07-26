@@ -37,6 +37,11 @@ class FakeSettingsRepository extends SettingsRepository {
     bool? pitchAccentAudioEnabled,
     Color? highlightColor,
     bool? autoAddToCollection,
+    bool? reviewShowSentenceOnFront,
+    bool? reviewSwipeUpEnabled,
+    bool? reviewSwipeDownEnabled,
+    bool? reviewSwipeLeftEnabled,
+    bool? reviewSwipeRightEnabled,
   }) async {
     _settings = AppSettings(
       llmApiKey: llmApiKey ?? _settings.llmApiKey,
@@ -46,8 +51,17 @@ class FakeSettingsRepository extends SettingsRepository {
       pitchAccentAudioEnabled:
           pitchAccentAudioEnabled ?? _settings.pitchAccentAudioEnabled,
       highlightColor: highlightColor ?? _settings.highlightColor,
-      autoAddToCollection:
-          autoAddToCollection ?? _settings.autoAddToCollection,
+      autoAddToCollection: autoAddToCollection ?? _settings.autoAddToCollection,
+      reviewShowSentenceOnFront:
+          reviewShowSentenceOnFront ?? _settings.reviewShowSentenceOnFront,
+      reviewSwipeUpEnabled:
+          reviewSwipeUpEnabled ?? _settings.reviewSwipeUpEnabled,
+      reviewSwipeDownEnabled:
+          reviewSwipeDownEnabled ?? _settings.reviewSwipeDownEnabled,
+      reviewSwipeLeftEnabled:
+          reviewSwipeLeftEnabled ?? _settings.reviewSwipeLeftEnabled,
+      reviewSwipeRightEnabled:
+          reviewSwipeRightEnabled ?? _settings.reviewSwipeRightEnabled,
     );
   }
 }
@@ -164,55 +178,61 @@ void main() {
   });
 
   group('ReaderMiningSession pitch-accent audio', () {
-    test('playPitchAccentAudio plays and returns true when audio exists', () async {
-      final playedPaths = <String>[];
-      final container = _buildContainer(
-        settings: const AppSettings(
-          llmApiKey: null,
-          llmExplanationsEnabled: true,
-          ttsEnabled: false,
-          pitchAccentAudioEnabled: true,
-        ),
-        tts: FakeTtsService(),
-        pitchAccentProvider: FakePitchAccentAudioProvider({
-          '猫|ねこ': Uint8List.fromList([1, 2, 3]),
-        }),
-        playedPaths: playedPaths,
-      );
-      addTearDown(container.dispose);
+    test(
+      'playPitchAccentAudio plays and returns true when audio exists',
+      () async {
+        final playedPaths = <String>[];
+        final container = _buildContainer(
+          settings: const AppSettings(
+            llmApiKey: null,
+            llmExplanationsEnabled: true,
+            ttsEnabled: false,
+            pitchAccentAudioEnabled: true,
+          ),
+          tts: FakeTtsService(),
+          pitchAccentProvider: FakePitchAccentAudioProvider({
+            '猫|ねこ': Uint8List.fromList([1, 2, 3]),
+          }),
+          playedPaths: playedPaths,
+        );
+        addTearDown(container.dispose);
 
-      final session = container.read(_testSessionProvider);
-      final played = await session.playPitchAccentAudio(
-        expression: '猫',
-        reading: 'ねこ',
-      );
+        final session = container.read(_testSessionProvider);
+        final played = await session.playPitchAccentAudio(
+          expression: '猫',
+          reading: 'ねこ',
+        );
 
-      expect(played, isTrue);
-      expect(playedPaths, hasLength(1));
-    });
+        expect(played, isTrue);
+        expect(playedPaths, hasLength(1));
+      },
+    );
 
-    test('playPitchAccentAudio returns false when no recording exists', () async {
-      final container = _buildContainer(
-        settings: const AppSettings(
-          llmApiKey: null,
-          llmExplanationsEnabled: true,
-          ttsEnabled: false,
-          pitchAccentAudioEnabled: true,
-        ),
-        tts: FakeTtsService(),
-        pitchAccentProvider: FakePitchAccentAudioProvider(const {}),
-        playedPaths: [],
-      );
-      addTearDown(container.dispose);
+    test(
+      'playPitchAccentAudio returns false when no recording exists',
+      () async {
+        final container = _buildContainer(
+          settings: const AppSettings(
+            llmApiKey: null,
+            llmExplanationsEnabled: true,
+            ttsEnabled: false,
+            pitchAccentAudioEnabled: true,
+          ),
+          tts: FakeTtsService(),
+          pitchAccentProvider: FakePitchAccentAudioProvider(const {}),
+          playedPaths: [],
+        );
+        addTearDown(container.dispose);
 
-      final session = container.read(_testSessionProvider);
-      final played = await session.playPitchAccentAudio(
-        expression: '無い',
-        reading: 'ない',
-      );
+        final session = container.read(_testSessionProvider);
+        final played = await session.playPitchAccentAudio(
+          expression: '無い',
+          reading: 'ない',
+        );
 
-      expect(played, isFalse);
-    });
+        expect(played, isFalse);
+      },
+    );
 
     test('playPitchAccentAudio throws when the toggle is off', () async {
       final container = _buildContainer(

@@ -6457,6 +6457,80 @@ class $SettingsTable extends Settings
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _reviewShowSentenceOnFrontMeta =
+      const VerificationMeta('reviewShowSentenceOnFront');
+  @override
+  late final GeneratedColumn<bool> reviewShowSentenceOnFront =
+      GeneratedColumn<bool>(
+        'review_show_sentence_on_front',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("review_show_sentence_on_front" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _reviewSwipeUpEnabledMeta =
+      const VerificationMeta('reviewSwipeUpEnabled');
+  @override
+  late final GeneratedColumn<bool> reviewSwipeUpEnabled = GeneratedColumn<bool>(
+    'review_swipe_up_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("review_swipe_up_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _reviewSwipeDownEnabledMeta =
+      const VerificationMeta('reviewSwipeDownEnabled');
+  @override
+  late final GeneratedColumn<bool> reviewSwipeDownEnabled =
+      GeneratedColumn<bool>(
+        'review_swipe_down_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("review_swipe_down_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _reviewSwipeLeftEnabledMeta =
+      const VerificationMeta('reviewSwipeLeftEnabled');
+  @override
+  late final GeneratedColumn<bool> reviewSwipeLeftEnabled =
+      GeneratedColumn<bool>(
+        'review_swipe_left_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("review_swipe_left_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
+  static const VerificationMeta _reviewSwipeRightEnabledMeta =
+      const VerificationMeta('reviewSwipeRightEnabled');
+  @override
+  late final GeneratedColumn<bool> reviewSwipeRightEnabled =
+      GeneratedColumn<bool>(
+        'review_swipe_right_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("review_swipe_right_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(true),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6467,6 +6541,11 @@ class $SettingsTable extends Settings
     updatedAt,
     highlightColorValue,
     autoAddToCollection,
+    reviewShowSentenceOnFront,
+    reviewSwipeUpEnabled,
+    reviewSwipeDownEnabled,
+    reviewSwipeLeftEnabled,
+    reviewSwipeRightEnabled,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6537,6 +6616,51 @@ class $SettingsTable extends Settings
         ),
       );
     }
+    if (data.containsKey('review_show_sentence_on_front')) {
+      context.handle(
+        _reviewShowSentenceOnFrontMeta,
+        reviewShowSentenceOnFront.isAcceptableOrUnknown(
+          data['review_show_sentence_on_front']!,
+          _reviewShowSentenceOnFrontMeta,
+        ),
+      );
+    }
+    if (data.containsKey('review_swipe_up_enabled')) {
+      context.handle(
+        _reviewSwipeUpEnabledMeta,
+        reviewSwipeUpEnabled.isAcceptableOrUnknown(
+          data['review_swipe_up_enabled']!,
+          _reviewSwipeUpEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('review_swipe_down_enabled')) {
+      context.handle(
+        _reviewSwipeDownEnabledMeta,
+        reviewSwipeDownEnabled.isAcceptableOrUnknown(
+          data['review_swipe_down_enabled']!,
+          _reviewSwipeDownEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('review_swipe_left_enabled')) {
+      context.handle(
+        _reviewSwipeLeftEnabledMeta,
+        reviewSwipeLeftEnabled.isAcceptableOrUnknown(
+          data['review_swipe_left_enabled']!,
+          _reviewSwipeLeftEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('review_swipe_right_enabled')) {
+      context.handle(
+        _reviewSwipeRightEnabledMeta,
+        reviewSwipeRightEnabled.isAcceptableOrUnknown(
+          data['review_swipe_right_enabled']!,
+          _reviewSwipeRightEnabledMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -6577,6 +6701,26 @@ class $SettingsTable extends Settings
       autoAddToCollection: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}auto_add_to_collection'],
+      )!,
+      reviewShowSentenceOnFront: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}review_show_sentence_on_front'],
+      )!,
+      reviewSwipeUpEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}review_swipe_up_enabled'],
+      )!,
+      reviewSwipeDownEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}review_swipe_down_enabled'],
+      )!,
+      reviewSwipeLeftEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}review_swipe_left_enabled'],
+      )!,
+      reviewSwipeRightEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}review_swipe_right_enabled'],
       )!,
     );
   }
@@ -6638,6 +6782,28 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// app's existing tap-then-explicit-add flow (spec's "Auto-add OFF"
   /// behavior) as the unchanged default.
   final bool autoAddToCollection;
+
+  /// Spec §12 review screen: show the word's original source sentence (with
+  /// the word itself highlighted, found by re-tokenizing the sentence at
+  /// review-queue-build time and matching by dictForm/reading -- see
+  /// `ReviewController.build`) as the front of a word review card, instead
+  /// of just the bare word. Off by default -- the bare-word recognition
+  /// front is this app's original, unchanged behavior. Grammar cards are
+  /// unaffected either way: there's no single "word" to highlight for those.
+  final bool reviewShowSentenceOnFront;
+
+  /// Review-screen swipe-to-rate, one toggle per direction so a user who
+  /// only wants (say) up/down can disable left/right rather than all-or-
+  /// nothing. The direction-to-rating mapping itself
+  /// (up=Easy/right=Good/left=Hard/down=Again -- see
+  /// `review_screen.dart`'s `_ratingForSwipe`) is fixed, not configurable;
+  /// only whether each direction is live at all. All default on: the
+  /// on-screen rating buttons are always shown regardless, so enabling
+  /// swipe never removes an existing way to rate a card.
+  final bool reviewSwipeUpEnabled;
+  final bool reviewSwipeDownEnabled;
+  final bool reviewSwipeLeftEnabled;
+  final bool reviewSwipeRightEnabled;
   const SettingsRow({
     required this.id,
     this.llmApiKey,
@@ -6647,6 +6813,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     this.updatedAt,
     this.highlightColorValue,
     required this.autoAddToCollection,
+    required this.reviewShowSentenceOnFront,
+    required this.reviewSwipeUpEnabled,
+    required this.reviewSwipeDownEnabled,
+    required this.reviewSwipeLeftEnabled,
+    required this.reviewSwipeRightEnabled,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6665,6 +6836,13 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       map['highlight_color_value'] = Variable<int>(highlightColorValue);
     }
     map['auto_add_to_collection'] = Variable<bool>(autoAddToCollection);
+    map['review_show_sentence_on_front'] = Variable<bool>(
+      reviewShowSentenceOnFront,
+    );
+    map['review_swipe_up_enabled'] = Variable<bool>(reviewSwipeUpEnabled);
+    map['review_swipe_down_enabled'] = Variable<bool>(reviewSwipeDownEnabled);
+    map['review_swipe_left_enabled'] = Variable<bool>(reviewSwipeLeftEnabled);
+    map['review_swipe_right_enabled'] = Variable<bool>(reviewSwipeRightEnabled);
     return map;
   }
 
@@ -6684,6 +6862,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ? const Value.absent()
           : Value(highlightColorValue),
       autoAddToCollection: Value(autoAddToCollection),
+      reviewShowSentenceOnFront: Value(reviewShowSentenceOnFront),
+      reviewSwipeUpEnabled: Value(reviewSwipeUpEnabled),
+      reviewSwipeDownEnabled: Value(reviewSwipeDownEnabled),
+      reviewSwipeLeftEnabled: Value(reviewSwipeLeftEnabled),
+      reviewSwipeRightEnabled: Value(reviewSwipeRightEnabled),
     );
   }
 
@@ -6709,6 +6892,21 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       autoAddToCollection: serializer.fromJson<bool>(
         json['autoAddToCollection'],
       ),
+      reviewShowSentenceOnFront: serializer.fromJson<bool>(
+        json['reviewShowSentenceOnFront'],
+      ),
+      reviewSwipeUpEnabled: serializer.fromJson<bool>(
+        json['reviewSwipeUpEnabled'],
+      ),
+      reviewSwipeDownEnabled: serializer.fromJson<bool>(
+        json['reviewSwipeDownEnabled'],
+      ),
+      reviewSwipeLeftEnabled: serializer.fromJson<bool>(
+        json['reviewSwipeLeftEnabled'],
+      ),
+      reviewSwipeRightEnabled: serializer.fromJson<bool>(
+        json['reviewSwipeRightEnabled'],
+      ),
     );
   }
   @override
@@ -6725,6 +6923,15 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'highlightColorValue': serializer.toJson<int?>(highlightColorValue),
       'autoAddToCollection': serializer.toJson<bool>(autoAddToCollection),
+      'reviewShowSentenceOnFront': serializer.toJson<bool>(
+        reviewShowSentenceOnFront,
+      ),
+      'reviewSwipeUpEnabled': serializer.toJson<bool>(reviewSwipeUpEnabled),
+      'reviewSwipeDownEnabled': serializer.toJson<bool>(reviewSwipeDownEnabled),
+      'reviewSwipeLeftEnabled': serializer.toJson<bool>(reviewSwipeLeftEnabled),
+      'reviewSwipeRightEnabled': serializer.toJson<bool>(
+        reviewSwipeRightEnabled,
+      ),
     };
   }
 
@@ -6737,6 +6944,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     Value<DateTime?> updatedAt = const Value.absent(),
     Value<int?> highlightColorValue = const Value.absent(),
     bool? autoAddToCollection,
+    bool? reviewShowSentenceOnFront,
+    bool? reviewSwipeUpEnabled,
+    bool? reviewSwipeDownEnabled,
+    bool? reviewSwipeLeftEnabled,
+    bool? reviewSwipeRightEnabled,
   }) => SettingsRow(
     id: id ?? this.id,
     llmApiKey: llmApiKey.present ? llmApiKey.value : this.llmApiKey,
@@ -6750,6 +6962,15 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         ? highlightColorValue.value
         : this.highlightColorValue,
     autoAddToCollection: autoAddToCollection ?? this.autoAddToCollection,
+    reviewShowSentenceOnFront:
+        reviewShowSentenceOnFront ?? this.reviewShowSentenceOnFront,
+    reviewSwipeUpEnabled: reviewSwipeUpEnabled ?? this.reviewSwipeUpEnabled,
+    reviewSwipeDownEnabled:
+        reviewSwipeDownEnabled ?? this.reviewSwipeDownEnabled,
+    reviewSwipeLeftEnabled:
+        reviewSwipeLeftEnabled ?? this.reviewSwipeLeftEnabled,
+    reviewSwipeRightEnabled:
+        reviewSwipeRightEnabled ?? this.reviewSwipeRightEnabled,
   );
   SettingsRow copyWithCompanion(SettingsCompanion data) {
     return SettingsRow(
@@ -6771,6 +6992,21 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       autoAddToCollection: data.autoAddToCollection.present
           ? data.autoAddToCollection.value
           : this.autoAddToCollection,
+      reviewShowSentenceOnFront: data.reviewShowSentenceOnFront.present
+          ? data.reviewShowSentenceOnFront.value
+          : this.reviewShowSentenceOnFront,
+      reviewSwipeUpEnabled: data.reviewSwipeUpEnabled.present
+          ? data.reviewSwipeUpEnabled.value
+          : this.reviewSwipeUpEnabled,
+      reviewSwipeDownEnabled: data.reviewSwipeDownEnabled.present
+          ? data.reviewSwipeDownEnabled.value
+          : this.reviewSwipeDownEnabled,
+      reviewSwipeLeftEnabled: data.reviewSwipeLeftEnabled.present
+          ? data.reviewSwipeLeftEnabled.value
+          : this.reviewSwipeLeftEnabled,
+      reviewSwipeRightEnabled: data.reviewSwipeRightEnabled.present
+          ? data.reviewSwipeRightEnabled.value
+          : this.reviewSwipeRightEnabled,
     );
   }
 
@@ -6784,7 +7020,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('highlightColorValue: $highlightColorValue, ')
-          ..write('autoAddToCollection: $autoAddToCollection')
+          ..write('autoAddToCollection: $autoAddToCollection, ')
+          ..write('reviewShowSentenceOnFront: $reviewShowSentenceOnFront, ')
+          ..write('reviewSwipeUpEnabled: $reviewSwipeUpEnabled, ')
+          ..write('reviewSwipeDownEnabled: $reviewSwipeDownEnabled, ')
+          ..write('reviewSwipeLeftEnabled: $reviewSwipeLeftEnabled, ')
+          ..write('reviewSwipeRightEnabled: $reviewSwipeRightEnabled')
           ..write(')'))
         .toString();
   }
@@ -6799,6 +7040,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     updatedAt,
     highlightColorValue,
     autoAddToCollection,
+    reviewShowSentenceOnFront,
+    reviewSwipeUpEnabled,
+    reviewSwipeDownEnabled,
+    reviewSwipeLeftEnabled,
+    reviewSwipeRightEnabled,
   );
   @override
   bool operator ==(Object other) =>
@@ -6811,7 +7057,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.pitchAccentAudioEnabled == this.pitchAccentAudioEnabled &&
           other.updatedAt == this.updatedAt &&
           other.highlightColorValue == this.highlightColorValue &&
-          other.autoAddToCollection == this.autoAddToCollection);
+          other.autoAddToCollection == this.autoAddToCollection &&
+          other.reviewShowSentenceOnFront == this.reviewShowSentenceOnFront &&
+          other.reviewSwipeUpEnabled == this.reviewSwipeUpEnabled &&
+          other.reviewSwipeDownEnabled == this.reviewSwipeDownEnabled &&
+          other.reviewSwipeLeftEnabled == this.reviewSwipeLeftEnabled &&
+          other.reviewSwipeRightEnabled == this.reviewSwipeRightEnabled);
 }
 
 class SettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -6823,6 +7074,11 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<DateTime?> updatedAt;
   final Value<int?> highlightColorValue;
   final Value<bool> autoAddToCollection;
+  final Value<bool> reviewShowSentenceOnFront;
+  final Value<bool> reviewSwipeUpEnabled;
+  final Value<bool> reviewSwipeDownEnabled;
+  final Value<bool> reviewSwipeLeftEnabled;
+  final Value<bool> reviewSwipeRightEnabled;
   const SettingsCompanion({
     this.id = const Value.absent(),
     this.llmApiKey = const Value.absent(),
@@ -6832,6 +7088,11 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.updatedAt = const Value.absent(),
     this.highlightColorValue = const Value.absent(),
     this.autoAddToCollection = const Value.absent(),
+    this.reviewShowSentenceOnFront = const Value.absent(),
+    this.reviewSwipeUpEnabled = const Value.absent(),
+    this.reviewSwipeDownEnabled = const Value.absent(),
+    this.reviewSwipeLeftEnabled = const Value.absent(),
+    this.reviewSwipeRightEnabled = const Value.absent(),
   });
   SettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -6842,6 +7103,11 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.updatedAt = const Value.absent(),
     this.highlightColorValue = const Value.absent(),
     this.autoAddToCollection = const Value.absent(),
+    this.reviewShowSentenceOnFront = const Value.absent(),
+    this.reviewSwipeUpEnabled = const Value.absent(),
+    this.reviewSwipeDownEnabled = const Value.absent(),
+    this.reviewSwipeLeftEnabled = const Value.absent(),
+    this.reviewSwipeRightEnabled = const Value.absent(),
   });
   static Insertable<SettingsRow> custom({
     Expression<int>? id,
@@ -6852,6 +7118,11 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<DateTime>? updatedAt,
     Expression<int>? highlightColorValue,
     Expression<bool>? autoAddToCollection,
+    Expression<bool>? reviewShowSentenceOnFront,
+    Expression<bool>? reviewSwipeUpEnabled,
+    Expression<bool>? reviewSwipeDownEnabled,
+    Expression<bool>? reviewSwipeLeftEnabled,
+    Expression<bool>? reviewSwipeRightEnabled,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6866,6 +7137,16 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
         'highlight_color_value': highlightColorValue,
       if (autoAddToCollection != null)
         'auto_add_to_collection': autoAddToCollection,
+      if (reviewShowSentenceOnFront != null)
+        'review_show_sentence_on_front': reviewShowSentenceOnFront,
+      if (reviewSwipeUpEnabled != null)
+        'review_swipe_up_enabled': reviewSwipeUpEnabled,
+      if (reviewSwipeDownEnabled != null)
+        'review_swipe_down_enabled': reviewSwipeDownEnabled,
+      if (reviewSwipeLeftEnabled != null)
+        'review_swipe_left_enabled': reviewSwipeLeftEnabled,
+      if (reviewSwipeRightEnabled != null)
+        'review_swipe_right_enabled': reviewSwipeRightEnabled,
     });
   }
 
@@ -6878,6 +7159,11 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<DateTime?>? updatedAt,
     Value<int?>? highlightColorValue,
     Value<bool>? autoAddToCollection,
+    Value<bool>? reviewShowSentenceOnFront,
+    Value<bool>? reviewSwipeUpEnabled,
+    Value<bool>? reviewSwipeDownEnabled,
+    Value<bool>? reviewSwipeLeftEnabled,
+    Value<bool>? reviewSwipeRightEnabled,
   }) {
     return SettingsCompanion(
       id: id ?? this.id,
@@ -6890,6 +7176,15 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
       updatedAt: updatedAt ?? this.updatedAt,
       highlightColorValue: highlightColorValue ?? this.highlightColorValue,
       autoAddToCollection: autoAddToCollection ?? this.autoAddToCollection,
+      reviewShowSentenceOnFront:
+          reviewShowSentenceOnFront ?? this.reviewShowSentenceOnFront,
+      reviewSwipeUpEnabled: reviewSwipeUpEnabled ?? this.reviewSwipeUpEnabled,
+      reviewSwipeDownEnabled:
+          reviewSwipeDownEnabled ?? this.reviewSwipeDownEnabled,
+      reviewSwipeLeftEnabled:
+          reviewSwipeLeftEnabled ?? this.reviewSwipeLeftEnabled,
+      reviewSwipeRightEnabled:
+          reviewSwipeRightEnabled ?? this.reviewSwipeRightEnabled,
     );
   }
 
@@ -6924,6 +7219,31 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
     if (autoAddToCollection.present) {
       map['auto_add_to_collection'] = Variable<bool>(autoAddToCollection.value);
     }
+    if (reviewShowSentenceOnFront.present) {
+      map['review_show_sentence_on_front'] = Variable<bool>(
+        reviewShowSentenceOnFront.value,
+      );
+    }
+    if (reviewSwipeUpEnabled.present) {
+      map['review_swipe_up_enabled'] = Variable<bool>(
+        reviewSwipeUpEnabled.value,
+      );
+    }
+    if (reviewSwipeDownEnabled.present) {
+      map['review_swipe_down_enabled'] = Variable<bool>(
+        reviewSwipeDownEnabled.value,
+      );
+    }
+    if (reviewSwipeLeftEnabled.present) {
+      map['review_swipe_left_enabled'] = Variable<bool>(
+        reviewSwipeLeftEnabled.value,
+      );
+    }
+    if (reviewSwipeRightEnabled.present) {
+      map['review_swipe_right_enabled'] = Variable<bool>(
+        reviewSwipeRightEnabled.value,
+      );
+    }
     return map;
   }
 
@@ -6937,7 +7257,12 @@ class SettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('pitchAccentAudioEnabled: $pitchAccentAudioEnabled, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('highlightColorValue: $highlightColorValue, ')
-          ..write('autoAddToCollection: $autoAddToCollection')
+          ..write('autoAddToCollection: $autoAddToCollection, ')
+          ..write('reviewShowSentenceOnFront: $reviewShowSentenceOnFront, ')
+          ..write('reviewSwipeUpEnabled: $reviewSwipeUpEnabled, ')
+          ..write('reviewSwipeDownEnabled: $reviewSwipeDownEnabled, ')
+          ..write('reviewSwipeLeftEnabled: $reviewSwipeLeftEnabled, ')
+          ..write('reviewSwipeRightEnabled: $reviewSwipeRightEnabled')
           ..write(')'))
         .toString();
   }
@@ -13251,6 +13576,11 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<DateTime?> updatedAt,
       Value<int?> highlightColorValue,
       Value<bool> autoAddToCollection,
+      Value<bool> reviewShowSentenceOnFront,
+      Value<bool> reviewSwipeUpEnabled,
+      Value<bool> reviewSwipeDownEnabled,
+      Value<bool> reviewSwipeLeftEnabled,
+      Value<bool> reviewSwipeRightEnabled,
     });
 typedef $$SettingsTableUpdateCompanionBuilder =
     SettingsCompanion Function({
@@ -13262,6 +13592,11 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<DateTime?> updatedAt,
       Value<int?> highlightColorValue,
       Value<bool> autoAddToCollection,
+      Value<bool> reviewShowSentenceOnFront,
+      Value<bool> reviewSwipeUpEnabled,
+      Value<bool> reviewSwipeDownEnabled,
+      Value<bool> reviewSwipeLeftEnabled,
+      Value<bool> reviewSwipeRightEnabled,
     });
 
 class $$SettingsTableFilterComposer
@@ -13310,6 +13645,31 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<bool> get autoAddToCollection => $composableBuilder(
     column: $table.autoAddToCollection,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reviewShowSentenceOnFront => $composableBuilder(
+    column: $table.reviewShowSentenceOnFront,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reviewSwipeUpEnabled => $composableBuilder(
+    column: $table.reviewSwipeUpEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reviewSwipeDownEnabled => $composableBuilder(
+    column: $table.reviewSwipeDownEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reviewSwipeLeftEnabled => $composableBuilder(
+    column: $table.reviewSwipeLeftEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reviewSwipeRightEnabled => $composableBuilder(
+    column: $table.reviewSwipeRightEnabled,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -13362,6 +13722,31 @@ class $$SettingsTableOrderingComposer
     column: $table.autoAddToCollection,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get reviewShowSentenceOnFront => $composableBuilder(
+    column: $table.reviewShowSentenceOnFront,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get reviewSwipeUpEnabled => $composableBuilder(
+    column: $table.reviewSwipeUpEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get reviewSwipeDownEnabled => $composableBuilder(
+    column: $table.reviewSwipeDownEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get reviewSwipeLeftEnabled => $composableBuilder(
+    column: $table.reviewSwipeLeftEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get reviewSwipeRightEnabled => $composableBuilder(
+    column: $table.reviewSwipeRightEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableAnnotationComposer
@@ -13406,6 +13791,31 @@ class $$SettingsTableAnnotationComposer
     column: $table.autoAddToCollection,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get reviewShowSentenceOnFront => $composableBuilder(
+    column: $table.reviewShowSentenceOnFront,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get reviewSwipeUpEnabled => $composableBuilder(
+    column: $table.reviewSwipeUpEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get reviewSwipeDownEnabled => $composableBuilder(
+    column: $table.reviewSwipeDownEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get reviewSwipeLeftEnabled => $composableBuilder(
+    column: $table.reviewSwipeLeftEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get reviewSwipeRightEnabled => $composableBuilder(
+    column: $table.reviewSwipeRightEnabled,
+    builder: (column) => column,
+  );
 }
 
 class $$SettingsTableTableManager
@@ -13447,6 +13857,11 @@ class $$SettingsTableTableManager
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int?> highlightColorValue = const Value.absent(),
                 Value<bool> autoAddToCollection = const Value.absent(),
+                Value<bool> reviewShowSentenceOnFront = const Value.absent(),
+                Value<bool> reviewSwipeUpEnabled = const Value.absent(),
+                Value<bool> reviewSwipeDownEnabled = const Value.absent(),
+                Value<bool> reviewSwipeLeftEnabled = const Value.absent(),
+                Value<bool> reviewSwipeRightEnabled = const Value.absent(),
               }) => SettingsCompanion(
                 id: id,
                 llmApiKey: llmApiKey,
@@ -13456,6 +13871,11 @@ class $$SettingsTableTableManager
                 updatedAt: updatedAt,
                 highlightColorValue: highlightColorValue,
                 autoAddToCollection: autoAddToCollection,
+                reviewShowSentenceOnFront: reviewShowSentenceOnFront,
+                reviewSwipeUpEnabled: reviewSwipeUpEnabled,
+                reviewSwipeDownEnabled: reviewSwipeDownEnabled,
+                reviewSwipeLeftEnabled: reviewSwipeLeftEnabled,
+                reviewSwipeRightEnabled: reviewSwipeRightEnabled,
               ),
           createCompanionCallback:
               ({
@@ -13467,6 +13887,11 @@ class $$SettingsTableTableManager
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int?> highlightColorValue = const Value.absent(),
                 Value<bool> autoAddToCollection = const Value.absent(),
+                Value<bool> reviewShowSentenceOnFront = const Value.absent(),
+                Value<bool> reviewSwipeUpEnabled = const Value.absent(),
+                Value<bool> reviewSwipeDownEnabled = const Value.absent(),
+                Value<bool> reviewSwipeLeftEnabled = const Value.absent(),
+                Value<bool> reviewSwipeRightEnabled = const Value.absent(),
               }) => SettingsCompanion.insert(
                 id: id,
                 llmApiKey: llmApiKey,
@@ -13476,6 +13901,11 @@ class $$SettingsTableTableManager
                 updatedAt: updatedAt,
                 highlightColorValue: highlightColorValue,
                 autoAddToCollection: autoAddToCollection,
+                reviewShowSentenceOnFront: reviewShowSentenceOnFront,
+                reviewSwipeUpEnabled: reviewSwipeUpEnabled,
+                reviewSwipeDownEnabled: reviewSwipeDownEnabled,
+                reviewSwipeLeftEnabled: reviewSwipeLeftEnabled,
+                reviewSwipeRightEnabled: reviewSwipeRightEnabled,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

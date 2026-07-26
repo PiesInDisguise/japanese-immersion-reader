@@ -241,6 +241,66 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               const Divider(height: 32),
               const Text(
+                'Review (spec §12)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Show sentence on front'),
+                subtitle: const Text(
+                  "Word review cards show the original sentence they were "
+                  "mined from, with the word highlighted, instead of just "
+                  "the bare word.",
+                ),
+                value: settings.reviewShowSentenceOnFront,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(reviewShowSentenceOnFront: value),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Review swipe gestures',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const Text(
+                'The on-screen rating buttons always work regardless of '
+                'these -- swiping is an optional shortcut.',
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Swipe up (Easy)'),
+                value: settings.reviewSwipeUpEnabled,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(reviewSwipeUpEnabled: value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Swipe down (Again)'),
+                value: settings.reviewSwipeDownEnabled,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(reviewSwipeDownEnabled: value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Swipe left (Hard)'),
+                value: settings.reviewSwipeLeftEnabled,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(reviewSwipeLeftEnabled: value),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Swipe right (Good)'),
+                value: settings.reviewSwipeRightEnabled,
+                onChanged: (value) => ref
+                    .read(settingsRepositoryProvider)
+                    .update(reviewSwipeRightEnabled: value),
+              ),
+              const Divider(height: 32),
+              const Text(
                 'Dictionaries (spec §10)',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -293,9 +353,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _saveApiKey(String value) async {
-    await ref
-        .read(settingsRepositoryProvider)
-        .update(llmApiKey: value.trim());
+    await ref.read(settingsRepositoryProvider).update(llmApiKey: value.trim());
     if (mounted) {
       ScaffoldMessenger.of(
         context,
