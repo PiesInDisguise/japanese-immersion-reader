@@ -108,6 +108,52 @@ class WordCollectionRepository {
     ];
   }
 
+  /// Per-book review deck: every word due on or before [now] that was
+  /// sighted at least once in [workId] (the document/book id) -- earliest-
+  /// due first, same as [due]. A word sighted in more than one book (mined
+  /// while reading Book A, then encountered again in Book B) shows up in
+  /// each of those books' decks independently, not just its most recent
+  /// one -- reviewing a book means "everything due that I mined while
+  /// reading it," which doesn't stop being true just because the word also
+  /// showed up elsewhere. Deduplicated on the word's own id (not the
+  /// sighting's), since a word can have multiple sightings within the same
+  /// book too (e.g. mined, forgotten, re-mined on a later page).
+  Future<List<DueWord>> dueForWork(String workId, {DateTime? now}) async {
+    final cutoff = now ?? DateTime.now().toUtc();
+    final query =
+        _db.select(_db.collectedWords).join([
+            innerJoin(
+              _db.collectedWordSources,
+              _db.collectedWordSources.collectedWordId.equalsExp(
+                _db.collectedWords.id,
+              ),
+            ),
+          ])
+          ..where(
+            _db.collectedWords.srsDue.isSmallerOrEqualValue(cutoff) &
+                _db.collectedWordSources.workId.equals(workId),
+          )
+          ..orderBy([OrderingTerm.asc(_db.collectedWords.srsDue)]);
+    final rows = await query.get();
+
+    final seenIds = <String>{};
+    final result = <DueWord>[];
+    for (final row in rows) {
+      final word = row.readTable(_db.collectedWords);
+      if (!seenIds.add(word.id)) continue;
+      result.add(
+        DueWord(
+          id: word.id,
+          dictForm: word.dictForm,
+          reading: word.reading,
+          senseIds: (jsonDecode(word.senseIdsJson) as List).cast<int>(),
+          due: word.srsDue,
+        ),
+      );
+    }
+    return result;
+  }
+
   /// Spec §12's rating buttons: scores [id] (a [DueWord.id]) via the real
   /// FSRS scheduler and reschedules it.
   Future<void> review(String id, Rating rating, {DateTime? now}) {
@@ -157,8 +203,7 @@ class WordCollectionRepository {
   /// Spec §15's "words-mined count".
   Future<int> count() async {
     final countColumn = _db.collectedWords.id.count();
-    final query = _db.selectOnly(_db.collectedWords)
-      ..addColumns([countColumn]);
+    final query = _db.selectOnly(_db.collectedWords)..addColumns([countColumn]);
     final row = await query.getSingle();
     return row.read(countColumn) ?? 0;
   }

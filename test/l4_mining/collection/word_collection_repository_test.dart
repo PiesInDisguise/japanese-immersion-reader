@@ -326,36 +326,142 @@ void main() {
     });
   });
 
-  group('review', () {
-    test('scores a due word via the real FSRS scheduler and reschedules it', () async {
+  group('dueForWork', () {
+    test(
+      'only returns due words sighted in the given book, earliest first',
+      () async {
+        final inWorkOne = await repo.mine(
+          dictForm: 'A',
+          reading: 'a',
+          senseIds: const [],
+          source: _source, // workId: 'work-1'
+        );
+        final inWorkTwo = await repo.mine(
+          dictForm: 'B',
+          reading: 'b',
+          senseIds: const [],
+          source: _otherSource, // workId: 'work-2'
+        );
+        final now = DateTime.utc(2026, 1, 10);
+        await _forceSrsState(
+          db,
+          inWorkOne.entryId,
+          difficulty: 5,
+          stability: 5,
+          due: DateTime.utc(2026, 1, 1),
+          lapses: 0,
+          status: SrsStatus.review,
+        );
+        await _forceSrsState(
+          db,
+          inWorkTwo.entryId,
+          difficulty: 5,
+          stability: 5,
+          due: DateTime.utc(2026, 1, 1),
+          lapses: 0,
+          status: SrsStatus.review,
+        );
+
+        final dueInWorkOne = await repo.dueForWork('work-1', now: now);
+        expect(dueInWorkOne.map((d) => d.id), [inWorkOne.entryId]);
+
+        final dueInWorkTwo = await repo.dueForWork('work-2', now: now);
+        expect(dueInWorkTwo.map((d) => d.id), [inWorkTwo.entryId]);
+      },
+    );
+
+    test('a word sighted in two different books appears in both of their '
+        'decks', () async {
       final result = await repo.mine(
-        dictForm: 'X',
-        reading: 'Y',
+        dictForm: 'A',
+        reading: 'a',
+        senseIds: const [],
+        source: _source, // workId: 'work-1'
+      );
+      // A second sighting of the *same* word, from a different book --
+      // re-tapping an already-collected word appends a sighting rather
+      // than minting a new entry (see the "re-tap resets" test above).
+      await repo.mine(
+        dictForm: 'A',
+        reading: 'a',
+        senseIds: const [],
+        source: _otherSource, // workId: 'work-2'
+      );
+      await _forceSrsState(
+        db,
+        result.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2026, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+
+      final now = DateTime.utc(2026, 1, 10);
+      expect((await repo.dueForWork('work-1', now: now)).map((d) => d.id), [
+        result.entryId,
+      ]);
+      expect((await repo.dueForWork('work-2', now: now)).map((d) => d.id), [
+        result.entryId,
+      ]);
+    });
+
+    test('excludes words not yet due, even if sighted in that book', () async {
+      final result = await repo.mine(
+        dictForm: 'A',
+        reading: 'a',
         senseIds: const [],
         source: _source,
       );
-      final reviewedAt = DateTime.utc(2026, 1, 1);
-
-      await repo.review(result.entryId, Rating.good, now: reviewedAt);
-
-      final row = await (db.select(
-        db.collectedWords,
-      )..where((w) => w.id.equals(result.entryId))).getSingle();
-      // A single Good rating on a brand-new card advances it one real
-      // Anki-style learning step -- it does not graduate straight to
-      // `review` (that needs an Easy, or a Good on the last step; see
-      // `fsrs_scheduler_learning_steps_test.dart` for the scheduler-level
-      // coverage of that).
-      expect(row.srsStatus, SrsStatus.learning.name);
-      expect(row.srsStep, isNotNull);
-      expect(row.fsrsDifficulty, isNotNull);
-      expect(row.fsrsStability, isNotNull);
-      expect(row.srsDue.isAfter(reviewedAt), isTrue);
-      expect(
-        row.lastReviewedAt!.isAtSameMomentAs(reviewedAt),
-        isTrue,
+      await _forceSrsState(
+        db,
+        result.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2030, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
       );
+
+      final due = await repo.dueForWork(
+        'work-1',
+        now: DateTime.utc(2026, 1, 10),
+      );
+
+      expect(due, isEmpty);
     });
+  });
+
+  group('review', () {
+    test(
+      'scores a due word via the real FSRS scheduler and reschedules it',
+      () async {
+        final result = await repo.mine(
+          dictForm: 'X',
+          reading: 'Y',
+          senseIds: const [],
+          source: _source,
+        );
+        final reviewedAt = DateTime.utc(2026, 1, 1);
+
+        await repo.review(result.entryId, Rating.good, now: reviewedAt);
+
+        final row = await (db.select(
+          db.collectedWords,
+        )..where((w) => w.id.equals(result.entryId))).getSingle();
+        // A single Good rating on a brand-new card advances it one real
+        // Anki-style learning step -- it does not graduate straight to
+        // `review` (that needs an Easy, or a Good on the last step; see
+        // `fsrs_scheduler_learning_steps_test.dart` for the scheduler-level
+        // coverage of that).
+        expect(row.srsStatus, SrsStatus.learning.name);
+        expect(row.srsStep, isNotNull);
+        expect(row.fsrsDifficulty, isNotNull);
+        expect(row.fsrsStability, isNotNull);
+        expect(row.srsDue.isAfter(reviewedAt), isTrue);
+        expect(row.lastReviewedAt!.isAtSameMomentAs(reviewedAt), isTrue);
+      },
+    );
   });
 
   group('latestSightingSentenceId', () {
@@ -383,10 +489,7 @@ void main() {
         source: _otherSource,
       );
 
-      expect(
-        await repo.latestSightingSentenceId(result.entryId),
-        'sentence-2',
-      );
+      expect(await repo.latestSightingSentenceId(result.entryId), 'sentence-2');
     });
 
     test('returns null for an id with no sightings', () async {

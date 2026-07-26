@@ -283,6 +283,68 @@ void main() {
     });
   });
 
+  group('dueForWork', () {
+    test('only returns due grammar points sighted in the given book, earliest '
+        'first', () async {
+      final inWorkOne = await repo.mine(
+        grammarPointId: 'point-a',
+        source: _source, // workId: 'work-1'
+      );
+      final inWorkTwo = await repo.mine(
+        grammarPointId: 'point-b',
+        source: _otherSource, // workId: 'work-2'
+      );
+      final now = DateTime.utc(2026, 1, 10);
+      await _forceSrsState(
+        db,
+        inWorkOne.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2026, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+      await _forceSrsState(
+        db,
+        inWorkTwo.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2026, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+
+      final dueInWorkOne = await repo.dueForWork('work-1', now: now);
+      expect(dueInWorkOne.map((d) => d.id), [inWorkOne.entryId]);
+
+      final dueInWorkTwo = await repo.dueForWork('work-2', now: now);
+      expect(dueInWorkTwo.map((d) => d.id), [inWorkTwo.entryId]);
+    });
+
+    test('excludes grammar points not yet due', () async {
+      final result = await repo.mine(
+        grammarPointId: 'point-a',
+        source: _source,
+      );
+      await _forceSrsState(
+        db,
+        result.entryId,
+        difficulty: 5,
+        stability: 5,
+        due: DateTime.utc(2030, 1, 1),
+        lapses: 0,
+        status: SrsStatus.review,
+      );
+
+      final due = await repo.dueForWork(
+        'work-1',
+        now: DateTime.utc(2026, 1, 10),
+      );
+
+      expect(due, isEmpty);
+    });
+  });
+
   group('review', () {
     test(
       'scores a due grammar point via the real FSRS scheduler and reschedules '
@@ -331,10 +393,7 @@ void main() {
       );
       await repo.mine(grammarPointId: 'point-a', source: _otherSource);
 
-      expect(
-        await repo.latestSightingSentenceId(result.entryId),
-        'sentence-2',
-      );
+      expect(await repo.latestSightingSentenceId(result.entryId), 'sentence-2');
     });
 
     test('returns null for an id with no sightings', () async {

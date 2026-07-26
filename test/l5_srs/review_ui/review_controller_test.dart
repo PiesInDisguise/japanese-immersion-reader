@@ -38,11 +38,16 @@ class FakeWordCollectionRepository extends WordCollectionRepository {
   FakeWordCollectionRepository() : super(_inertDatabase());
 
   List<DueWord> dueWords = [];
+  final Map<String, List<DueWord>> dueWordsByWorkId = {};
   final Map<String, String> sentenceIdsByEntry = {};
   final List<({String id, Rating rating})> reviewCalls = [];
 
   @override
   Future<List<DueWord>> due({DateTime? now}) async => dueWords;
+
+  @override
+  Future<List<DueWord>> dueForWork(String workId, {DateTime? now}) async =>
+      dueWordsByWorkId[workId] ?? const [];
 
   @override
   Future<String?> latestSightingSentenceId(String id) async =>
@@ -58,11 +63,16 @@ class FakeGrammarCollectionRepository extends GrammarCollectionRepository {
   FakeGrammarCollectionRepository() : super(_inertDatabase());
 
   List<DueGrammar> dueGrammars = [];
+  final Map<String, List<DueGrammar>> dueGrammarsByWorkId = {};
   final Map<String, String> sentenceIdsByEntry = {};
   final List<({String id, Rating rating})> reviewCalls = [];
 
   @override
   Future<List<DueGrammar>> due({DateTime? now}) async => dueGrammars;
+
+  @override
+  Future<List<DueGrammar>> dueForWork(String workId, {DateTime? now}) async =>
+      dueGrammarsByWorkId[workId] ?? const [];
 
   @override
   Future<String?> latestSightingSentenceId(String id) async =>
@@ -193,7 +203,7 @@ void main() {
   });
 
   test('builds an empty queue when nothing is due', () async {
-    final state = await container.read(reviewControllerProvider.future);
+    final state = await container.read(reviewControllerProvider(null).future);
     expect(state.cards, isEmpty);
     expect(state.isComplete, isTrue);
   });
@@ -212,7 +222,7 @@ void main() {
       ];
       wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
 
-      final state = await container.read(reviewControllerProvider.future);
+      final state = await container.read(reviewControllerProvider(null).future);
 
       expect(state.cards, hasLength(1));
       final card = state.cards.single;
@@ -254,7 +264,7 @@ void main() {
       ),
     ];
 
-    final state = await container.read(reviewControllerProvider.future);
+    final state = await container.read(reviewControllerProvider(null).future);
 
     expect(state.cards, hasLength(1));
     expect(state.cards.single.back, 'difficult; hard, tough');
@@ -269,7 +279,7 @@ void main() {
       ),
     ];
 
-    final state = await container.read(reviewControllerProvider.future);
+    final state = await container.read(reviewControllerProvider(null).future);
 
     expect(state.cards, hasLength(1));
     final card = state.cards.single;
@@ -297,7 +307,7 @@ void main() {
       ),
     ];
 
-    final state = await container.read(reviewControllerProvider.future);
+    final state = await container.read(reviewControllerProvider(null).future);
 
     expect(state.cards.map((c) => c.entryId), ['grammar-1', 'word-1']);
   });
@@ -312,11 +322,11 @@ void main() {
         due: DateTime.utc(2026, 1, 1),
       ),
     ];
-    await container.read(reviewControllerProvider.future);
+    await container.read(reviewControllerProvider(null).future);
 
-    container.read(reviewControllerProvider.notifier).reveal();
+    container.read(reviewControllerProvider(null).notifier).reveal();
 
-    final state = container.read(reviewControllerProvider).value!;
+    final state = container.read(reviewControllerProvider(null)).value!;
     expect(state.isRevealed, isTrue);
     expect(state.index, 0);
   });
@@ -340,13 +350,13 @@ void main() {
           due: DateTime.utc(2026, 1, 2),
         ),
       ];
-      await container.read(reviewControllerProvider.future);
+      await container.read(reviewControllerProvider(null).future);
 
-      final notifier = container.read(reviewControllerProvider.notifier);
+      final notifier = container.read(reviewControllerProvider(null).notifier);
       await notifier.rate(Rating.good);
 
       expect(wordRepository.reviewCalls, [(id: 'word-1', rating: Rating.good)]);
-      var state = container.read(reviewControllerProvider).value!;
+      var state = container.read(reviewControllerProvider(null)).value!;
       expect(state.index, 1);
       expect(state.isRevealed, isFalse);
       expect(state.current!.entryId, 'grammar-1');
@@ -355,7 +365,7 @@ void main() {
       expect(grammarRepository.reviewCalls, [
         (id: 'grammar-1', rating: Rating.again),
       ]);
-      state = container.read(reviewControllerProvider).value!;
+      state = container.read(reviewControllerProvider(null)).value!;
       expect(state.isComplete, isTrue);
     },
   );
@@ -382,7 +392,7 @@ void main() {
       ];
       wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
 
-      final state = await container.read(reviewControllerProvider.future);
+      final state = await container.read(reviewControllerProvider(null).future);
 
       final card = state.cards.single;
       expect(card.frontHighlightStart, isNull);
@@ -437,7 +447,7 @@ void main() {
       ];
       wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
 
-      final state = await container.read(reviewControllerProvider.future);
+      final state = await container.read(reviewControllerProvider(null).future);
 
       final card = state.cards.single;
       expect(card.contextSentence, '猫が走った。');
@@ -489,7 +499,7 @@ void main() {
       ];
       wordRepository.sentenceIdsByEntry['word-1'] = 'sentence-1';
 
-      final state = await container.read(reviewControllerProvider.future);
+      final state = await container.read(reviewControllerProvider(null).future);
 
       final card = state.cards.single;
       expect(card.contextSentence, '犬が鳴いた。');
@@ -528,12 +538,80 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      final state = await container.read(reviewControllerProvider.future);
+      final state = await container.read(reviewControllerProvider(null).future);
 
       final card = state.cards.single;
       expect(card.kind, ReviewCardKind.grammar);
       expect(card.frontHighlightStart, isNull);
       expect(card.frontHighlightEnd, isNull);
+    });
+  });
+
+  group('scoped to one book (workId)', () {
+    test('only includes words/grammar due-for-that-book, not the full "All" '
+        'deck', () async {
+      wordRepository.dueWords = [
+        DueWord(
+          id: 'word-1',
+          dictForm: '猫',
+          reading: 'ねこ',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      wordRepository.dueWordsByWorkId['book-a'] = [
+        DueWord(
+          id: 'word-2',
+          dictForm: '犬',
+          reading: 'いぬ',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      grammarRepository.dueGrammars = [
+        DueGrammar(
+          id: 'grammar-1',
+          grammarPointId: 'te-iru-progressive',
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      grammarRepository.dueGrammarsByWorkId['book-a'] = [
+        DueGrammar(
+          id: 'grammar-2',
+          grammarPointId: 'te-iru-progressive',
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+
+      final allState = await container.read(
+        reviewControllerProvider(null).future,
+      );
+      expect(allState.cards.map((c) => c.entryId), ['word-1', 'grammar-1']);
+
+      final bookState = await container.read(
+        reviewControllerProvider('book-a').future,
+      );
+      expect(bookState.cards.map((c) => c.entryId), ['word-2', 'grammar-2']);
+    });
+
+    test('rating a card in a book-scoped deck still calls through to the '
+        'right repository', () async {
+      wordRepository.dueWordsByWorkId['book-a'] = [
+        DueWord(
+          id: 'word-2',
+          dictForm: '犬',
+          reading: 'いぬ',
+          senseIds: const [],
+          due: DateTime.utc(2026, 1, 1),
+        ),
+      ];
+      await container.read(reviewControllerProvider('book-a').future);
+
+      await container
+          .read(reviewControllerProvider('book-a').notifier)
+          .rate(Rating.good);
+
+      expect(wordRepository.reviewCalls, [(id: 'word-2', rating: Rating.good)]);
     });
   });
 }

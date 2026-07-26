@@ -82,20 +82,32 @@ class ReviewQueueState {
   );
 }
 
+/// Keyed by [ReviewController.workId] -- `null` is spec's "All" deck
+/// (every due word/grammar point, regardless of book); a real document id
+/// scopes the deck to only what was sighted in that book (see
+/// `WordCollectionRepository.dueForWork`/`GrammarCollectionRepository.
+/// dueForWork`). [ReviewDeckPickerScreen] is what actually offers both.
 final reviewControllerProvider =
-    AsyncNotifierProvider<ReviewController, ReviewQueueState>(
+    AsyncNotifierProvider.family<ReviewController, ReviewQueueState, String?>(
       ReviewController.new,
     );
 
 /// Drives one review-deck session (spec §12): builds the due queue (words +
-/// grammar points, earliest-due first) once, then reveals/rates one card at
-/// a time. Real scheduling itself lives in `ReviewEngine`
+/// grammar points, earliest-due first, optionally scoped to one book via
+/// [workId]) once, then reveals/rates one card at a time. Real scheduling
+/// itself lives in `ReviewEngine`
 /// (`lib/l4_mining/collection/review_engine.dart`), reached through
 /// `WordCollectionRepository.review`/`GrammarCollectionRepository.review` --
 /// this class only owns the queue/reveal-state concern, mirroring how
 /// `CardModeController` only owns card position on top of the shared
 /// `ReaderMiningSession`.
 class ReviewController extends AsyncNotifier<ReviewQueueState> {
+  ReviewController(this.workId);
+
+  /// `null` for spec's "All" deck; a document id to scope this session to
+  /// just that book's due words/grammar points.
+  final String? workId;
+
   @override
   Future<ReviewQueueState> build() async {
     final wordRepository = ref.watch(wordCollectionRepositoryProvider);
@@ -113,7 +125,10 @@ class ReviewController extends AsyncNotifier<ReviewQueueState> {
     final now = DateTime.now().toUtc();
     final cards = <ReviewCard>[];
 
-    for (final word in await wordRepository.due(now: now)) {
+    final dueWords = workId == null
+        ? await wordRepository.due(now: now)
+        : await wordRepository.dueForWork(workId!, now: now);
+    for (final word in dueWords) {
       final hits = await dictionaryRepository.lookup(
         dictForm: word.dictForm,
         surfaceForm: word.dictForm,
@@ -146,7 +161,10 @@ class ReviewController extends AsyncNotifier<ReviewQueueState> {
       );
     }
 
-    for (final grammar in await grammarRepository.due(now: now)) {
+    final dueGrammars = workId == null
+        ? await grammarRepository.due(now: now)
+        : await grammarRepository.dueForWork(workId!, now: now);
+    for (final grammar in dueGrammars) {
       final point = grammarMatcher.pointById(grammar.grammarPointId);
       final sentenceId = await grammarRepository.latestSightingSentenceId(
         grammar.id,

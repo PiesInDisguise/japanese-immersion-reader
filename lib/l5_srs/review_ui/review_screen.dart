@@ -12,11 +12,20 @@ import 'review_controller.dart';
 /// (1=Again/2=Hard/3=Good/4=Easy), or (per-direction-toggleable, see
 /// `AppSettings.reviewSwipeUpEnabled` and friends) a swipe.
 class ReviewScreen extends ConsumerWidget {
-  const ReviewScreen({super.key});
+  /// [workId] is `null` for spec's "All" deck, or a document id to scope
+  /// this session to just that book -- see [reviewControllerProvider]'s own
+  /// doc comment. [deckTitle] is purely cosmetic (the app bar's base label,
+  /// e.g. a book's title) and doesn't affect which deck loads; omit it to
+  /// fall back to the plain "Review" label [ReviewDeckPickerScreen]'s own
+  /// "All" tile uses.
+  const ReviewScreen({super.key, this.workId, this.deckTitle});
+
+  final String? workId;
+  final String? deckTitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncState = ref.watch(reviewControllerProvider);
+    final asyncState = ref.watch(reviewControllerProvider(workId));
     final settings =
         ref.watch(appSettingsProvider).value ?? AppSettings.defaults;
 
@@ -24,7 +33,8 @@ class ReviewScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(_titleFor(asyncState))),
       body: SafeArea(
         child: asyncState.when(
-          data: (state) => _ReviewBody(state: state, settings: settings),
+          data: (state) =>
+              _ReviewBody(workId: workId, state: state, settings: settings),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Padding(
@@ -38,10 +48,11 @@ class ReviewScreen extends ConsumerWidget {
   }
 
   String _titleFor(AsyncValue<ReviewQueueState> value) {
+    final base = deckTitle ?? 'Review';
     return value.maybeWhen(
       data: (state) =>
-          state.isComplete ? 'Review' : 'Review (${state.remaining} left)',
-      orElse: () => 'Review',
+          state.isComplete ? base : '$base (${state.remaining} left)',
+      orElse: () => base,
     );
   }
 }
@@ -59,8 +70,13 @@ Rating _ratingForSwipe(_SwipeDirection direction) => switch (direction) {
 };
 
 class _ReviewBody extends ConsumerStatefulWidget {
-  const _ReviewBody({required this.state, required this.settings});
+  const _ReviewBody({
+    required this.workId,
+    required this.state,
+    required this.settings,
+  });
 
+  final String? workId;
   final ReviewQueueState state;
   final AppSettings settings;
 
@@ -85,7 +101,7 @@ class _ReviewBodyState extends ConsumerState<_ReviewBody> {
   }
 
   void _rate(Rating rating) =>
-      ref.read(reviewControllerProvider.notifier).rate(rating);
+      ref.read(reviewControllerProvider(widget.workId).notifier).rate(rating);
 
   bool _directionEnabled(_SwipeDirection direction) => switch (direction) {
     _SwipeDirection.up => widget.settings.reviewSwipeUpEnabled,
@@ -214,8 +230,9 @@ class _ReviewBodyState extends ConsumerState<_ReviewBody> {
               ),
               if (!state.isRevealed)
                 FilledButton(
-                  onPressed: () =>
-                      ref.read(reviewControllerProvider.notifier).reveal(),
+                  onPressed: () => ref
+                      .read(reviewControllerProvider(widget.workId).notifier)
+                      .reveal(),
                   child: const Text('Show answer'),
                 )
               else

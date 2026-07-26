@@ -8,7 +8,7 @@ import 'package:japanese_immersion_reader/l1_ingestion/cover_art_extractor.dart'
 import 'package:japanese_immersion_reader/l1_ingestion/unified_importer.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/card_mode/card_mode_screen.dart';
 import 'package:japanese_immersion_reader/l3_reader_ui/reading_position.dart';
-import 'package:japanese_immersion_reader/l5_srs/review_ui/review_screen.dart';
+import 'package:japanese_immersion_reader/l5_srs/review_ui/review_deck_picker_screen.dart';
 
 import 'library_screen.dart';
 import 'remote_browse_screen.dart';
@@ -104,8 +104,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _loadSample() => _openDocument(loadSampleBook);
 
-  Future<void> _loadSampleVerticalPdf() =>
-      _openDocument(loadSampleVerticalPdf);
+  Future<void> _loadSampleVerticalPdf() => _openDocument(loadSampleVerticalPdf);
 
   /// One button for every sideloaded source format: [importAnyFile] inspects
   /// the picked file's extension and, for a `.pdf`, its actual text-layer
@@ -123,19 +122,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// class doc comment). Subsequent imports reuse the cached models.
   Future<void> _importBook() {
     File? importedFile;
-    return _openDocument(
-      () async {
-        final result = await FilePicker.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['epub', 'pdf'],
-        );
-        final path = result?.files.single.path;
-        if (path == null) throw StateError('No file selected.');
-        importedFile = File(path);
-        return importAnyFile(importedFile!, onProgress: (_) {});
-      },
-      afterSave: (document) => _extractAndStoreCover(document, importedFile),
-    );
+    return _openDocument(() async {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['epub', 'pdf'],
+      );
+      final path = result?.files.single.path;
+      if (path == null) throw StateError('No file selected.');
+      importedFile = File(path);
+      return importAnyFile(importedFile!, onProgress: (_) {});
+    }, afterSave: (document) => _extractAndStoreCover(document, importedFile));
   }
 
   /// Spec §5's remote book sources: [RemoteBrowseScreen] handles connecting
@@ -144,17 +140,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// routing the sideload button uses, including scanned-PDF detection.
   Future<void> _importFromRemote() {
     File? remoteFile;
-    return _openDocument(
-      () async {
-        final file = await Navigator.of(context).push<File>(
-          MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()),
-        );
-        if (file == null) throw StateError('No book selected.');
-        remoteFile = file;
-        return importAnyFile(file, onProgress: (_) {});
-      },
-      afterSave: (document) => _extractAndStoreCover(document, remoteFile),
-    );
+    return _openDocument(() async {
+      final file = await Navigator.of(context).push<File>(
+        MaterialPageRoute(builder: (_) => const RemoteBrowseScreen()),
+      );
+      if (file == null) throw StateError('No book selected.');
+      remoteFile = file;
+      return importAnyFile(file, onProgress: (_) {});
+    }, afterSave: (document) => _extractAndStoreCover(document, remoteFile));
   }
 
   /// Best-effort Library cover-art extraction (see `extractCoverArt`'s own
@@ -169,7 +162,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (file == null) return;
     final bytes = await extractCoverArt(file);
     if (bytes == null) return;
-    final path = await ref.read(coverArtStoreProvider).write(document.id, bytes);
+    final path = await ref
+        .read(coverArtStoreProvider)
+        .write(document.id, bytes);
     await ref
         .read(documentRepositoryProvider)
         .setAutoExtractedCoverIfAbsent(document.id, path);
@@ -184,9 +179,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
         ],
       ),
@@ -233,16 +228,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 icon: const Icon(Icons.style_outlined),
                 label: const Text('Review'),
                 onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ReviewScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const ReviewDeckPickerScreen(),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.bar_chart_outlined),
                 label: const Text('Stats'),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const StatsScreen()),
-                ),
+                onPressed: () => Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const StatsScreen())),
               ),
             ],
             if (_error != null) ...[

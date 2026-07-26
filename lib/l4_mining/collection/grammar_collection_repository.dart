@@ -90,6 +90,43 @@ class GrammarCollectionRepository {
     ];
   }
 
+  /// Per-book review deck -- grammar-side mirror of
+  /// `WordCollectionRepository.dueForWork` (see that method's own doc
+  /// comment for the full reasoning on multi-book sightings and dedup).
+  Future<List<DueGrammar>> dueForWork(String workId, {DateTime? now}) async {
+    final cutoff = now ?? DateTime.now().toUtc();
+    final query =
+        _db.select(_db.collectedGrammars).join([
+            innerJoin(
+              _db.collectedGrammarSources,
+              _db.collectedGrammarSources.collectedGrammarId.equalsExp(
+                _db.collectedGrammars.id,
+              ),
+            ),
+          ])
+          ..where(
+            _db.collectedGrammars.srsDue.isSmallerOrEqualValue(cutoff) &
+                _db.collectedGrammarSources.workId.equals(workId),
+          )
+          ..orderBy([OrderingTerm.asc(_db.collectedGrammars.srsDue)]);
+    final rows = await query.get();
+
+    final seenIds = <String>{};
+    final result = <DueGrammar>[];
+    for (final row in rows) {
+      final grammar = row.readTable(_db.collectedGrammars);
+      if (!seenIds.add(grammar.id)) continue;
+      result.add(
+        DueGrammar(
+          id: grammar.id,
+          grammarPointId: grammar.grammarPointId,
+          due: grammar.srsDue,
+        ),
+      );
+    }
+    return result;
+  }
+
   /// Spec §12's rating buttons: scores [id] (a [DueGrammar.id]) via the real
   /// FSRS scheduler and reschedules it.
   Future<void> review(String id, Rating rating, {DateTime? now}) {
