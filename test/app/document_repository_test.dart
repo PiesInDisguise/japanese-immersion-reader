@@ -74,40 +74,46 @@ void main() {
       expect(documents, hasLength(1));
     });
 
-    test('saving again with changed content overwrites, not duplicates', () async {
-      await repository.save(_buildDocument());
+    test(
+      'saving again with changed content overwrites, not duplicates',
+      () async {
+        await repository.save(_buildDocument());
 
-      final updated = Document(
-        id: 'doc-1',
-        title: 'Test Book (corrected)',
-        sourceType: DocumentSourceType.epub,
-        chapters: [
-          Chapter(
-            id: 'ch-1',
-            index: 0,
-            title: 'Chapter 1',
-            blocks: [
-              Block(
-                id: 'block-1',
-                index: 0,
-                kind: BlockKind.paragraph,
-                sentences: [
-                  Sentence(
-                    id: 'sent-0',
-                    index: 0,
-                    tokens: const [Token(surface: '猫が大好きです。')],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
-      await repository.save(updated);
+        final updated = Document(
+          id: 'doc-1',
+          title: 'Test Book (corrected)',
+          sourceType: DocumentSourceType.epub,
+          chapters: [
+            Chapter(
+              id: 'ch-1',
+              index: 0,
+              title: 'Chapter 1',
+              blocks: [
+                Block(
+                  id: 'block-1',
+                  index: 0,
+                  kind: BlockKind.paragraph,
+                  sentences: [
+                    Sentence(
+                      id: 'sent-0',
+                      index: 0,
+                      tokens: const [Token(surface: '猫が大好きです。')],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        );
+        await repository.save(updated);
 
-      expect(await repository.sentenceContent('sent-0'), '猫が大好きです。');
-      expect(await repository.documentTitle('doc-1'), 'Test Book (corrected)');
-    });
+        expect(await repository.sentenceContent('sent-0'), '猫が大好きです。');
+        expect(
+          await repository.documentTitle('doc-1'),
+          'Test Book (corrected)',
+        );
+      },
+    );
 
     test(
       're-saving the same document preserves addedAt but bumps updatedAt',
@@ -120,7 +126,9 @@ void main() {
         // Drift's default DateTimeColumn storage is second-precision (unix
         // seconds, not milliseconds) -- a shorter delay wouldn't reliably
         // cross a detectable boundary and would make this test flaky.
-        await Future<void>.delayed(const Duration(seconds: 1, milliseconds: 100));
+        await Future<void>.delayed(
+          const Duration(seconds: 1, milliseconds: 100),
+        );
         await repository.save(_buildDocument());
         final second = await (db.select(
           db.documents,
@@ -161,26 +169,32 @@ void main() {
       expect(row.lastSentenceId, 'sent-1');
     });
 
-    test('updateCoverImagePath overwrites an existing cover unconditionally', () async {
-      await repository.save(_buildDocument());
-      await repository.updateCoverImagePath('doc-1', '/covers/first');
-      await repository.updateCoverImagePath('doc-1', '/covers/second');
+    test(
+      'updateCoverImagePath overwrites an existing cover unconditionally',
+      () async {
+        await repository.save(_buildDocument());
+        await repository.updateCoverImagePath('doc-1', '/covers/first');
+        await repository.updateCoverImagePath('doc-1', '/covers/second');
 
-      final row = await (db.select(
-        db.documents,
-      )..where((d) => d.id.equals('doc-1'))).getSingle();
-      expect(row.coverImagePath, '/covers/second');
-    });
+        final row = await (db.select(
+          db.documents,
+        )..where((d) => d.id.equals('doc-1'))).getSingle();
+        expect(row.coverImagePath, '/covers/second');
+      },
+    );
 
-    test('setAutoExtractedCoverIfAbsent sets a cover when none exists', () async {
-      await repository.save(_buildDocument());
-      await repository.setAutoExtractedCoverIfAbsent('doc-1', '/covers/auto');
+    test(
+      'setAutoExtractedCoverIfAbsent sets a cover when none exists',
+      () async {
+        await repository.save(_buildDocument());
+        await repository.setAutoExtractedCoverIfAbsent('doc-1', '/covers/auto');
 
-      final row = await (db.select(
-        db.documents,
-      )..where((d) => d.id.equals('doc-1'))).getSingle();
-      expect(row.coverImagePath, '/covers/auto');
-    });
+        final row = await (db.select(
+          db.documents,
+        )..where((d) => d.id.equals('doc-1'))).getSingle();
+        expect(row.coverImagePath, '/covers/auto');
+      },
+    );
 
     test('setAutoExtractedCoverIfAbsent never overwrites an existing cover '
         '(auto-extraction must not clobber a user-picked one)', () async {
@@ -221,6 +235,41 @@ void main() {
       expect(documents.map((d) => d.id).toList(), ['doc-2', 'doc-1']);
       expect(documents.first.title, 'Second Book');
       expect(documents.first.sourceType, 'pdfText');
+    });
+  });
+
+  group('deleteDocument', () {
+    test('removes the document, its chapters, and its sentences', () async {
+      await repository.save(_buildDocument());
+
+      await repository.deleteDocument('doc-1');
+
+      expect(await repository.listDocuments(), isEmpty);
+      expect(await repository.loadDocument('doc-1'), isNull);
+      expect(await repository.sentenceContent('sent-0'), isNull);
+      expect(await (db.select(db.chapters)).get(), isEmpty);
+    });
+
+    test('leaves other documents untouched', () async {
+      await repository.save(_buildDocument());
+      await repository.save(
+        Document(
+          id: 'doc-2',
+          title: 'Second Book',
+          sourceType: DocumentSourceType.pdfText,
+          chapters: const [],
+        ),
+      );
+
+      await repository.deleteDocument('doc-1');
+
+      final remaining = await repository.listDocuments();
+      expect(remaining.map((d) => d.id), ['doc-2']);
+    });
+
+    test('deleting an id that was never saved is a harmless no-op', () async {
+      await repository.deleteDocument('no-such-id');
+      expect(await repository.listDocuments(), isEmpty);
     });
   });
 

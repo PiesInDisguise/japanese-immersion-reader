@@ -164,6 +164,37 @@ class DocumentRepository {
     return row?.lastSentenceId;
   }
 
+  /// Removes [documentId] and its Chapters/Sentences rows -- regenerable
+  /// content, reproduced byte-for-byte by re-importing the same source
+  /// file (same reasoning `tables.dart`'s own sync-readiness audit already
+  /// applies to these two tables). Deliberately does *not* touch
+  /// `CollectedWords`/`CollectedGrammars` or their sighting tables, even
+  /// though those sightings' `workId`/`sentenceId` point at rows this
+  /// deletes: a mined word is the reader's own learned vocabulary, earned
+  /// independently of whichever book it happened to come from, and
+  /// removing a book from the Library must never silently delete SRS
+  /// progress. Any review card for a word mined here just loses its
+  /// "original sentence" context afterward (`sentenceContent`'s own "null
+  /// means unavailable" contract already handles that) -- not a crash, not
+  /// data loss of the part that actually matters.
+  ///
+  /// No SQLite FK-cascade in this codebase (see `tables.dart`'s note on
+  /// `CollectedWordSources`) -- Chapters/Sentences must be deleted
+  /// explicitly, not left to a cascade that doesn't exist.
+  Future<void> deleteDocument(String documentId) {
+    return _db.transaction(() async {
+      await (_db.delete(
+        _db.sentences,
+      )..where((s) => s.documentId.equals(documentId))).go();
+      await (_db.delete(
+        _db.chapters,
+      )..where((c) => c.documentId.equals(documentId))).go();
+      await (_db.delete(
+        _db.documents,
+      )..where((d) => d.id.equals(documentId))).go();
+    });
+  }
+
   /// Reconstructs a full, in-memory [Document] -- every chapter/block/
   /// sentence/token -- from what [save] persisted, so the Library screen
   /// can reopen a book without re-picking/re-importing its source file.
